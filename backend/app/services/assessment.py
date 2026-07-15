@@ -166,6 +166,14 @@ class AssessmentService:
         questions = await self.get_questions(session.assessment_version)
         return self._session_state(session, questions)
 
+    async def get_active_assessment(self, user_id: str) -> SessionState | None:
+        """Return an owned active assessment without creating a new session."""
+        session = await self.store.find_active_session(user_id)
+        if not session:
+            return None
+        questions = await self.get_questions(session.assessment_version)
+        return self._session_state(session, questions)
+
     async def save_answer(
         self, user_id: str, session_id: str, question_id: str, value: AnswerValue
     ) -> SessionState:
@@ -258,6 +266,10 @@ class AssessmentService:
         if not result:
             raise AssessmentNotFoundError
         return result
+
+    async def get_latest_assessment_optional(self, user_id: str) -> AssessmentResult | None:
+        """Return an owned result when present without translating absence into an error."""
+        return await self.store.find_latest_result(user_id)
 
     def validate_answer(self, question: AssessmentQuestion, value: AnswerValue) -> AnswerValue:
         if question.required and self._is_empty(value):

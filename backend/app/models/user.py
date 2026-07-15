@@ -11,6 +11,8 @@ class User(BaseModel):
     id: str
     email: str
     password_hash: str = Field(repr=False)
+    display_name: str | None = None
+    preferred_units: str | None = None
     is_active: bool = True
     token_version: int = Field(default=0, ge=0)
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))

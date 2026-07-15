@@ -1,11 +1,30 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import { ProtectedRoute } from "../components/ProtectedRoute";
+import { FullPageLoader } from "../components/ui";
+import { AssessmentProvider } from "../contexts/AssessmentContext";
 import { AuthProvider } from "../contexts/AuthContext";
 import { LoginPage } from "../pages/auth/LoginPage";
 import { RegisterPage } from "../pages/auth/RegisterPage";
 import { AuthLayout } from "../layouts/AuthLayout";
+import { AssessmentLayout } from "../layouts/AssessmentLayout";
 import { useAuth } from "../hooks/useAuth";
+
+const AssessmentWelcomePage = lazy(() => import("../pages/assessment/AssessmentWelcomePage"));
+const AssessmentResumePage = lazy(() => import("../pages/assessment/AssessmentResumePage"));
+const AssessmentWizardPage = lazy(() => import("../pages/assessment/AssessmentWizardPage"));
+const AssessmentReviewPage = lazy(() => import("../pages/assessment/AssessmentReviewPage"));
+const AssessmentCompletedPage = lazy(() => import("../pages/assessment/AssessmentCompletedPage"));
+const DashboardPage = lazy(() => import("../pages/dashboard/DashboardPage"));
+
+function AssessmentExperience() {
+  return (
+    <AssessmentProvider>
+      <AssessmentLayout />
+    </AssessmentProvider>
+  );
+}
 
 function AuthOnlyRedirect() {
   const { user, isLoading } = useAuth();
@@ -20,25 +39,6 @@ function AuthOnlyRedirect() {
     );
   }
   return user ? <Navigate to="/app" replace /> : <Navigate to="/login" replace />;
-}
-
-function AppHome() {
-  const { user, logout } = useAuth();
-  return (
-    <main className="protected-shell">
-      <section className="protected-card" aria-labelledby="welcome-title">
-        <p className="eyebrow">RAHFIT AI</p>
-        <h1 id="welcome-title">Your coaching journey starts here.</h1>
-        <p className="muted-text">
-          Signed in as <strong>{user?.email}</strong>. Assessment, workouts, nutrition, and coaching
-          will be added in upcoming phases.
-        </p>
-        <button className="button button-primary" type="button" onClick={() => void logout()}>
-          Sign out
-        </button>
-      </section>
-    </main>
-  );
 }
 
 function NotFoundPage() {
@@ -60,17 +60,36 @@ export function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          <Route element={<AuthLayout />}>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-          </Route>
-          <Route element={<ProtectedRoute />}>
-            <Route path="/app" element={<AppHome />} />
-          </Route>
-          <Route path="/" element={<AuthOnlyRedirect />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+        <Suspense fallback={<FullPageLoader label="Loading experience" />}>
+          <Routes>
+            <Route element={<AuthLayout />}>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+            </Route>
+            <Route element={<ProtectedRoute />}>
+              <Route path="/app" element={<DashboardPage />} />
+              <Route element={<AssessmentExperience />}>
+                <Route path="/assessment" element={<AssessmentWelcomePage />} />
+                <Route path="/assessment/resume/:sessionId" element={<AssessmentResumePage />} />
+                <Route path="/assessment/session/:sessionId" element={<AssessmentWizardPage />} />
+                <Route
+                  path="/assessment/session/:sessionId/question/:questionId"
+                  element={<AssessmentWizardPage />}
+                />
+                <Route
+                  path="/assessment/session/:sessionId/review"
+                  element={<AssessmentReviewPage />}
+                />
+                <Route
+                  path="/assessment/completed/:sessionId"
+                  element={<AssessmentCompletedPage />}
+                />
+              </Route>
+            </Route>
+            <Route path="/" element={<AuthOnlyRedirect />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </Suspense>
       </AuthProvider>
     </BrowserRouter>
   );

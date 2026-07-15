@@ -21,6 +21,10 @@ class UserRepository:
             id=str(document["_id"]),
             email=str(document["email"]),
             password_hash=str(document["password_hash"]),
+            display_name=(str(document["display_name"]) if document.get("display_name") else None),
+            preferred_units=(
+                str(document["preferred_units"]) if document.get("preferred_units") else None
+            ),
             is_active=bool(document["is_active"]),
             token_version=int(document.get("token_version", 0)),
             created_at=document["created_at"],

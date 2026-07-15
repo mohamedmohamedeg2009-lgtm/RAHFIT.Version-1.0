@@ -13,15 +13,18 @@ export function LinearProgress({ value, max = 100, label }: ProgressProps) {
           <span>{Math.round((bounded / max) * 100)}%</span>
         </div>
       ) : null}
-      <div
-        className="ds-progress"
-        role="progressbar"
-        aria-valuenow={bounded}
-        aria-valuemin={0}
-        aria-valuemax={max}
-        aria-label={label ?? "Progress"}
-      >
-        <span style={{ width: `${(bounded / max) * 100}%` }} />
+      <div className="ds-progress-frame">
+        <progress
+          className="ds-progress"
+          value={bounded}
+          max={max}
+          aria-valuenow={bounded}
+          aria-valuemin={0}
+          aria-valuemax={max}
+          aria-label={label ?? "Progress"}
+        >
+          {Math.round((bounded / max) * 100)}%
+        </progress>
       </div>
     </div>
   );

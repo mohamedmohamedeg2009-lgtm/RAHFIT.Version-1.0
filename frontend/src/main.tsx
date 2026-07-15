@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 
 import { App } from "./app/App";
 import { ErrorBoundary } from "./app/ErrorBoundary";
+import { LocaleProvider } from "./contexts/LocaleContext";
 import { ThemeProvider } from "./theme";
 import "./styles/index.css";
 
@@ -16,7 +17,9 @@ createRoot(rootElement).render(
   <StrictMode>
     <ErrorBoundary>
       <ThemeProvider>
-        <App />
+        <LocaleProvider>
+          <App />
+        </LocaleProvider>
       </ThemeProvider>
     </ErrorBoundary>
   </StrictMode>,

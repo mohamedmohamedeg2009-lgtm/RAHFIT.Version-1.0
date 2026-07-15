@@ -116,6 +116,7 @@ export function Select({
         id={id}
         className={`ds-input ds-select ${className}`}
         aria-invalid={Boolean(error)}
+        aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
         {...props}
       >
         {options.map((option) => (

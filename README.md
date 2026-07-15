@@ -1,6 +1,6 @@
 # RAHFIT AI
 
-Engineering foundation for an AI-powered health, fitness, and nutrition SaaS platform. This repository intentionally contains **no product features, authentication endpoints, AI implementation, or fitness/nutrition logic**. It establishes the standards and cross-cutting infrastructure required to build those safely.
+Engineering foundation and first production vertical slices for an AI-powered health, fitness, and nutrition SaaS platform. Authentication, the deterministic Smart Assessment, and the Intelligent Dashboard are implemented; workout, nutrition, AI coaching, and other future product modules remain intentionally deferred.
 
 ## Repository layout
 
@@ -21,7 +21,7 @@ Engineering foundation for an AI-powered health, fitness, and nutrition SaaS pla
 3. Create a Python 3.12 virtual environment, install `backend/requirements-dev.txt`, then run `uvicorn app.main:app --app-dir backend --reload`.
 4. In `frontend`, run `npm install`, then `npm run dev`.
 
-See [Setup Guide](docs/Setup-Guide.md) for details, [Architecture](docs/Architecture.md) for boundaries and extension points, the [Product Blueprint](docs/Product-Blueprint.md) for the approved product specification before feature implementation, the [Smart Assessment Blueprint](docs/Smart-Assessment-Blueprint.md) for the approved adaptive-assessment specification, the [AI Architecture Blueprint](docs/AI-Architecture-Blueprint.md) for the approved hybrid AI design, the [API Blueprint](docs/API-Blueprint.md) for the approved REST interface contract, the [Enterprise Domain Blueprint](docs/Enterprise-Domain-Blueprint.md) for the approved business-domain model, the [UI/UX Blueprint](docs/UI-UX-Blueprint.md) for the approved product experience and interface architecture, and the [Implementation Plan](docs/Implementation-Plan.md) for the approved development roadmap.
+See [Setup Guide](docs/Setup-Guide.md) for details, [Architecture](docs/Architecture.md) for boundaries and extension points, the [Dashboard Architecture](docs/Dashboard-Architecture.md) for the Intelligent Dashboard aggregation and UX contract, the [Product Blueprint](docs/Product-Blueprint.md) for the approved product specification before feature implementation, the [Smart Assessment Blueprint](docs/Smart-Assessment-Blueprint.md) for the approved adaptive-assessment specification, the [AI Architecture Blueprint](docs/AI-Architecture-Blueprint.md) for the approved hybrid AI design, the [API Blueprint](docs/API-Blueprint.md) for the approved REST interface contract, the [Enterprise Domain Blueprint](docs/Enterprise-Domain-Blueprint.md) for the approved business-domain model, the [UI/UX Blueprint](docs/UI-UX-Blueprint.md) for the approved product experience and interface architecture, and the [Implementation Plan](docs/Implementation-Plan.md) for the approved development roadmap.
 
 ## Quality checks
 
