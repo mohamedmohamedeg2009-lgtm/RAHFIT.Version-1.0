@@ -15,7 +15,14 @@ class Settings(BaseSettings):
     debug: bool = False
     api_v1_prefix: str = "/api/v1"
     log_level: str = "INFO"
-    allowed_origins: Annotated[list[str], NoDecode] = Field(default_factory=list)
+    allowed_origins: Annotated[list[str], NoDecode] = Field(
+        default_factory=lambda: [
+            "http://localhost:5173",
+            "http://localhost:5174",
+            "http://127.0.0.1:5173",
+            "http://127.0.0.1:5174",
+        ]
+    )
     mongodb_uri: MongoDsn
     mongodb_database: str = Field(min_length=1)
     jwt_secret_key: SecretStr = Field(min_length=32)

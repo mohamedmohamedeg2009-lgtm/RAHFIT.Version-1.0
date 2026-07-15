@@ -9,16 +9,21 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "react-router-dom": "^7.18.1"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "latest",
     "@eslint/js": "latest",
+    "@tailwindcss/vite": "latest",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "autoprefixer": "latest",
@@ -26,11 +31,13 @@
     "eslint-plugin-react-hooks": "latest",
     "eslint-plugin-react-refresh": "latest",
     "globals": "latest",
+    "jsdom": "^29.1.1",
     "postcss": "latest",
     "prettier": "latest",
     "tailwindcss": "latest",
     "typescript": "~5.8.3",
     "typescript-eslint": "latest",
-    "vite": "latest"
+    "vite": "latest",
+    "vitest": "^4.1.10"
   }
 }

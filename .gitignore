@@ -31,3 +31,4 @@ Thumbs.db
 # Local runtime artifacts
 logs/
 *.log
+.mongodb-data/
