@@ -32,6 +32,16 @@ def _response(
 
 
 async def http_exception_handler(request: Request, exc: StarletteHTTPException) -> JSONResponse:
+    if isinstance(exc.detail, Mapping):
+        code = str(exc.detail.get("code", "http_error"))
+        message = str(exc.detail.get("message", "The request could not be completed."))
+        raw_details = exc.detail.get("details")
+        details = (
+            raw_details
+            if isinstance(raw_details, Sequence) and not isinstance(raw_details, str | bytes)
+            else None
+        )
+        return _response(request, exc.status_code, code, message, details)
     return _response(request, exc.status_code, "http_error", str(exc.detail))
 
 

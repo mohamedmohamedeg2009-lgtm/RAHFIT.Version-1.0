@@ -16,6 +16,7 @@ from app.core.exceptions import (
     validation_exception_handler,
 )
 from app.core.logging import configure_logging
+from app.database.assessment_catalog import initialize_assessment_catalog
 from app.database.indexes import initialize_indexes
 from app.database.mongodb import MongoDatabase
 from app.middleware.rate_limit import RateLimitMiddleware
@@ -29,6 +30,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     database = MongoDatabase(settings)
     await database.connect()
     await initialize_indexes(database.database)
+    await initialize_assessment_catalog(database.database)
     app.state.database = database
     yield
     await database.disconnect()

@@ -1,10 +1,11 @@
 @import "tailwindcss";
+@import "./tokens.css";
 
 :root {
   color-scheme: light;
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-  color: #17202f;
-  background: #f4f7f9;
+  color: var(--color-text-primary);
+  background: var(--color-background);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
@@ -17,12 +18,499 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #f4f7f9;
+  background: var(--color-background);
 }
 
 button,
 input {
   font: inherit;
+}
+
+/* Generic design-system primitives. Product screens should compose these classes through UI components. */
+.ds-button {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  padding: var(--space-12) var(--space-20);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: var(--font-button);
+  font-weight: 750;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background var(--motion-normal) var(--motion-easing),
+    border-color var(--motion-normal) var(--motion-easing),
+    transform var(--motion-fast) var(--motion-easing);
+}
+.ds-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.ds-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+.ds-button-primary {
+  color: #fff;
+  background: var(--color-primary);
+}
+.ds-button-secondary {
+  color: #fff;
+  background: var(--color-secondary);
+}
+.ds-button-outline {
+  color: var(--color-primary);
+  background: transparent;
+  border-color: var(--color-primary);
+}
+.ds-button-ghost {
+  color: var(--color-primary);
+  background: transparent;
+}
+.ds-button-danger {
+  color: #fff;
+  background: var(--color-danger);
+}
+.ds-button-sm {
+  min-height: 2.25rem;
+  padding: var(--space-8) var(--space-12);
+  font-size: var(--font-body-sm);
+}
+.ds-button-lg {
+  min-height: 3.25rem;
+  padding: var(--space-16) var(--space-24);
+}
+.ds-input {
+  width: 100%;
+  min-height: 3rem;
+  padding: var(--space-12) var(--space-16);
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition:
+    border-color var(--motion-normal) var(--motion-easing),
+    box-shadow var(--motion-normal) var(--motion-easing);
+}
+.ds-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus-ring) 24%, transparent);
+}
+.ds-input[aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+.ds-field {
+  display: grid;
+  gap: var(--space-8);
+  color: var(--color-text-primary);
+}
+.ds-field label {
+  font-size: var(--font-body-sm);
+  font-weight: 700;
+}
+.ds-field-hint,
+.ds-field-error {
+  margin: 0;
+  font-size: var(--font-caption);
+  line-height: 1.45;
+}
+.ds-field-hint {
+  color: var(--color-text-secondary);
+}
+.ds-field-error {
+  color: var(--color-danger);
+}
+.ds-textarea {
+  min-height: 7rem;
+  resize: vertical;
+}
+.ds-select {
+  appearance: auto;
+}
+.ds-password {
+  position: relative;
+}
+.ds-password-toggle {
+  position: absolute;
+  right: var(--space-8);
+  bottom: var(--space-8);
+  min-height: 2rem;
+  color: var(--color-primary);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.ds-choice {
+  display: flex;
+  gap: var(--space-12);
+  align-items: flex-start;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+.ds-choice input {
+  margin-top: 0.3rem;
+  accent-color: var(--color-primary);
+}
+.ds-choice span {
+  display: grid;
+  gap: var(--space-2);
+}
+.ds-choice small,
+.ds-switch small {
+  color: var(--color-text-secondary);
+}
+.ds-choice em {
+  color: var(--color-danger);
+  font-size: var(--font-caption);
+  font-style: normal;
+}
+.ds-switch {
+  display: flex;
+  gap: var(--space-12);
+  align-items: center;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+.ds-switch input {
+  position: absolute;
+  opacity: 0;
+}
+.ds-switch-track {
+  position: relative;
+  width: 2.75rem;
+  height: 1.5rem;
+  flex: 0 0 auto;
+  background: var(--color-border);
+  border-radius: var(--radius-pill);
+  transition: background var(--motion-normal) var(--motion-easing);
+}
+.ds-switch-track::after {
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  top: 0.25rem;
+  left: 0.25rem;
+  background: var(--color-surface);
+  border-radius: 50%;
+  content: "";
+  transition: transform var(--motion-normal) var(--motion-easing);
+}
+.ds-switch input:checked + .ds-switch-track {
+  background: var(--color-primary);
+}
+.ds-switch input:checked + .ds-switch-track::after {
+  transform: translateX(1.25rem);
+}
+.ds-card {
+  padding: var(--space-24);
+  color: var(--color-text-primary);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft);
+}
+.ds-card-metric {
+  display: grid;
+  gap: var(--space-8);
+}
+.ds-card-profile {
+  border-radius: var(--radius-2xl);
+}
+.ds-card-workout {
+  border-inline-start: 4px solid var(--color-primary);
+}
+.ds-card-nutrition {
+  border-inline-start: 4px solid var(--color-success);
+}
+.ds-card-ai {
+  border-inline-start: 4px solid var(--color-ai);
+}
+.ds-badge,
+.ds-tag,
+.ds-chip {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-caption);
+  font-weight: 750;
+  line-height: 1;
+}
+.ds-badge {
+  padding: var(--space-8) var(--space-12);
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+.ds-tag {
+  padding: var(--space-8) var(--space-12);
+  color: var(--color-text-secondary);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+}
+.ds-chip {
+  padding: var(--space-12) var(--space-16);
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+.ds-alert {
+  display: flex;
+  gap: var(--space-12);
+  align-items: flex-start;
+  padding: var(--space-16);
+  color: var(--color-text-primary);
+  border: 1px solid;
+  border-radius: var(--radius-md);
+}
+.ds-alert-icon {
+  display: grid;
+  width: 1.35rem;
+  height: 1.35rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  font-weight: 800;
+}
+.ds-alert strong {
+  display: block;
+  margin-bottom: var(--space-4);
+}
+.ds-alert-success {
+  background: color-mix(in srgb, var(--color-success) 10%, transparent);
+  border-color: color-mix(in srgb, var(--color-success) 30%, transparent);
+}
+.ds-alert-success .ds-alert-icon {
+  color: var(--color-success);
+  background: color-mix(in srgb, var(--color-success) 18%, transparent);
+}
+.ds-alert-warning {
+  background: color-mix(in srgb, var(--color-warning) 10%, transparent);
+  border-color: color-mix(in srgb, var(--color-warning) 30%, transparent);
+}
+.ds-alert-warning .ds-alert-icon {
+  color: var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning) 18%, transparent);
+}
+.ds-alert-danger {
+  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  border-color: color-mix(in srgb, var(--color-danger) 30%, transparent);
+}
+.ds-alert-danger .ds-alert-icon {
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 18%, transparent);
+}
+.ds-alert-info {
+  background: color-mix(in srgb, var(--color-info) 10%, transparent);
+  border-color: color-mix(in srgb, var(--color-info) 30%, transparent);
+}
+.ds-alert-info .ds-alert-icon {
+  color: var(--color-info);
+  background: color-mix(in srgb, var(--color-info) 18%, transparent);
+}
+.ds-alert-close,
+.ds-icon-button {
+  margin-inline-start: auto;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.ds-icon-button {
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-sm);
+  font-size: 1.5rem;
+}
+.ds-empty,
+.ds-error {
+  display: grid;
+  max-width: 32rem;
+  gap: var(--space-8);
+  padding: var(--space-40) var(--space-24);
+  color: var(--color-text-primary);
+  text-align: center;
+}
+.ds-empty-mark {
+  color: var(--color-primary);
+  font-size: 2rem;
+}
+.ds-empty h3,
+.ds-empty p,
+.ds-error h3,
+.ds-error p {
+  margin: 0;
+}
+.ds-empty p,
+.ds-error p {
+  color: var(--color-text-secondary);
+}
+.ds-error {
+  border: 1px solid color-mix(in srgb, var(--color-danger) 30%, transparent);
+  border-radius: var(--radius-lg);
+}
+.ds-error h3 {
+  color: var(--color-danger);
+}
+.ds-overlay {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-24);
+  background: rgba(15, 28, 37, 0.48);
+}
+.ds-dialog,
+.ds-drawer {
+  max-width: 40rem;
+  width: min(100%, 40rem);
+  max-height: min(90vh, 48rem);
+  overflow: auto;
+  padding: var(--space-24);
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}
+.ds-drawer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: min(100%, 28rem);
+  max-height: none;
+  border-radius: var(--radius-xl) 0 0 var(--radius-xl);
+}
+.ds-overlay-header {
+  display: flex;
+  gap: var(--space-16);
+  align-items: center;
+  margin-bottom: var(--space-20);
+}
+.ds-overlay-header h2 {
+  margin: 0;
+  font-size: var(--font-heading-s);
+}
+.ds-progress-wrap {
+  display: grid;
+  gap: var(--space-8);
+}
+.ds-progress-label,
+.ds-step-summary {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-text-secondary);
+  font-size: var(--font-caption);
+}
+.ds-progress {
+  height: 0.5rem;
+  overflow: hidden;
+  background: var(--color-border);
+  border-radius: var(--radius-pill);
+}
+.ds-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: inherit;
+  transition: width var(--motion-slow) var(--motion-easing);
+}
+.ds-circular-progress {
+  display: grid;
+  width: 5rem;
+  height: 5rem;
+  place-items: center;
+  background: conic-gradient(var(--color-primary) var(--progress), var(--color-border) 0);
+  border-radius: 50%;
+}
+.ds-circular-progress::before {
+  position: absolute;
+  width: 4rem;
+  height: 4rem;
+  background: var(--color-surface);
+  border-radius: 50%;
+  content: "";
+}
+.ds-circular-progress strong {
+  position: relative;
+  font-size: var(--font-caption);
+}
+.ds-steps {
+  display: grid;
+  gap: var(--space-8);
+}
+.ds-step-track {
+  display: flex;
+  gap: var(--space-4);
+}
+.ds-step-track span {
+  height: 0.35rem;
+  flex: 1;
+  background: var(--color-border);
+  border-radius: var(--radius-pill);
+}
+.ds-step-track span.is-complete {
+  background: var(--color-primary);
+}
+.ds-spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid currentColor;
+  border-inline-end-color: transparent;
+  border-radius: 50%;
+  animation: ds-spin 0.7s linear infinite;
+}
+.ds-skeleton {
+  display: block;
+  background: linear-gradient(
+    90deg,
+    var(--color-border),
+    color-mix(in srgb, var(--color-border) 42%, var(--color-surface)),
+    var(--color-border)
+  );
+  background-size: 200% 100%;
+  border-radius: var(--radius-sm);
+  animation: ds-shimmer 1.5s linear infinite;
+}
+.ds-full-loader {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  align-content: center;
+  gap: var(--space-12);
+  color: var(--color-text-secondary);
+}
+.ds-full-loader p {
+  margin: 0;
+}
+.ds-full-loader .ds-spinner {
+  width: 2rem;
+  height: 2rem;
+}
+@keyframes ds-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes ds-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ds-button,
+  .ds-input,
+  .ds-progress > span,
+  .ds-skeleton,
+  .ds-spinner {
+    transition: none;
+    animation: none;
+  }
 }
 button,
 a {
