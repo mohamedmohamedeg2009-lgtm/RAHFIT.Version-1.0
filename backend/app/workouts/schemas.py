@@ -18,7 +18,11 @@ from app.workouts.models import (
 
 
 class WorkoutGenerationRequest(BaseModel):
-    model_config = ConfigDict(frozen=True, extra="forbid")
+    model_config = ConfigDict(
+        frozen=True,
+        extra="forbid",
+        json_schema_extra={"examples": [{"duration_weeks": 8, "use_ai_assistance": False}]},
+    )
 
     duration_weeks: int = Field(default=8, ge=4, le=12)
     use_ai_assistance: bool = False
@@ -76,7 +80,20 @@ class WorkoutPlanResponse(BaseModel):
 
 
 class RecordWorkoutSessionRequest(BaseModel):
-    model_config = ConfigDict(frozen=True, extra="forbid")
+    model_config = ConfigDict(
+        frozen=True,
+        extra="forbid",
+        json_schema_extra={
+            "examples": [
+                {
+                    "plan_id": "plan-identifier",
+                    "day_number": 1,
+                    "status": "in_progress",
+                    "completed_exercises": [],
+                }
+            ]
+        },
+    )
 
     plan_id: str
     day_number: int = Field(ge=1, le=7)
@@ -89,7 +106,28 @@ class RecordWorkoutSessionRequest(BaseModel):
 class UpdateWorkoutSessionRequest(BaseModel):
     """A full progress snapshot for the mutable fields of an owned session."""
 
-    model_config = ConfigDict(frozen=True, extra="forbid")
+    model_config = ConfigDict(
+        frozen=True,
+        extra="forbid",
+        json_schema_extra={
+            "examples": [
+                {
+                    "status": "in_progress",
+                    "completed_exercises": [
+                        {
+                            "exercise_id": "approved_exercise_id",
+                            "completed_sets": [
+                                {"set_number": 1, "actual_reps": 8, "completed": True}
+                            ],
+                            "skipped": False,
+                            "pain_reported": False,
+                        }
+                    ],
+                    "actual_duration_minutes": 30,
+                }
+            ]
+        },
+    )
 
     status: SessionStatus | None = None
     completed_exercises: tuple[CompletedExercise, ...] | None = None
@@ -159,7 +197,11 @@ class WorkoutAdaptationResponse(BaseModel):
 
 
 class WorkoutAdaptationRequest(BaseModel):
-    model_config = ConfigDict(frozen=True, extra="forbid")
+    model_config = ConfigDict(
+        frozen=True,
+        extra="forbid",
+        json_schema_extra={"examples": [{"plan_id": "plan-identifier"}]},
+    )
 
     plan_id: str = Field(min_length=1, max_length=128)
 

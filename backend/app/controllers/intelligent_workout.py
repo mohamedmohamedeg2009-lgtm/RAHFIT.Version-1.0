@@ -8,6 +8,7 @@ from app.ai.service import AIService
 from app.config import Settings, get_settings
 from app.context import UserIntelligenceContextBuilder
 from app.controllers.auth import get_current_user
+from app.core.exceptions import ErrorResponse
 from app.health import HealthProfileRepository
 from app.models.user import User
 from app.profile import UserProfileRepository
@@ -54,6 +55,23 @@ DEFAULT_PAGE_SIZE = 20
 MAXIMUM_PAGE_SIZE = 100
 
 router = APIRouter(prefix="/intelligent-workouts", tags=["Intelligent Workouts"])
+
+_ERROR_DESCRIPTIONS = {
+    401: "Authentication credentials are missing, invalid, or expired.",
+    403: "Readiness or professional-clearance rules prohibit the operation.",
+    404: "The owner-scoped workout resource is not available.",
+    409: "A prerequisite or workout lifecycle state prevents the operation.",
+    422: "Request validation or deterministic workout validation failed.",
+    500: "An unexpected internal failure occurred.",
+    503: "Generation or persistence could not complete safely.",
+}
+
+
+def _documented_errors(*status_codes: int) -> dict[int | str, dict[str, Any]]:
+    return {
+        code: {"model": ErrorResponse, "description": _ERROR_DESCRIPTIONS[code]}
+        for code in status_codes
+    }
 
 
 def get_intelligent_workout_service(
@@ -150,7 +168,15 @@ def _translate(exc: WorkoutError) -> NoReturn:
     "/plans/generate",
     response_model=WorkoutPlanResponse,
     status_code=status.HTTP_201_CREATED,
+    operation_id="intelligent_workouts_generate_plan",
     summary="Generate and activate an intelligent workout plan",
+    description=(
+        "Builds a readiness-gated plan for the authenticated owner. Python validates the "
+        "complete plan before persistence. Optional AI assistance may explain only the "
+        "approved plan and always falls back deterministically when unavailable."
+    ),
+    response_description="The newly generated and active client-safe workout plan.",
+    responses=_documented_errors(401, 403, 409, 422, 500, 503),
 )
 async def generate_plan(
     body: WorkoutGenerationRequest,
@@ -163,7 +189,14 @@ async def generate_plan(
         _translate(exc)
 
 
-@router.get("/plans/active", response_model=WorkoutPlanResponse, summary="Get active plan")
+@router.get(
+    "/plans/active",
+    response_model=WorkoutPlanResponse,
+    operation_id="intelligent_workouts_get_active_plan",
+    summary="Get the active intelligent workout plan",
+    description="Returns only the authenticated owner's current active plan.",
+    responses=_documented_errors(401, 404, 500),
+)
 async def get_active_plan(
     user: Annotated[User, Depends(get_current_user)],
     service: Annotated[WorkoutService, Depends(get_intelligent_workout_service)],
@@ -174,7 +207,16 @@ async def get_active_plan(
         _translate(exc)
 
 
-@router.get("/plans", response_model=WorkoutPlanListResponse, summary="List owned plans")
+@router.get(
+    "/plans",
+    response_model=WorkoutPlanListResponse,
+    operation_id="intelligent_workouts_list_plans",
+    summary="List intelligent workout plan history",
+    description=(
+        "Returns a bounded, owner-scoped page ordered by generation time and stable plan ID."
+    ),
+    responses=_documented_errors(401, 422, 500),
+)
 async def list_plans(
     user: Annotated[User, Depends(get_current_user)],
     service: Annotated[WorkoutService, Depends(get_intelligent_workout_service)],
@@ -190,7 +232,16 @@ async def list_plans(
     )
 
 
-@router.get("/plans/{plan_id}", response_model=WorkoutPlanResponse, summary="Get owned plan")
+@router.get(
+    "/plans/{plan_id}",
+    response_model=WorkoutPlanResponse,
+    operation_id="intelligent_workouts_get_plan",
+    summary="Get an intelligent workout plan",
+    description=(
+        "Returns an owner-scoped plan. Foreign and unknown identifiers share the same response."
+    ),
+    responses=_documented_errors(401, 404, 422, 500),
+)
 async def get_plan(
     plan_id: Annotated[str, Path(pattern=RESOURCE_ID_PATTERN)],
     user: Annotated[User, Depends(get_current_user)],
@@ -205,7 +256,13 @@ async def get_plan(
 @router.post(
     "/plans/{plan_id}/activate",
     response_model=WorkoutPlanResponse,
-    summary="Activate an owned plan",
+    operation_id="intelligent_workouts_activate_plan",
+    summary="Activate an intelligent workout plan",
+    description=(
+        "Activates an eligible owner-scoped plan and archives the prior active plan through "
+        "the workout service consistency boundary."
+    ),
+    responses=_documented_errors(401, 404, 409, 422, 500, 503),
 )
 async def activate_plan(
     plan_id: Annotated[str, Path(pattern=RESOURCE_ID_PATTERN)],
@@ -221,7 +278,10 @@ async def activate_plan(
 @router.post(
     "/plans/{plan_id}/archive",
     response_model=WorkoutArchiveResponse,
-    summary="Archive an owned active plan",
+    operation_id="intelligent_workouts_archive_plan",
+    summary="Archive an active intelligent workout plan",
+    description="Archives an owner-scoped active plan and rejects invalid lifecycle transitions.",
+    responses=_documented_errors(401, 404, 409, 422, 500, 503),
 )
 async def archive_plan(
     plan_id: Annotated[str, Path(pattern=RESOURCE_ID_PATTERN)],
@@ -239,7 +299,13 @@ async def archive_plan(
     "/sessions",
     response_model=WorkoutSessionResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Start or record an owned workout session",
+    operation_id="intelligent_workouts_create_session",
+    summary="Start an intelligent workout session",
+    description=(
+        "Creates an owner-scoped session for an eligible active plan day. Completion and "
+        "adaptation fields are computed by the server."
+    ),
+    responses=_documented_errors(401, 404, 409, 422, 500),
 )
 async def create_session(
     body: RecordWorkoutSessionRequest,
@@ -252,7 +318,16 @@ async def create_session(
         _translate(exc)
 
 
-@router.get("/sessions", response_model=WorkoutSessionListResponse, summary="List sessions")
+@router.get(
+    "/sessions",
+    response_model=WorkoutSessionListResponse,
+    operation_id="intelligent_workouts_list_sessions",
+    summary="List intelligent workout sessions",
+    description=(
+        "Returns a bounded owner-scoped session page, optionally filtered by an owned plan."
+    ),
+    responses=_documented_errors(401, 422, 500),
+)
 async def list_sessions(
     user: Annotated[User, Depends(get_current_user)],
     service: Annotated[WorkoutService, Depends(get_intelligent_workout_service)],
@@ -272,7 +347,12 @@ async def list_sessions(
 @router.get(
     "/sessions/{session_id}",
     response_model=WorkoutSessionResponse,
-    summary="Get owned session",
+    operation_id="intelligent_workouts_get_session",
+    summary="Get an intelligent workout session",
+    description=(
+        "Returns an owner-scoped session. Foreign and unknown identifiers share the same response."
+    ),
+    responses=_documented_errors(401, 404, 422, 500),
 )
 async def get_session(
     session_id: Annotated[str, Path(pattern=RESOURCE_ID_PATTERN)],
@@ -288,7 +368,13 @@ async def get_session(
 @router.patch(
     "/sessions/{session_id}",
     response_model=WorkoutSessionResponse,
-    summary="Update owned in-progress session",
+    operation_id="intelligent_workouts_update_session",
+    summary="Record intelligent workout session progress",
+    description=(
+        "Updates allowed fields on an in-progress owner-scoped session. Planned limits, "
+        "completion, skips, pain review flags, and lifecycle timestamps remain server-owned."
+    ),
+    responses=_documented_errors(401, 404, 409, 422, 500),
 )
 async def update_session(
     session_id: Annotated[str, Path(pattern=RESOURCE_ID_PATTERN)],
@@ -305,7 +391,13 @@ async def update_session(
 @router.post(
     "/adaptation/analyze",
     response_model=WorkoutAdaptationResponse,
-    summary="Analyze safe deterministic plan adaptation",
+    operation_id="intelligent_workouts_analyze_adaptation",
+    summary="Analyze deterministic workout adaptation",
+    description=(
+        "Returns an auditable recommendation from recent owner-scoped sessions and readiness. "
+        "This operation never mutates the workout plan automatically."
+    ),
+    responses=_documented_errors(401, 404, 409, 422, 500, 503),
 )
 async def analyze_adaptation(
     body: WorkoutAdaptationRequest,

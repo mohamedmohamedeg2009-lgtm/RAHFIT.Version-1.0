@@ -43,6 +43,8 @@ The [User Intelligence Layer](docs/User-Intelligence-Layer.md) defines the canon
 
 The [Workout Engine](docs/Workout-Engine.md) defines the versioned Python exercise catalog, readiness-gated deterministic planning, owner-scoped plan and session persistence, strict validation, progress records, and auditable adaptation recommendations. Gemini is optional and may only explain an already-valid plan through `AIService`; disabled, timed-out, rate-limited, malformed, or unsafe provider output uses the deterministic fallback without requiring a Gemini key. Its authenticated, versioned API is available at `/api/v1/intelligent-workouts`; the legacy `/api/v1/workouts` contract remains compatible.
 
+The [Intelligent Workout API Contract](docs/Intelligent-Workout-API-Contract.md) is the frontend-facing source for stable operation IDs, authenticated setup, request/response types, error handling, lifecycle rules, and the repeatable HTTP smoke-test workflow.
+
 ## Quality checks
 
 ```powershell
@@ -54,6 +56,8 @@ pytest
 # Focused Workout Engine verification
 pytest backend/tests/test_intelligent_workout_engine.py -q
 pytest backend/tests/test_intelligent_workout_api.py -q
+pytest backend/tests/test_intelligent_workout_openapi.py -q
+pytest backend/tests/test_intelligent_workout_http_smoke.py -q
 
 Set-Location frontend
 npm run lint

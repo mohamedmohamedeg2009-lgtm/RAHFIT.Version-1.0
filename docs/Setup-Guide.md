@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Python 3.12+
+- Python 3.12 (canonical; CI and tooling target this exact minor version)
 - Node.js 22+
 - MongoDB 7+
 - Git

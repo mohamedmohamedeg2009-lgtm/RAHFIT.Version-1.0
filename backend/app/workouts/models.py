@@ -109,7 +109,7 @@ class WorkoutWarning(BaseModel):
     professional_guidance: bool = False
 
 
-class WorkoutDay(BaseModel):
+class IntelligentWorkoutDay(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     day_number: int = Field(ge=1, le=7)
@@ -126,11 +126,16 @@ class WorkoutDay(BaseModel):
         return next((item for item in self.sections if item.section_type == section_type), None)
 
     @model_validator(mode="after")
-    def unique_sections(self) -> "WorkoutDay":
+    def unique_sections(self) -> "IntelligentWorkoutDay":
         types = tuple(item.section_type for item in self.sections)
         if len(types) != len(set(types)):
             raise ValueError("Workout day sections must be unique.")
         return self
+
+
+# Internal compatibility alias. The distinct class name keeps the public OpenAPI
+# component stable and separate from the legacy workout contract.
+WorkoutDay = IntelligentWorkoutDay
 
 
 class WorkoutExplanation(BaseModel):
