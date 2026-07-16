@@ -31,6 +31,8 @@ The [AI Conversation Domain](docs/AI-Conversation-Domain.md) documents owner-iso
 
 The [Approved AI Context Builder](docs/AI-Context-Builder.md) documents purpose-minimized, owner-isolated, size-bounded context selection for future AI Coach safety and orchestration stages.
 
+The [AI Policy Layer](docs/AI-Policy-Layer.md) documents deterministic capability permissions, forbidden actions, professional-guidance decisions, and stable reason codes.
+
 ## Quality checks
 
 ```powershell
