@@ -3,9 +3,11 @@ import pytest
 from app.database.indexes import (
     AI_CONVERSATION_INDEXES,
     AI_MESSAGE_INDEXES,
+    USER_INTELLIGENCE_INDEXES,
     WORKOUT_SESSION_INDEX,
     ensure_ai_conversation_indexes,
     ensure_named_index,
+    ensure_user_intelligence_indexes,
     ensure_workout_session_index,
 )
 
@@ -64,7 +66,7 @@ class FakeNamedIndexCollection:
     async def create_index(self, keys: object, **options: object) -> None:
         name = str(options["name"])
         self.created.append(name)
-        self.indexes[name] = {"key": keys}
+        self.indexes[name] = {"key": keys, **options}
 
 
 class FakeIndexDatabase:
@@ -72,6 +74,8 @@ class FakeIndexDatabase:
         self.collections = {
             "ai_conversations": FakeNamedIndexCollection(),
             "ai_messages": FakeNamedIndexCollection(),
+            "user_profiles": FakeNamedIndexCollection(),
+            "health_profiles": FakeNamedIndexCollection(),
         }
 
     def __getitem__(self, name: str) -> FakeNamedIndexCollection:
@@ -106,3 +110,16 @@ async def test_same_name_ai_index_drift_is_replaced_without_dropping_other_index
     assert collection.dropped == ["ai_conversations_owner_activity"]
     assert "unrelated_index" in collection.indexes
     assert collection.indexes["ai_conversations_owner_activity"]["key"] == expected
+
+
+@pytest.mark.asyncio
+async def test_user_intelligence_indexes_are_unique_and_owner_scoped() -> None:
+    database = FakeIndexDatabase()
+
+    await ensure_user_intelligence_indexes(database)
+
+    for collection_name, index_name in USER_INTELLIGENCE_INDEXES:
+        collection = database[collection_name]
+        assert collection.created == [index_name]
+        assert collection.indexes[index_name]["key"] == "user_id"
+        assert collection.indexes[index_name]["unique"] is True

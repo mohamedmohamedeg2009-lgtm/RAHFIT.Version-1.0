@@ -27,6 +27,9 @@ class Equipment(StrEnum):
     BODYWEIGHT = "bodyweight"
     KETTLEBELL = "kettlebell"
     MEDICINE_BALL = "medicine_ball"
+    BENCH = "bench"
+    PULL_UP_BAR = "pull_up_bar"
+    CARDIO_MACHINE = "cardio_machine"
 
 
 class TrainingGoal(StrEnum):
@@ -49,6 +52,7 @@ class TrainingLocation(StrEnum):
     COMMERCIAL_GYM = "commercial_gym"
     HOME_GYM = "home_gym"
     BODYWEIGHT_ONLY = "bodyweight_only"
+    OUTDOOR = "outdoor"
 
 
 class ExerciseDifficulty(StrEnum):

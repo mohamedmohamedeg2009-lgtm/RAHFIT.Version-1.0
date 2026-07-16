@@ -4,6 +4,7 @@ from app.controllers.ai_coach import router as ai_coach_router
 from app.controllers.assessment import router as assessment_router
 from app.controllers.auth import router as auth_router
 from app.controllers.dashboard import router as dashboard_router
+from app.controllers.intelligent_workout import router as intelligent_workout_router
 from app.controllers.nutrition import router as nutrition_router
 from app.controllers.workout import router as workout_router
 
@@ -12,5 +13,6 @@ router.include_router(auth_router)
 router.include_router(assessment_router)
 router.include_router(dashboard_router)
 router.include_router(workout_router)
+router.include_router(intelligent_workout_router)
 router.include_router(nutrition_router)
 router.include_router(ai_coach_router)

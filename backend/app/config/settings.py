@@ -34,7 +34,11 @@ class Settings(BaseSettings):
     rate_limit_requests: int = Field(default=100, gt=0)
     rate_limit_window_seconds: int = Field(default=60, gt=0)
     ai_feature_enabled: bool = Field(default=False, validation_alias="AI_FEATURE_ENABLED")
-    ai_provider: str = Field(default="openai", validation_alias="AI_PROVIDER")
+    ai_provider: str = Field(default="gemini", validation_alias="AI_PROVIDER")
+    gemini_api_key: SecretStr | None = Field(default=None, validation_alias="GEMINI_API_KEY")
+    gemini_model: str = Field(default="gemini-2.5-flash", validation_alias="GEMINI_MODEL")
+    ai_timeout: float = Field(default=15, ge=1, le=60, validation_alias="AI_TIMEOUT")
+    # Legacy OpenAI-compatible configuration remains supported for existing deployments.
     ai_api_key: SecretStr | None = Field(default=None, validation_alias="AI_API_KEY")
     ai_model: str = Field(default="gpt-4.1-mini", validation_alias="AI_MODEL")
     ai_request_timeout_seconds: float = Field(
@@ -58,7 +62,7 @@ class Settings(BaseSettings):
     @field_validator("ai_provider", mode="before")
     @classmethod
     def normalize_ai_provider(cls, value: object) -> str:
-        normalized = str(value).strip().lower() if value is not None else "openai"
+        normalized = str(value).strip().lower() if value is not None else "gemini"
         return normalized[:50]
 
     @field_validator("ai_feature_enabled", mode="before")
@@ -75,12 +79,34 @@ class Settings(BaseSettings):
         normalized = str(value).strip() if value is not None else ""
         return (normalized or "gpt-4.1-mini")[:100]
 
+    @field_validator("gemini_model", mode="before")
+    @classmethod
+    def normalize_gemini_model(cls, value: object) -> str:
+        normalized = str(value).strip() if value is not None else ""
+        return (normalized or "gemini-2.5-flash")[:100]
+
     @field_validator("ai_api_key", mode="before")
     @classmethod
     def normalize_ai_api_key(cls, value: object) -> object:
         if isinstance(value, str) and not value.strip():
             return None
         return value
+
+    @field_validator("gemini_api_key", mode="before")
+    @classmethod
+    def normalize_gemini_api_key(cls, value: object) -> object:
+        if isinstance(value, str) and not value.strip():
+            return None
+        return value
+
+    @field_validator("ai_timeout", mode="before")
+    @classmethod
+    def normalize_primary_ai_timeout(cls, value: object) -> float:
+        try:
+            parsed = float(str(value))
+        except (TypeError, ValueError):
+            return 15
+        return parsed if 1 <= parsed <= 60 else 15
 
     @field_validator("ai_request_timeout_seconds", mode="before")
     @classmethod

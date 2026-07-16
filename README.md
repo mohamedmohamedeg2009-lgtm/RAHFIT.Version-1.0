@@ -25,7 +25,7 @@ See [Setup Guide](docs/Setup-Guide.md) for details, [Architecture](docs/Architec
 
 The [Nutrition Architecture](docs/Nutrition-Architecture.md) documents deterministic nutrition calculations, food safety rules, meal generation, and daily progress tracking.
 
-The [AI Provider Infrastructure](docs/AI-Provider-Infrastructure.md) documents the provider-neutral contract, safe configuration, availability states, error mapping, and test-only fake provider.
+The [AI Provider Infrastructure](docs/AI-Provider-Infrastructure.md) documents the AIService boundary, provider pattern, Gemini and Mock adapters, structured output validation, safe configuration, and future provider extension process.
 
 The [AI Conversation Domain](docs/AI-Conversation-Domain.md) documents owner-isolated conversation persistence, lifecycle rules, trusted internal messages, bounded retention, and migration-safe indexes.
 
@@ -37,6 +37,12 @@ The [AI Capability Classifier](docs/AI-Capability-Classifier.md) documents deter
 
 The [Deterministic AI Safety Engine](docs/AI-Safety-Engine.md) documents fail-closed pre-generation decisions, safety precedence, policy and context integration, provider eligibility, and privacy-preserving findings.
 
+The [AI Architecture Gate Review](docs/AI-Architecture-Gate-Review.md) evaluates end-to-end readiness before provider generation and defines the required compatibility, validation, idempotency, persistence, cost-control, and testing gates.
+
+The [User Intelligence Layer](docs/User-Intelligence-Layer.md) defines the canonical profile and health domains, deterministic readiness validation, minimum-approved AI context projection, persistence, privacy boundaries, and adoption migration.
+
+The [Workout Engine](docs/Workout-Engine.md) defines the versioned Python exercise catalog, readiness-gated deterministic planning, owner-scoped plan and session persistence, strict validation, progress records, and auditable adaptation recommendations. Gemini is optional and may only explain an already-valid plan through `AIService`; disabled, timed-out, rate-limited, malformed, or unsafe provider output uses the deterministic fallback without requiring a Gemini key. Its authenticated, versioned API is available at `/api/v1/intelligent-workouts`; the legacy `/api/v1/workouts` contract remains compatible.
+
 ## Quality checks
 
 ```powershell
@@ -44,6 +50,10 @@ ruff check backend
 black --check backend
 mypy backend/app
 pytest
+
+# Focused Workout Engine verification
+pytest backend/tests/test_intelligent_workout_engine.py -q
+pytest backend/tests/test_intelligent_workout_api.py -q
 
 Set-Location frontend
 npm run lint

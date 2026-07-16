@@ -9,6 +9,7 @@ from app.ai.providers import (
     AIProviderRequest,
     FakeAIProvider,
     FakeProviderMode,
+    GeminiProvider,
     OpenAICompatibleProvider,
     ProviderErrorCategory,
 )
@@ -52,25 +53,55 @@ def provider_request() -> AIProviderRequest:
 def test_ai_configuration_defaults_are_disabled_and_secret_optional() -> None:
     settings = configured_settings()
     assert settings.ai_feature_enabled is False
-    assert settings.ai_provider == "openai"
-    assert settings.ai_api_key is None
-    assert settings.ai_request_timeout_seconds == 15
+    assert settings.ai_provider == "gemini"
+    assert settings.gemini_api_key is None
+    assert settings.gemini_model == "gemini-2.5-flash"
+    assert settings.ai_timeout == 15
     assert settings.ai_max_output_tokens == 600
 
 
 def test_ai_configuration_normalizes_values_and_whitespace_key() -> None:
     settings = configured_settings(
         AI_FEATURE_ENABLED=True,
-        AI_PROVIDER="  OPENAI  ",
-        AI_API_KEY="   ",
-        AI_MODEL="  test-model  ",
+        AI_PROVIDER="  GEMINI  ",
+        GEMINI_API_KEY="   ",
+        GEMINI_MODEL="  test-model  ",
     )
-    assert settings.ai_provider == "openai"
-    assert settings.ai_model == "test-model"
-    assert settings.ai_api_key is None
+    assert settings.ai_provider == "gemini"
+    assert settings.gemini_model == "test-model"
+    assert settings.gemini_api_key is None
 
     invalid_flag = configured_settings(AI_FEATURE_ENABLED="not-a-boolean")
     assert invalid_flag.ai_feature_enabled is False
+
+
+def test_gemini_configuration_uses_dedicated_environment_variables() -> None:
+    settings = configured_settings(
+        AI_PROVIDER="gemini",
+        GEMINI_API_KEY="gemini-test-key",
+        GEMINI_MODEL=" gemini-custom-model ",
+        AI_TIMEOUT="21",
+    )
+
+    assert settings.gemini_api_key is not None
+    assert settings.gemini_api_key.get_secret_value() == "gemini-test-key"
+    assert settings.gemini_model == "gemini-custom-model"
+    assert settings.ai_timeout == 21
+
+
+def test_legacy_openai_provider_remains_explicitly_configurable() -> None:
+    resolution = AIProviderResolver(
+        configured_settings(
+            AI_FEATURE_ENABLED=True,
+            AI_PROVIDER="openai",
+            AI_API_KEY="legacy-test-key",
+            AI_MODEL="legacy-model",
+        )
+    ).resolve()
+
+    assert isinstance(resolution.provider, OpenAICompatibleProvider)
+    assert resolution.provider_name == "openai"
+    assert resolution.model_name == "legacy-model"
 
 
 @pytest.mark.parametrize(
@@ -81,9 +112,11 @@ def test_invalid_ai_limits_fall_back_safely_without_breaking_startup(
     timeout: object, tokens: object
 ) -> None:
     settings = configured_settings(
+        AI_TIMEOUT=timeout,
         AI_REQUEST_TIMEOUT_SECONDS=timeout,
         AI_MAX_OUTPUT_TOKENS=tokens,
     )
+    assert settings.ai_timeout == 15
     assert settings.ai_request_timeout_seconds == 15
     assert settings.ai_max_output_tokens == 600
 
@@ -95,11 +128,11 @@ def test_invalid_ai_limits_fall_back_safely_without_breaking_startup(
         ({}, AIAvailabilityStatus.DISABLED),
         ({"AI_FEATURE_ENABLED": True}, AIAvailabilityStatus.SETUP_REQUIRED),
         (
-            {"AI_FEATURE_ENABLED": True, "AI_API_KEY": "test-key"},
+            {"AI_FEATURE_ENABLED": True, "GEMINI_API_KEY": "test-key"},
             AIAvailabilityStatus.AVAILABLE,
         ),
         (
-            {"AI_FEATURE_ENABLED": True, "AI_PROVIDER": "unknown", "AI_API_KEY": "key"},
+            {"AI_FEATURE_ENABLED": True, "AI_PROVIDER": "unknown", "GEMINI_API_KEY": "key"},
             AIAvailabilityStatus.TEMPORARILY_UNAVAILABLE,
         ),
     ),
@@ -219,7 +252,10 @@ async def test_configured_adapter_maps_vendor_statuses_to_stable_errors(
 
 @pytest.mark.asyncio
 async def test_availability_endpoint_is_authenticated_and_secret_free() -> None:
-    settings = configured_settings(AI_FEATURE_ENABLED=True, AI_API_KEY="super-secret-test-key")
+    settings = configured_settings(
+        AI_FEATURE_ENABLED=True,
+        GEMINI_API_KEY="super-secret-test-key",
+    )
     app = FastAPI()
     app.include_router(router, prefix="/api/v1")
     app.dependency_overrides[get_current_user] = authenticated_user
@@ -251,13 +287,16 @@ async def test_availability_endpoint_rejects_guests() -> None:
 async def test_availability_does_not_call_provider_or_log_api_key(
     monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:
-    settings = configured_settings(AI_FEATURE_ENABLED=True, AI_API_KEY="never-log-this-key")
+    settings = configured_settings(
+        AI_FEATURE_ENABLED=True,
+        GEMINI_API_KEY="never-log-this-key",
+    )
 
     async def forbidden_generate(*args: object, **kwargs: object) -> None:
         del args, kwargs
         raise AssertionError("Availability must not call the provider.")
 
-    monkeypatch.setattr(OpenAICompatibleProvider, "generate", forbidden_generate)
+    monkeypatch.setattr(GeminiProvider, "generate_text", forbidden_generate)
     result = await AIAvailabilityService(settings).get_availability()
     assert result.status == AIAvailabilityStatus.AVAILABLE
     assert "never-log-this-key" not in caplog.text

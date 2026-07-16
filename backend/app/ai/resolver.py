@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
-from app.ai.providers import AIProvider, OpenAICompatibleProvider
+from app.ai.provider import AIProvider
+from app.ai.providers import GeminiProvider, OpenAICompatibleProvider
 from app.config import Settings
 from app.models.ai_provider import AIAvailabilityStatus
 
@@ -15,7 +16,7 @@ class ProviderResolution:
 
 
 class AIProviderResolver:
-    """Resolve configuration locally without creating a network client or making a request."""
+    """Resolve configuration and adapters locally without making a provider request."""
 
     def __init__(self, settings: Settings, override: AIProvider | None = None) -> None:
         self.settings = settings
@@ -38,7 +39,7 @@ class AIProviderResolver:
                 model_name=None,
                 reason_code="ai_feature_disabled",
             )
-        if self.settings.ai_provider != "openai":
+        if self.settings.ai_provider not in {"gemini", "openai"}:
             return ProviderResolution(
                 provider=None,
                 status=AIAvailabilityStatus.TEMPORARILY_UNAVAILABLE,
@@ -46,21 +47,37 @@ class AIProviderResolver:
                 model_name=self.settings.ai_model,
                 reason_code="ai_provider_unsupported",
             )
-        key = self.settings.ai_api_key
+        key = (
+            self.settings.gemini_api_key
+            if self.settings.ai_provider == "gemini"
+            else self.settings.ai_api_key
+        )
         if key is None or not key.get_secret_value().strip():
             return ProviderResolution(
                 provider=None,
                 status=AIAvailabilityStatus.SETUP_REQUIRED,
                 provider_name=self.settings.ai_provider,
-                model_name=self.settings.ai_model,
+                model_name=(
+                    self.settings.gemini_model
+                    if self.settings.ai_provider == "gemini"
+                    else self.settings.ai_model
+                ),
                 reason_code="ai_provider_setup_required",
             )
-        provider = OpenAICompatibleProvider(
-            api_key=key.get_secret_value(),
-            model=self.settings.ai_model,
-            request_timeout_seconds=self.settings.ai_request_timeout_seconds,
-            max_output_tokens=self.settings.ai_max_output_tokens,
-        )
+        if self.settings.ai_provider == "gemini":
+            provider: AIProvider = GeminiProvider(
+                api_key=key.get_secret_value(),
+                model=self.settings.gemini_model,
+                request_timeout_seconds=self.settings.ai_timeout,
+                max_output_tokens=self.settings.ai_max_output_tokens,
+            )
+        else:
+            provider = OpenAICompatibleProvider(
+                api_key=key.get_secret_value(),
+                model=self.settings.ai_model,
+                request_timeout_seconds=self.settings.ai_request_timeout_seconds,
+                max_output_tokens=self.settings.ai_max_output_tokens,
+            )
         return ProviderResolution(
             provider=provider,
             status=AIAvailabilityStatus.AVAILABLE,

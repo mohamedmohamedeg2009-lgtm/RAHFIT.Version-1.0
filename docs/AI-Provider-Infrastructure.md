@@ -1,119 +1,191 @@
-# RAHFIT AI — AI Provider Infrastructure and Availability
+# RAHFIT AI — Provider-Based AI Architecture
 
-**Sprint:** 2.1  
-**Status:** Implemented  
-**Scope:** Provider infrastructure only. No AI Coach conversation, prompt acceptance endpoint, memory, context builder, plan mutation, or chat interface is included.
+**Status:** Implemented foundation
 
-## 1. Sprint Scope
+**Scope:** Provider abstraction, Gemini and mock adapters, safe service orchestration, structured output validation, dependency injection, configuration, logging, and tests. No public generation endpoint or frontend feature is included.
 
-This sprint establishes the smallest safe boundary required for future AI features. The backend can identify whether AI is disabled, requires setup, is locally available, or is temporarily unavailable. A provider-neutral contract prevents future domain services from depending directly on one vendor.
+## 1. Architecture Goal
 
-Core authentication, assessment, dashboard, workout, and nutrition functionality remains independent of provider availability. No provider request occurs during startup or an availability check.
+Application and domain services must never import or call a vendor SDK. All generation follows one dependency direction:
 
-## 2. Provider-Neutral Architecture
+```text
+Business service
+    ↓
+AIService
+    ↓
+AIProvider
+    ↓
+GeminiProvider | MockProvider | future provider
+```
 
-The infrastructure has five boundaries:
+`AIService` is the application boundary. `AIProvider` is the vendor-neutral contract. Provider adapters own vendor translation only. This keeps safety, context ownership, validation, and domain policy outside vendor code.
 
-1. Environment-backed settings normalize provider configuration without consuming generic host variables.
-2. A typed provider protocol describes generic request, response, usage, availability, and failure behavior.
-3. An OpenAI-compatible adapter translates the protocol into one external HTTP request.
-4. A resolver selects the configured adapter or returns a safe local availability state.
-5. An availability service exposes secret-free status to the authenticated API and existing dashboard feature system.
+## 2. Package Responsibilities
 
-No RAHFIT assessment, workout, nutrition, safety, conversation, or user-context logic exists inside the provider interface.
+| Package or file | Responsibility |
+| --- | --- |
+| `app/ai/provider.py` | Abstract provider interface and provider-neutral request, response, usage, and availability contracts |
+| `app/ai/exceptions.py` | Stable provider, timeout, validation, and safety exceptions without vendor details |
+| `app/ai/service.py` | Approved Context construction, Safety Engine invocation, provider invocation, output validation, and safe metadata logging |
+| `app/ai/providers/gemini_provider.py` | Google GenAI SDK translation, timeout enforcement, structured response configuration, usage extraction, and stable error mapping |
+| `app/ai/providers/mock_provider.py` | Deterministic test provider with no network behavior |
+| `app/ai/providers/openai_compatible_provider.py` | Backward-compatible adapter for existing configured deployments |
+| `app/ai/providers/__init__.py` | Stable exports, including compatibility names used by earlier tests and services |
+| `app/ai/schemas/` | Trusted internal AIService request and typed response contracts |
+| `app/ai/prompts/` | Reserved for a future reviewed and versioned prompt layer; no prompt templates are implemented here |
+| `app/ai/resolver.py` | Local configuration resolution and explicit provider injection |
 
 ## 3. Provider Contract
 
-The generic request contains system instructions, approved user content, a bounded output-token request, and optional non-sensitive metadata. It does not contain domain-specific models or provider credentials.
+Every provider implements:
 
-The generic response contains generated text, an optional structured payload, provider and model names, optional input/output/total token counts, latency, and a safe provider request identifier. It never includes authentication headers, API keys, raw client objects, or vendor exceptions.
+- `generate_text` for bounded text output.
+- `generate_json` for output constrained by a caller-provided Pydantic model.
+- `health_check` for an explicit provider probe.
+- Stable provider name, model, timeout, output-token limit, and availability properties.
 
-The provider protocol exposes its configured model, request timeout, maximum output tokens, local availability, and one non-streaming generation operation. Streaming, tools, browsing, files, function calling, and agents are intentionally absent.
+The legacy `generate` method remains as a compatibility alias for text generation. New application code uses `AIService`, not this alias and not provider adapters directly.
 
-## 4. Configured Provider Adapter
+Provider requests contain only trusted system instructions, serialized approved context, bounded output tokens, and non-sensitive correlation metadata. API keys never enter provider-neutral request objects.
 
-The configured adapter targets an OpenAI-compatible chat-completions interface because no previously installed vendor SDK or stronger project-specific provider decision existed. The runtime uses the already approved HTTP client dependency rather than introducing a large SDK.
+## 4. AIService Pipeline
 
-The adapter is instantiated only after the feature is enabled, the provider name is supported, and a non-blank key exists. Its HTTP client is created only for a generation request. It enforces the configured timeout and caps request output tokens at the configured maximum. There is no startup call, availability probe, streaming, or automatic retry loop.
+For text and structured generation, `AIService` performs the following sequence:
 
-Provider responses are validated defensively. Missing or blank content becomes a stable invalid-response error. Token usage and request identifiers are accepted only when they have the expected safe types.
+1. Normalize and bound the trusted internal prompt.
+2. Replace the context request's question with the normalized prompt.
+3. Build owner-scoped Approved Context through the existing Context Builder.
+4. Construct the existing trusted `AISafetyRequest` from authenticated ownership, classification, policy, context, locale, and request ID.
+5. Invoke the existing deterministic Safety Engine.
+6. Stop with `AISafetyError` when the safety result does not require a provider.
+7. Serialize only context sections approved by the Safety Engine.
+8. Invoke the injected provider exactly once.
+9. Validate text or structured output.
+10. Return typed output plus safe provider, model, token, latency, request ID, and safety metadata.
 
-## 5. Deterministic Fake Provider
+The service has no database access, HTTP endpoint, authentication logic, provider selection global, or mutable singleton.
 
-The fake provider is an explicit test dependency. It never performs network access and returns a stable response, stable request identifier, one-millisecond latency, and deterministic token counts. Tests can select deterministic timeout, rate-limit, unavailable, and invalid-response modes and can inspect the typed requests received.
+## 5. Gemini Provider
 
-The configuration resolver never selects `fake`, including in production. Tests inject it directly through the resolver override. This prevents a fake response from silently becoming production behavior.
+`GeminiProvider` uses the official Google GenAI SDK and its asynchronous API. Model, API key, timeout, and maximum output tokens come only from validated settings.
 
-## 6. Provider Resolver
+Text generation supplies approved context as content and trusted system instructions through the SDK configuration. JSON generation additionally requests `application/json` and supplies the caller's Pydantic response model as the response schema. The returned value is validated before it crosses the provider boundary.
 
-The resolver has no global mutable state. It receives validated settings and an optional test override. Resolution is local and deterministic:
+The adapter extracts safe token counts and the provider request identifier when available. It maps timeout, authentication, rate-limit, server, invalid-response, and unexpected failures to stable internal exceptions. Raw SDK errors and credentials are never returned or logged.
 
-| Condition | Result |
-| --- | --- |
-| Feature disabled | `disabled` |
-| Feature enabled with missing/blank key | `setup_required` |
-| Supported provider with valid local configuration | `available` |
-| Unknown provider | `temporarily_unavailable` |
-| Explicit test override | `available` with the injected provider |
+The availability endpoint remains configuration-only and does not call `health_check`. A health probe occurs only when an explicit trusted caller invokes it.
 
-Resolving availability does not make an external request or create an HTTP client.
+## 6. Mock Provider
 
-## 7. Availability API
+`MockProvider` is deterministic and makes no network calls. It records typed requests and supports stable success, timeout, rate-limit, unavailable, and invalid-response modes.
 
-`GET /api/v1/ai-coach/availability` is the only AI Coach-prefixed endpoint in this sprint. It requires authentication because the existing dashboard and future feature entitlements are authenticated product surfaces.
+The resolver cannot select MockProvider from runtime configuration. Tests inject it through constructors or the resolver override. Compatibility exports retain the previous `FakeAIProvider` and `FakeProviderMode` names.
 
-Expected configuration states return successful responses. The response contains feature-enabled state, stable status, safe provider/model names where applicable, a stable reason code, and concise display text. It does not reveal the key, raw key-presence diagnostics, headers, stack traces, or provider authentication details.
+## 7. Structured Outputs
 
-No endpoint accepts prompts, user content, provider payloads, conversations, messages, or memory.
+`generate_json` requires a concrete Pydantic model from the trusted caller. This supports coach responses and future workout or nutrition output contracts without coupling the provider package to those domains.
 
-## 8. Dashboard Integration
+Validation occurs at two boundaries:
 
-The existing dashboard already has a reusable feature-availability model, so it consumes the dedicated availability service. The dashboard maps infrastructure state to its existing feature statuses without adding a page, route, or custom AI Coach interface. It contains presentation mapping only; provider selection remains in the resolver and availability service.
+1. The provider asks the vendor for the requested schema and validates the returned payload.
+2. `AIService` validates the provider-neutral structured payload again before returning it.
 
-## 9. Environment Configuration
+Missing payloads, invalid JSON, additional forbidden fields, impossible field values, or schema mismatches result in `AIValidationError`. Raw LLM output is never accepted as a workout plan, nutrition plan, or coach response.
 
-| Variable | Default | Validation and purpose |
+## 8. Dependency Injection
+
+`AIService` receives these dependencies through its constructor:
+
+- `AIProvider`
+- Context Builder-compatible dependency
+- Safety Engine-compatible dependency
+- optional structured logger
+
+`AIProviderResolver` receives validated settings and an optional explicit provider override. No provider instance, API client, service, or mutable provider choice is stored in module-global state.
+
+Business services that later require generation must depend on `AIService`. They must not import `google.genai`, `GeminiProvider`, or any other provider adapter.
+
+## 9. Configuration
+
+| Variable | Default | Purpose |
 | --- | --- | --- |
-| `AI_FEATURE_ENABLED` | `false` | Explicit feature gate; disabled by default |
-| `AI_PROVIDER` | `openai` | Trimmed and normalized to lowercase; unknown values resolve safely |
-| `AI_API_KEY` | empty | Optional secret; blank/whitespace is treated as missing |
-| `AI_MODEL` | `gpt-4.1-mini` | Trimmed; blank values use the safe default |
-| `AI_REQUEST_TIMEOUT_SECONDS` | `15` | Safe range 1–60 seconds; invalid values fall back to 15 |
-| `AI_MAX_OUTPUT_TOKENS` | `600` | Safe range 1–4096; invalid values fall back to 600 |
+| `AI_FEATURE_ENABLED` | `false` | Fail-safe feature gate |
+| `AI_PROVIDER` | `gemini` | Provider selected by the resolver |
+| `GEMINI_API_KEY` | empty | Gemini secret loaded through `SecretStr` |
+| `GEMINI_MODEL` | `gemini-2.5-flash` | Gemini model identifier |
+| `AI_TIMEOUT` | `15` | Gemini request timeout in seconds, bounded to 1–60 |
+| `AI_MAX_OUTPUT_TOKENS` | `600` | Output ceiling, bounded to 1–4096 |
 
-All variables use an unambiguous `AI_` prefix. Real credentials belong in ignored local/deployment secrets, never `.env.example` or source control.
+Legacy `AI_API_KEY`, `AI_MODEL`, and `AI_REQUEST_TIMEOUT_SECONDS` remain available only when `AI_PROVIDER=openai`. This preserves existing deployments while making Gemini the default.
 
-## 10. Stable Error Mapping
+Real credentials belong in ignored local environment files or deployment secret managers. They must never be committed, returned by an API, included in request metadata, or logged.
 
-Internal categories are `provider_disabled`, `provider_not_configured`, `provider_unavailable`, `provider_timeout`, `provider_rate_limited`, `provider_invalid_response`, `provider_authentication_failure`, and `unexpected_provider_failure`.
+## 10. Error Contract
 
-The configured adapter maps timeouts, network failures, authentication responses, rate limits, server failures, invalid payloads, and other HTTP failures into these stable categories. Vendor exception text is retained only as a chained internal cause and is not returned by the availability API.
+| Exception | Meaning |
+| --- | --- |
+| `AIProviderError` | Stable provider failure with provider, model, and safe category |
+| `AITimeoutError` | Provider timeout |
+| `AIValidationError` | Invalid provider output or invalid internal generation input |
+| `AISafetyError` | Safety Engine rejected provider generation |
 
-Future callers may log provider name, model, stable category, latency, and request correlation identifiers. They must not log API keys, authorization headers, full instructions, approved user content, sensitive context, or full provider responses.
+Stable provider categories include disabled, not configured, unavailable, timeout, rate limited, invalid response, authentication failure, and unexpected failure.
 
-## 11. Startup and Failure Behavior
+## 11. Logging and Privacy
 
-The backend starts when AI is disabled, when the key is absent, and when the feature is enabled but setup is incomplete. Invalid provider names become a safe availability state instead of breaking unrelated routes. Invalid timeout and token settings fall back to bounded defaults.
+Successful generation emits a structured `ai_generation_completed` event containing only:
 
-Authentication, dashboard, assessment, workout, and nutrition services neither import provider-specific clients nor depend on a successful external request. Availability checks are local and cannot incur paid usage.
+- request ID
+- provider
+- model
+- latency
+- input, output, and total token counts when available
 
-## 12. Testing Strategy
+Provider failures emit `ai_generation_failed` with the stable reason code. Logs never contain API keys, prompts, system instructions, Approved Context data, full provider responses, authentication data, or raw vendor exception messages.
 
-Automated tests cover configuration defaults and normalization, whitespace keys, bounded numeric settings, every availability state, unknown providers, production rejection of fake configuration, resolver override, deterministic fake response and token metadata, all fake failure modes, configured-adapter parsing, stable HTTP error mapping, authenticated availability responses, guest rejection, secret exclusion, no provider call during availability, startup without a key, single-route registration, and dashboard consumption.
+## 12. Adding a Future Provider
 
-External requests in adapter tests use an in-memory mock transport. No automated test calls a real or paid provider.
+To add a provider safely:
 
-## 13. Security Considerations
+1. Create an adapter under `app/ai/providers/` that implements every `AIProvider` method.
+2. Keep SDK imports inside that adapter.
+3. Load all credentials, models, limits, and timeouts from validated settings.
+4. Map vendor failures to the stable exception contract.
+5. Implement Pydantic-backed structured generation and defensive response parsing.
+6. Add deterministic, network-free unit tests for text, JSON, timeout, authentication, rate limit, malformed output, token metadata, and health behavior.
+7. Register the provider in `AIProviderResolver` without changing `AIService` or business services.
+8. Document its configuration and operational behavior.
 
-- Secrets use `SecretStr` configuration and are absent from response schemas.
-- The external client and authorization header exist only inside the configured adapter request boundary.
-- Availability is configuration-derived and performs no external call.
-- No unrestricted input or provider-generation API is exposed.
-- No raw provider exception is exposed through the API.
-- No dynamic evaluation, tools, browsing, file access, streaming, or agents exist.
-- The fake provider is injectable for tests but cannot be selected through production configuration.
-- Existing authentication protects the availability endpoint.
+## 13. Testing Strategy
 
-## 14. Explicitly Deferred
+Automated tests verify:
 
-AI Coach chat, conversations, messages, context selection, prompt orchestration, output safety gates, memory, usage quotas, cost accounting, AI plan explanation, workout or nutrition changes, streaming, tools, function calling, browsing, files, agents, vector storage, frontend chat routes, and chat components are deferred to later approved sprints.
+- Gemini text and structured configuration through an injected SDK client.
+- Pydantic validation of structured responses.
+- Stable timeout and rate-limit mapping without secret leakage.
+- Isolated health-check behavior.
+- MockProvider determinism and network independence.
+- Existing OpenAI-compatible behavior and compatibility imports.
+- Context construction before safety evaluation.
+- Safety rejection before any provider call.
+- Provider invocation only after an allowed safety result.
+- Structured validation at AIService.
+- Metadata-only logging.
+- Configuration-derived availability without provider calls.
+
+No automated test calls Gemini, OpenAI, or another paid service.
+
+## 14. Operational Boundaries
+
+- No public generation endpoint is introduced.
+- No authentication, MongoDB, repository, workout, nutrition, dashboard, or frontend behavior is changed.
+- No automatic retry is performed, preventing accidental duplicate billing.
+- No tools, browsing, code execution, file access, function calling, streaming, agents, or memory are enabled.
+- Provider output cannot directly mutate workout or nutrition state.
+- Future public generation requires the idempotency, quota, persistence, post-generation validation, and orchestration controls documented by the Architecture Gate Review.
+
+## 15. Migration
+
+No database migration is required.
+
+Deployment configuration must provide `GEMINI_API_KEY` when Gemini is enabled. Existing OpenAI-compatible deployments must set `AI_PROVIDER=openai` explicitly and may continue using their existing legacy variables.

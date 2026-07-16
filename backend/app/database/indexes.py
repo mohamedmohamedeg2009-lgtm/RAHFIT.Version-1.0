@@ -24,6 +24,53 @@ AI_MESSAGE_INDEXES: tuple[tuple[str, tuple[tuple[str, int], ...]], ...] = (
     ),
     ("ai_messages_owner_id", (("user_id", 1), ("_id", 1))),
 )
+USER_INTELLIGENCE_INDEXES: tuple[tuple[str, str], ...] = (
+    ("user_profiles", "user_profiles_user_unique"),
+    ("health_profiles", "health_profiles_user_unique"),
+)
+INTELLIGENT_WORKOUT_PLAN_COLLECTION = "intelligent_workout_plans"
+INTELLIGENT_WORKOUT_SESSION_COLLECTION = "intelligent_workout_sessions"
+
+
+async def ensure_intelligent_workout_indexes(database: Any) -> None:
+    plans = database[INTELLIGENT_WORKOUT_PLAN_COLLECTION]
+    sessions = database[INTELLIGENT_WORKOUT_SESSION_COLLECTION]
+    await plans.create_index(
+        "plan_id",
+        unique=True,
+        name="intelligent_workout_plans_plan_id_unique",
+    )
+    await plans.create_index(
+        [("user_id", 1), ("status", 1)],
+        unique=True,
+        partialFilterExpression={"status": "active"},
+        name="intelligent_workout_plans_one_active_per_user",
+    )
+    await plans.create_index(
+        [("user_id", 1), ("generated_at", -1)],
+        name="intelligent_workout_plans_owner_history",
+    )
+    await plans.create_index(
+        [("user_id", 1), ("status", 1), ("generated_at", -1)],
+        name="intelligent_workout_plans_owner_status",
+    )
+    await plans.create_index(
+        [("user_id", 1), ("generation_metadata.generation_key", 1), ("version", -1)],
+        name="intelligent_workout_plans_generation_history",
+    )
+    await sessions.create_index(
+        "session_id",
+        unique=True,
+        name="intelligent_workout_sessions_session_id_unique",
+    )
+    await sessions.create_index(
+        [("user_id", 1), ("plan_id", 1), ("started_at", -1)],
+        name="intelligent_workout_sessions_owner_plan_history",
+    )
+    await sessions.create_index(
+        [("user_id", 1), ("status", 1), ("started_at", -1)],
+        name="intelligent_workout_sessions_owner_status",
+    )
 
 
 async def ensure_named_index(collection: Any, keys: Sequence[tuple[str, int]], name: str) -> None:
@@ -43,6 +90,15 @@ async def ensure_ai_conversation_indexes(database: Any) -> None:
         await ensure_named_index(database["ai_conversations"], keys, name)
     for name, keys in AI_MESSAGE_INDEXES:
         await ensure_named_index(database["ai_messages"], keys, name)
+
+
+async def ensure_user_intelligence_indexes(database: Any) -> None:
+    for collection_name, index_name in USER_INTELLIGENCE_INDEXES:
+        await database[collection_name].create_index(
+            "user_id",
+            unique=True,
+            name=index_name,
+        )
 
 
 async def ensure_workout_session_index(collection: Any) -> None:
@@ -65,6 +121,8 @@ async def ensure_workout_session_index(collection: Any) -> None:
 async def initialize_indexes(database: AsyncIOMotorDatabase[dict[str, Any]]) -> None:
     """Register indexes required by implemented domains."""
     await database["users"].create_index("email", unique=True, name="users_email_unique")
+    await ensure_user_intelligence_indexes(database)
+    await ensure_intelligent_workout_indexes(database)
     await ensure_ai_conversation_indexes(database)
     await database["assessment_questions"].create_index(
         [("version", 1), ("question_id", 1)],
