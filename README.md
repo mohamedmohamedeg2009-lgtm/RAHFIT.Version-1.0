@@ -35,6 +35,8 @@ The [AI Policy Layer](docs/AI-Policy-Layer.md) documents deterministic capabilit
 
 The [AI Capability Classifier](docs/AI-Capability-Classifier.md) documents deterministic English, Arabic, and mixed-language intent classification, priority rules, confidence metadata, and safe unsupported routing.
 
+The [Deterministic AI Safety Engine](docs/AI-Safety-Engine.md) documents fail-closed pre-generation decisions, safety precedence, policy and context integration, provider eligibility, and privacy-preserving findings.
+
 ## Quality checks
 
 ```powershell
