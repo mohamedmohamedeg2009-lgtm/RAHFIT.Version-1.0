@@ -54,6 +54,28 @@ def test_auth_routes_remain_registered_in_the_application_router() -> None:
     assert {"/auth/register", "/auth/login", "/auth/refresh", "/auth/me", "/auth/logout"} <= paths
 
 
+def test_backend_configuration_starts_without_ai_key_when_ai_is_disabled_or_enabled(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    required_environment(monkeypatch)
+    monkeypatch.delenv("AI_API_KEY", raising=False)
+
+    monkeypatch.setenv("AI_FEATURE_ENABLED", "false")
+    disabled = Settings(_env_file=None)
+    monkeypatch.setenv("AI_FEATURE_ENABLED", "true")
+    setup_required = Settings(_env_file=None)
+
+    assert disabled.ai_feature_enabled is False
+    assert disabled.ai_api_key is None
+    assert setup_required.ai_feature_enabled is True
+    assert setup_required.ai_api_key is None
+
+
+def test_only_ai_availability_route_is_registered() -> None:
+    ai_paths = {route.path for route in router.routes if route.path.startswith("/ai-coach")}
+    assert ai_paths == {"/ai-coach/availability"}
+
+
 @pytest.mark.parametrize(
     "origin",
     (

@@ -3,12 +3,14 @@ from typing import Annotated, Any, cast
 from fastapi import APIRouter, Depends, Request
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from app.config import get_settings
 from app.controllers.auth import get_current_user
 from app.models.user import User
 from app.repositories.assessments import AssessmentRepository
 from app.repositories.nutrition import NutritionRepository
 from app.repositories.workouts import WorkoutRepository
 from app.schemas.dashboard import DashboardResponse
+from app.services.ai_availability import AIAvailabilityService
 from app.services.assessment import AssessmentService
 from app.services.dashboard import DashboardService
 from app.services.nutrition import NutritionService
@@ -24,7 +26,13 @@ def get_dashboard_service(request: Request) -> DashboardService:
     nutrition = NutritionService(
         NutritionRepository(database), assessment, WorkoutRepository(database)
     )
-    return DashboardService(assessment, workout, nutrition)
+    settings = get_settings()
+    return DashboardService(
+        assessment,
+        workout,
+        nutrition,
+        AIAvailabilityService(settings),
+    )
 
 
 @router.get(

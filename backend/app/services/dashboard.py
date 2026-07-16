@@ -2,6 +2,7 @@ from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from typing import Protocol
 
+from app.models.ai_provider import AIAvailability, AIAvailabilityStatus
 from app.models.assessment import AssessmentResult, SafetyStatus
 from app.models.dashboard import (
     DashboardAction,
@@ -38,6 +39,10 @@ class DashboardNutritionReader(Protocol):
     async def dashboard(self, user_id: str) -> NutritionDashboardState | None: ...
 
 
+class DashboardAICoachReader(Protocol):
+    async def get_availability(self) -> AIAvailability: ...
+
+
 class DashboardOwnershipError(Exception):
     """Raised when an internal source violates the owner-scoped reader contract."""
 
@@ -53,11 +58,13 @@ class DashboardService:
         assessment: DashboardAssessmentReader,
         workout: DashboardWorkoutReader | None = None,
         nutrition: DashboardNutritionReader | None = None,
+        ai_coach: DashboardAICoachReader | None = None,
         clock: Callable[[], datetime] | None = None,
     ) -> None:
         self.assessment = assessment
         self.workout = workout
         self.nutrition = nutrition
+        self.ai_coach = ai_coach
         self.clock = clock or (lambda: datetime.now(UTC))
 
     async def get_dashboard(self, user: User) -> DashboardView:
@@ -67,6 +74,7 @@ class DashboardService:
         partial_data = False
         workout_state: WorkoutDashboardState | None = None
         nutrition_state: NutritionDashboardState | None = None
+        ai_availability: AIAvailability | None = None
         try:
             active = await self.assessment.get_active_assessment(user.id)
             if active and active.session.user_id != user.id:
@@ -91,6 +99,16 @@ class DashboardService:
                 nutrition_state = await self.nutrition.dashboard(user.id)
             except Exception:
                 partial_data = True
+        if self.ai_coach:
+            try:
+                ai_availability = await self.ai_coach.get_availability()
+            except Exception:
+                ai_availability = AIAvailability(
+                    feature_enabled=True,
+                    status=AIAvailabilityStatus.TEMPORARILY_UNAVAILABLE,
+                    reason_code="ai_availability_check_failed",
+                    message="AI provider infrastructure is temporarily unavailable.",
+                )
 
         status = self._assessment_status(active, result, partial_data)
         profile_completeness, missing_profile_fields = self._profile_state(user)
@@ -123,6 +141,7 @@ class DashboardService:
                 partial_data,
                 self.workout is not None,
                 self.nutrition is not None,
+                ai_availability,
             ),
             safety_notice=self._safety_notice(active, result),
             progress=DashboardProgressSnapshot(
@@ -336,6 +355,7 @@ class DashboardService:
         partial_data: bool,
         workout_enabled: bool,
         nutrition_enabled: bool,
+        ai_availability: AIAvailability | None,
     ) -> tuple[DashboardFeature, ...]:
         if partial_data:
             assessment_feature = DashboardFeature(
@@ -442,11 +462,35 @@ class DashboardService:
                 destination_route="/nutrition",
             )
 
+        if ai_availability is None:
+            ai_feature = future_feature("ai_coach", "AI Coach")
+        elif ai_availability.status == AIAvailabilityStatus.AVAILABLE:
+            ai_feature = DashboardFeature(
+                key="ai_coach",
+                title="AI Coach",
+                status=FeatureStatus.AVAILABLE,
+                reason=ai_availability.message,
+            )
+        elif ai_availability.status == AIAvailabilityStatus.DISABLED:
+            ai_feature = DashboardFeature(
+                key="ai_coach",
+                title="AI Coach",
+                status=FeatureStatus.COMING_SOON,
+                reason=ai_availability.message,
+            )
+        else:
+            ai_feature = DashboardFeature(
+                key="ai_coach",
+                title="AI Coach",
+                status=FeatureStatus.ACTION_REQUIRED,
+                reason=ai_availability.message,
+            )
+
         return (
             assessment_feature,
             workout_feature,
             nutrition_feature,
-            future_feature("ai_coach", "AI Coach"),
+            ai_feature,
             future_feature("progress", "Progress tracking"),
             DashboardFeature(
                 key="reports",

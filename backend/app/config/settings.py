@@ -33,6 +33,16 @@ class Settings(BaseSettings):
     jwt_refresh_token_expire_days: int = Field(default=7, gt=0)
     rate_limit_requests: int = Field(default=100, gt=0)
     rate_limit_window_seconds: int = Field(default=60, gt=0)
+    ai_feature_enabled: bool = Field(default=False, validation_alias="AI_FEATURE_ENABLED")
+    ai_provider: str = Field(default="openai", validation_alias="AI_PROVIDER")
+    ai_api_key: SecretStr | None = Field(default=None, validation_alias="AI_API_KEY")
+    ai_model: str = Field(default="gpt-4.1-mini", validation_alias="AI_MODEL")
+    ai_request_timeout_seconds: float = Field(
+        default=15, ge=1, le=60, validation_alias="AI_REQUEST_TIMEOUT_SECONDS"
+    )
+    ai_max_output_tokens: int = Field(
+        default=600, ge=1, le=4096, validation_alias="AI_MAX_OUTPUT_TOKENS"
+    )
 
     @property
     def debug(self) -> bool:
@@ -44,6 +54,51 @@ class Settings(BaseSettings):
         if isinstance(value, str):
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
+
+    @field_validator("ai_provider", mode="before")
+    @classmethod
+    def normalize_ai_provider(cls, value: object) -> str:
+        normalized = str(value).strip().lower() if value is not None else "openai"
+        return normalized[:50]
+
+    @field_validator("ai_feature_enabled", mode="before")
+    @classmethod
+    def normalize_ai_feature_enabled(cls, value: object) -> bool:
+        if isinstance(value, bool):
+            return value
+        normalized = str(value).strip().lower()
+        return normalized in {"1", "true", "yes", "on"}
+
+    @field_validator("ai_model", mode="before")
+    @classmethod
+    def normalize_ai_model(cls, value: object) -> str:
+        normalized = str(value).strip() if value is not None else ""
+        return (normalized or "gpt-4.1-mini")[:100]
+
+    @field_validator("ai_api_key", mode="before")
+    @classmethod
+    def normalize_ai_api_key(cls, value: object) -> object:
+        if isinstance(value, str) and not value.strip():
+            return None
+        return value
+
+    @field_validator("ai_request_timeout_seconds", mode="before")
+    @classmethod
+    def normalize_ai_timeout(cls, value: object) -> float:
+        try:
+            parsed = float(str(value))
+        except (TypeError, ValueError):
+            return 15
+        return parsed if 1 <= parsed <= 60 else 15
+
+    @field_validator("ai_max_output_tokens", mode="before")
+    @classmethod
+    def normalize_ai_output_tokens(cls, value: object) -> int:
+        try:
+            parsed = int(str(value))
+        except (TypeError, ValueError):
+            return 600
+        return parsed if 1 <= parsed <= 4096 else 600
 
 
 @lru_cache

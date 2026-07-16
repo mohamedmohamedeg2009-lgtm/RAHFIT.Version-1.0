@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 from app.config import Settings, get_settings
 from app.controllers.auth import get_current_user
 from app.controllers.dashboard import get_dashboard_service, router
+from app.models.ai_provider import AIAvailability, AIAvailabilityStatus
 from app.models.assessment import (
     AssessmentAnswer,
     AssessmentProgress,
@@ -59,6 +60,18 @@ class FakeAssessmentReader:
         if self.fail:
             raise RuntimeError("database details must remain private")
         return self.result
+
+
+class FakeAIAvailabilityReader:
+    async def get_availability(self) -> AIAvailability:
+        return AIAvailability(
+            feature_enabled=True,
+            status=AIAvailabilityStatus.AVAILABLE,
+            provider="openai",
+            model="test-model",
+            reason_code="ai_provider_available",
+            message="AI provider infrastructure is available.",
+        )
 
 
 def user(*, complete_profile: bool = True, user_id: str = "owner-user") -> User:
@@ -138,6 +151,18 @@ async def test_no_assessment_selects_start_priority_and_locks_planning() -> None
     assert feature_statuses["assessment"] == FeatureStatus.ACTION_REQUIRED
     assert feature_statuses["workout"] == FeatureStatus.LOCKED
     assert dashboard.progress.latest_readiness_score is None
+
+
+async def test_dashboard_exposes_ai_availability_without_copying_ai_rules() -> None:
+    dashboard = await DashboardService(
+        FakeAssessmentReader(result=completed_result()),
+        ai_coach=FakeAIAvailabilityReader(),
+        clock=lambda: NOW,
+    ).get_dashboard(user())
+    ai_feature = next(item for item in dashboard.features if item.key == "ai_coach")
+    assert ai_feature.status == FeatureStatus.AVAILABLE
+    assert ai_feature.destination_route is None
+    assert ai_feature.reason == "AI provider infrastructure is available."
 
 
 async def test_incomplete_assessment_selects_resume_with_real_progress() -> None:
