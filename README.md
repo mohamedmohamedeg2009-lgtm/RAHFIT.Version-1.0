@@ -29,6 +29,8 @@ The [AI Provider Infrastructure](docs/AI-Provider-Infrastructure.md) documents t
 
 The [AI Conversation Domain](docs/AI-Conversation-Domain.md) documents owner-isolated conversation persistence, lifecycle rules, trusted internal messages, bounded retention, and migration-safe indexes.
 
+The [Approved AI Context Builder](docs/AI-Context-Builder.md) documents purpose-minimized, owner-isolated, size-bounded context selection for future AI Coach safety and orchestration stages.
+
 ## Quality checks
 
 ```powershell
