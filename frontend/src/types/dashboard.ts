@@ -8,6 +8,9 @@ export type DashboardActionType =
   | "complete_missing_profile_information"
   | "view_assessment_summary"
   | "continue_available_feature"
+  | "generate_workout"
+  | "start_workout"
+  | "continue_workout"
   | "log_out";
 export type DashboardSeverity = "info" | "success" | "warning" | "danger";
 export type FeatureStatus = "available" | "locked" | "coming_soon" | "action_required";
@@ -75,6 +78,16 @@ export interface DashboardMetadata {
 export interface DashboardData {
   user: DashboardUserSummary;
   assessment: DashboardAssessmentSummary;
+  workout: {
+    planId: string;
+    dayId: string;
+    title: string;
+    focus: string;
+    status: string;
+    completionPercentage: number;
+    destinationRoute: string;
+    lastActivityAt: string | null;
+  } | null;
   dailyPriority: DashboardAction;
   features: DashboardFeature[];
   safetyNotice: DashboardSafetyNotice | null;

@@ -258,6 +258,7 @@ def test_dashboard_route_returns_stable_owner_scoped_schema() -> None:
     assert set(payload) == {
         "user",
         "assessment",
+        "workout",
         "daily_priority",
         "features",
         "safety_notice",
@@ -269,6 +270,6 @@ def test_dashboard_route_returns_stable_owner_scoped_schema() -> None:
         "generated_at": "2026-07-16T08:00:00Z",
         "data_freshness": "live",
         "partial_data": False,
-        "dashboard_version": "1.0",
+        "dashboard_version": "1.1",
     }
     assert reader.requested_user_ids == [owner.id, owner.id]

@@ -17,6 +17,10 @@ const AssessmentWizardPage = lazy(() => import("../pages/assessment/AssessmentWi
 const AssessmentReviewPage = lazy(() => import("../pages/assessment/AssessmentReviewPage"));
 const AssessmentCompletedPage = lazy(() => import("../pages/assessment/AssessmentCompletedPage"));
 const DashboardPage = lazy(() => import("../pages/dashboard/DashboardPage"));
+const WorkoutPage = lazy(() => import("../pages/workout/WorkoutPage"));
+const WorkoutPlanPage = lazy(() => import("../pages/workout/WorkoutPlanPage"));
+const WorkoutSessionPage = lazy(() => import("../pages/workout/WorkoutSessionPage"));
+const WorkoutHistoryPage = lazy(() => import("../pages/workout/WorkoutHistoryPage"));
 
 function AssessmentExperience() {
   return (
@@ -68,6 +72,10 @@ export function App() {
             </Route>
             <Route element={<ProtectedRoute />}>
               <Route path="/app" element={<DashboardPage />} />
+              <Route path="/workouts" element={<WorkoutPage />} />
+              <Route path="/workouts/history" element={<WorkoutHistoryPage />} />
+              <Route path="/workouts/:planId" element={<WorkoutPlanPage />} />
+              <Route path="/workouts/:planId/session/:dayId" element={<WorkoutSessionPage />} />
               <Route element={<AssessmentExperience />}>
                 <Route path="/assessment" element={<AssessmentWelcomePage />} />
                 <Route path="/assessment/resume/:sessionId" element={<AssessmentResumePage />} />

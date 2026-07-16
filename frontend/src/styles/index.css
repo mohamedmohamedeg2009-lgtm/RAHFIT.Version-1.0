@@ -2383,3 +2383,290 @@ button:focus-visible {
     justify-content: space-between;
   }
 }
+
+/* Workout experience */
+.workout-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at 80% 0%,
+      color-mix(in srgb, var(--color-primary) 9%, transparent),
+      transparent 34rem
+    ),
+    var(--color-background);
+}
+.workout-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  min-height: 4.5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-24);
+  padding-inline: max(var(--space-24), calc((100% - 78rem) / 2));
+  border-bottom: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-background) 88%, transparent);
+  backdrop-filter: blur(18px);
+}
+.workout-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  color: var(--color-text-primary);
+  font-weight: 800;
+}
+.workout-brand span {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: var(--radius-md);
+  color: white;
+  background: var(--color-primary);
+}
+.workout-topbar nav {
+  display: flex;
+  gap: var(--space-20);
+}
+.workout-topbar nav a {
+  color: var(--color-text-secondary);
+  font-weight: 650;
+}
+.workout-topbar nav a:hover {
+  color: var(--color-primary);
+}
+.workout-shell {
+  width: min(100% - 2rem, 78rem);
+  margin-inline: auto;
+  padding-block: var(--space-48) var(--space-64);
+}
+.workout-hero {
+  max-width: 48rem;
+  margin-bottom: var(--space-32);
+}
+.workout-hero h1 {
+  margin: var(--space-16) 0 var(--space-8);
+  font-size: clamp(2.25rem, 6vw, 4rem);
+  letter-spacing: -0.045em;
+}
+.workout-hero p,
+.workout-day-card p,
+.workout-exercise-card p {
+  color: var(--color-text-secondary);
+}
+.workout-overview {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-16);
+  padding: var(--space-24);
+}
+.workout-overview > div {
+  display: grid;
+  gap: var(--space-8);
+}
+.workout-overview span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-body-sm);
+}
+.workout-overview strong {
+  text-transform: capitalize;
+}
+.workout-today,
+.workout-days-grid,
+.workout-exercise-list,
+.workout-history-list {
+  display: grid;
+  gap: var(--space-16);
+  margin-top: var(--space-32);
+}
+.workout-section-heading,
+.workout-day-card,
+.workout-history-list .ds-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-24);
+}
+.workout-section-heading span {
+  color: var(--color-primary);
+  font-weight: 750;
+}
+.workout-section-heading h2 {
+  margin: var(--space-4) 0 0;
+}
+.workout-day-card {
+  padding: var(--space-24);
+}
+.workout-day-card.is-today {
+  border-color: color-mix(in srgb, var(--color-primary) 45%, var(--color-border));
+  background: linear-gradient(
+    120deg,
+    color-mix(in srgb, var(--color-primary) 8%, var(--color-card)),
+    var(--color-card)
+  );
+}
+.workout-day-card h2 {
+  margin: var(--space-12) 0 var(--space-4);
+}
+.workout-empty-state {
+  display: grid;
+  max-width: 52rem;
+  gap: var(--space-24);
+  padding: var(--space-40);
+}
+.workout-empty-icon {
+  display: grid;
+  width: 4rem;
+  height: 4rem;
+  place-items: center;
+  border-radius: var(--radius-xl);
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+  font-size: 1.8rem;
+}
+.workout-generation-fields {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-16);
+}
+.workout-loading {
+  padding: var(--space-24);
+}
+.workout-session-progress {
+  position: sticky;
+  top: 5.5rem;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: var(--space-24);
+  padding: var(--space-20);
+}
+.workout-exercise-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--space-20);
+  padding: var(--space-24);
+}
+.workout-exercise-index {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-card));
+  font-weight: 800;
+}
+.workout-exercise-copy h2 {
+  margin: 0 0 var(--space-8);
+}
+.workout-exercise-copy > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-12);
+}
+.workout-exercise-copy dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-24);
+}
+.workout-exercise-copy dl div {
+  display: grid;
+  gap: var(--space-4);
+}
+.workout-exercise-copy dt,
+.workout-exercise-copy small {
+  color: var(--color-text-secondary);
+  font-size: var(--font-body-sm);
+}
+.workout-exercise-copy dd {
+  margin: 0;
+  font-weight: 750;
+}
+.workout-set-controls {
+  display: grid;
+  min-width: 9rem;
+  align-content: center;
+  gap: var(--space-8);
+}
+.workout-set-controls strong {
+  text-align: center;
+}
+.workout-complete-state {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-16);
+  padding: var(--space-48);
+  text-align: center;
+}
+.workout-complete-state > span {
+  display: grid;
+  width: 4rem;
+  height: 4rem;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  color: white;
+  background: var(--color-success);
+  font-size: 2rem;
+}
+.workout-history-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-32);
+  padding: var(--space-24);
+}
+.workout-history-summary > div {
+  display: grid;
+}
+.workout-history-summary strong {
+  font-size: var(--font-heading-xl);
+}
+.workout-history-list .ds-card {
+  padding: var(--space-20);
+}
+[dir="rtl"] .workout-empty-icon {
+  transform: scaleX(-1);
+}
+
+@media (max-width: 760px) {
+  .workout-topbar {
+    padding-inline: var(--space-16);
+  }
+  .workout-topbar nav a:first-child {
+    display: none;
+  }
+  .workout-overview {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .workout-day-card,
+  .workout-section-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .workout-day-card .ds-button {
+    width: 100%;
+  }
+  .workout-exercise-card {
+    grid-template-columns: auto 1fr;
+  }
+  .workout-set-controls {
+    grid-column: 1 / -1;
+    grid-template-columns: auto 1fr 1fr;
+    align-items: center;
+  }
+}
+@media (max-width: 480px) {
+  .workout-generation-fields,
+  .workout-overview {
+    grid-template-columns: 1fr;
+  }
+  .workout-session-progress {
+    grid-template-columns: 1fr;
+  }
+  .workout-set-controls {
+    grid-template-columns: 1fr;
+  }
+}

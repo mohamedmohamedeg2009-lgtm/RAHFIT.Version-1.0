@@ -72,6 +72,16 @@ type RawMetadata = {
 interface RawDashboard {
   user: RawUser;
   assessment: RawAssessment;
+  workout: {
+    plan_id: string;
+    day_id: string;
+    title: string;
+    focus: string;
+    status: string;
+    completion_percentage: number;
+    destination_route: string;
+    last_activity_at: string | null;
+  } | null;
   daily_priority: RawAction;
   features: RawFeature[];
   safety_notice: RawSafetyNotice | null;
@@ -112,6 +122,18 @@ function mapDashboard(raw: RawDashboard): DashboardData {
       latestCompletionDate: raw.assessment.latest_completion_date,
       reassessmentRecommended: raw.assessment.reassessment_recommended,
     },
+    workout: raw.workout
+      ? {
+          planId: raw.workout.plan_id,
+          dayId: raw.workout.day_id,
+          title: raw.workout.title,
+          focus: raw.workout.focus,
+          status: raw.workout.status,
+          completionPercentage: raw.workout.completion_percentage,
+          destinationRoute: raw.workout.destination_route,
+          lastActivityAt: raw.workout.last_activity_at,
+        }
+      : null,
     dailyPriority: action(raw.daily_priority),
     features: raw.features.map((feature) => ({
       key: feature.key,

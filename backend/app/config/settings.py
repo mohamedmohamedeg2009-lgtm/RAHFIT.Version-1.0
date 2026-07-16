@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal, cast
 
 from pydantic import Field, MongoDsn, SecretStr, field_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
@@ -42,4 +42,5 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()
+    settings_factory = cast(Any, Settings)
+    return cast(Settings, settings_factory())

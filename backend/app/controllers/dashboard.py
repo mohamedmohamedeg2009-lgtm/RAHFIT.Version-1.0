@@ -6,9 +6,11 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from app.controllers.auth import get_current_user
 from app.models.user import User
 from app.repositories.assessments import AssessmentRepository
+from app.repositories.workouts import WorkoutRepository
 from app.schemas.dashboard import DashboardResponse
 from app.services.assessment import AssessmentService
 from app.services.dashboard import DashboardService
+from app.services.workout import WorkoutService
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
@@ -16,7 +18,8 @@ router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 def get_dashboard_service(request: Request) -> DashboardService:
     database = cast(AsyncIOMotorDatabase[dict[str, Any]], request.app.state.database.database)
     assessment = AssessmentService(AssessmentRepository(database))
-    return DashboardService(assessment)
+    workout = WorkoutService(WorkoutRepository(database), assessment)
+    return DashboardService(assessment, workout)
 
 
 @router.get(

@@ -4,6 +4,7 @@ from enum import StrEnum
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.assessment import QuestionCategory, RiskLevel, SafetyStatus
+from app.models.workout import WorkoutDashboardState
 
 
 class DashboardAssessmentStatus(StrEnum):
@@ -20,6 +21,9 @@ class DashboardActionType(StrEnum):
     COMPLETE_PROFILE = "complete_missing_profile_information"
     VIEW_ASSESSMENT = "view_assessment_summary"
     CONTINUE_AVAILABLE = "continue_available_feature"
+    GENERATE_WORKOUT = "generate_workout"
+    START_WORKOUT = "start_workout"
+    CONTINUE_WORKOUT = "continue_workout"
     LOG_OUT = "log_out"
 
 
@@ -121,6 +125,7 @@ class DashboardView(BaseModel):
 
     user: DashboardUserSummary
     assessment: DashboardAssessmentSummary
+    workout: WorkoutDashboardState | None = None
     daily_priority: DashboardAction
     features: tuple[DashboardFeature, ...]
     safety_notice: DashboardSafetyNotice | None = None

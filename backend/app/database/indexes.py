@@ -28,6 +28,26 @@ async def initialize_indexes(database: AsyncIOMotorDatabase[dict[str, Any]]) -> 
     await database["assessment_results"].create_index(
         "session_id", unique=True, name="assessment_results_session_unique"
     )
+    await database["workout_plans"].create_index(
+        [("user_id", 1), ("status", 1)],
+        unique=True,
+        partialFilterExpression={"status": "active"},
+        name="workout_plans_one_active_per_user",
+    )
+    await database["workout_plans"].create_index(
+        [("user_id", 1), ("generated_at", -1)],
+        name="workout_plans_user_history",
+    )
+    await database["workout_sessions"].create_index(
+        [("user_id", 1), ("plan_id", 1), ("workout_day_id", 1), ("status", 1)],
+        unique=True,
+        partialFilterExpression={"status": "in_progress"},
+        name="workout_sessions_active_lookup",
+    )
+    await database["workout_sessions"].create_index(
+        [("user_id", 1), ("started_at", -1)],
+        name="workout_sessions_user_history",
+    )
     await database["assessment_results"].create_index(
         [("user_id", 1), ("generated_at", -1)],
         name="assessment_results_user_latest",

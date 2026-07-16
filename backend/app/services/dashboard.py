@@ -19,6 +19,7 @@ from app.models.dashboard import (
     FeatureStatus,
 )
 from app.models.user import User
+from app.models.workout import WorkoutDashboardState
 from app.services.assessment import SessionState
 
 
@@ -28,6 +29,10 @@ class DashboardAssessmentReader(Protocol):
     async def get_latest_assessment_optional(self, user_id: str) -> AssessmentResult | None: ...
 
 
+class DashboardWorkoutReader(Protocol):
+    async def get_dashboard_state(self, user_id: str) -> WorkoutDashboardState | None: ...
+
+
 class DashboardOwnershipError(Exception):
     """Raised when an internal source violates the owner-scoped reader contract."""
 
@@ -35,15 +40,17 @@ class DashboardOwnershipError(Exception):
 class DashboardService:
     """Aggregate owner-scoped dashboard state and select one explainable next action."""
 
-    VERSION = "1.0"
+    VERSION = "1.1"
     REASSESSMENT_AFTER = timedelta(days=90)
 
     def __init__(
         self,
         assessment: DashboardAssessmentReader,
+        workout: DashboardWorkoutReader | None = None,
         clock: Callable[[], datetime] | None = None,
     ) -> None:
         self.assessment = assessment
+        self.workout = workout
         self.clock = clock or (lambda: datetime.now(UTC))
 
     async def get_dashboard(self, user: User) -> DashboardView:
@@ -51,6 +58,7 @@ class DashboardService:
         active: SessionState | None = None
         result: AssessmentResult | None = None
         partial_data = False
+        workout_state: WorkoutDashboardState | None = None
         try:
             active = await self.assessment.get_active_assessment(user.id)
             if active and active.session.user_id != user.id:
@@ -65,6 +73,12 @@ class DashboardService:
             # Optional failures must not expose infrastructure details or blank the page.
             partial_data = True
 
+        if self.workout and not partial_data:
+            try:
+                workout_state = await self.workout.get_dashboard_state(user.id)
+            except Exception:
+                partial_data = True
+
         status = self._assessment_status(active, result, partial_data)
         profile_completeness, missing_profile_fields = self._profile_state(user)
         assessment_summary = self._assessment_summary(active, result, partial_data, now)
@@ -76,12 +90,21 @@ class DashboardService:
             profile_completeness=profile_completeness,
             missing_profile_fields=missing_profile_fields,
         )
-        priority = self._daily_priority(assessment_summary, profile_completeness, partial_data)
+        priority = self._daily_priority(
+            assessment_summary,
+            workout_state,
+            profile_completeness,
+            partial_data,
+            self.workout is not None,
+        )
         return DashboardView(
             user=user_summary,
             assessment=assessment_summary,
+            workout=workout_state,
             daily_priority=priority,
-            features=self._features(assessment_summary, partial_data),
+            features=self._features(
+                assessment_summary, workout_state, partial_data, self.workout is not None
+            ),
             safety_notice=self._safety_notice(active, result),
             progress=DashboardProgressSnapshot(
                 assessment_completion=assessment_summary.completion_percentage,
@@ -89,7 +112,12 @@ class DashboardService:
                 latest_readiness_score=assessment_summary.readiness_score,
                 last_activity_date=self._last_activity(active, result),
             ),
-            quick_actions=self._quick_actions(assessment_summary, missing_profile_fields),
+            quick_actions=self._quick_actions(
+                assessment_summary,
+                workout_state,
+                missing_profile_fields,
+                self.workout is not None,
+            ),
             metadata=DashboardMetadata(
                 generated_at=now,
                 data_freshness=(
@@ -187,8 +215,10 @@ class DashboardService:
     @staticmethod
     def _daily_priority(
         assessment: DashboardAssessmentSummary,
+        workout: WorkoutDashboardState | None,
         profile_completeness: int,
         partial_data: bool,
+        workout_enabled: bool,
     ) -> DashboardAction:
         if partial_data:
             return DashboardAction(
@@ -228,6 +258,29 @@ class DashboardService:
                 priority_reason="An unfinished assessment is the closest useful next step.",
                 severity=DashboardSeverity.INFO,
             )
+        if workout:
+            in_progress = workout.status == "in_progress"
+            return DashboardAction(
+                action_type=(
+                    DashboardActionType.CONTINUE_WORKOUT
+                    if in_progress
+                    else DashboardActionType.START_WORKOUT
+                ),
+                title="Continue today's workout" if in_progress else "Start today's workout",
+                description=f"{workout.title} is ready for you.",
+                destination_route=workout.destination_route,
+                priority_reason="A safe personalized workout is available today.",
+                severity=DashboardSeverity.SUCCESS,
+            )
+        if workout_enabled and assessment.status == DashboardAssessmentStatus.COMPLETED:
+            return DashboardAction(
+                action_type=DashboardActionType.GENERATE_WORKOUT,
+                title="Create your workout plan",
+                description="Use your completed assessment to build a deterministic plan.",
+                destination_route="/workouts",
+                priority_reason="Your assessment is complete and no active workout plan exists.",
+                severity=DashboardSeverity.INFO,
+            )
         if profile_completeness < 100:
             return DashboardAction(
                 action_type=DashboardActionType.COMPLETE_PROFILE,
@@ -258,7 +311,10 @@ class DashboardService:
 
     @staticmethod
     def _features(
-        assessment: DashboardAssessmentSummary, partial_data: bool
+        assessment: DashboardAssessmentSummary,
+        workout: WorkoutDashboardState | None,
+        partial_data: bool,
+        workout_enabled: bool,
     ) -> tuple[DashboardFeature, ...]:
         if partial_data:
             assessment_feature = DashboardFeature(
@@ -313,9 +369,42 @@ class DashboardService:
                 reason="This module is planned but is not available in the current release.",
             )
 
+        if not workout_enabled:
+            workout_feature = future_feature("workout", "Workout planning")
+        elif safety_locked:
+            workout_feature = DashboardFeature(
+                key="workout",
+                title="Workout planning",
+                status=FeatureStatus.LOCKED,
+                reason="Locked until the safety notice is professionally reviewed.",
+            )
+        elif not assessment_ready:
+            workout_feature = DashboardFeature(
+                key="workout",
+                title="Workout planning",
+                status=FeatureStatus.LOCKED,
+                reason="Complete the smart assessment first.",
+            )
+        elif workout:
+            workout_feature = DashboardFeature(
+                key="workout",
+                title="Workout planning",
+                status=FeatureStatus.AVAILABLE,
+                reason="Your personalized workout plan is available.",
+                destination_route=workout.destination_route,
+            )
+        else:
+            workout_feature = DashboardFeature(
+                key="workout",
+                title="Workout planning",
+                status=FeatureStatus.ACTION_REQUIRED,
+                reason="Generate a plan from your completed assessment.",
+                destination_route="/workouts",
+            )
+
         return (
             assessment_feature,
-            future_feature("workout", "Workout planning"),
+            workout_feature,
             future_feature("nutrition", "Nutrition planning"),
             future_feature("ai_coach", "AI Coach"),
             future_feature("progress", "Progress tracking"),
@@ -370,9 +459,31 @@ class DashboardService:
 
     @staticmethod
     def _quick_actions(
-        assessment: DashboardAssessmentSummary, missing_profile_fields: tuple[str, ...]
+        assessment: DashboardAssessmentSummary,
+        workout: WorkoutDashboardState | None,
+        missing_profile_fields: tuple[str, ...],
+        workout_enabled: bool,
     ) -> tuple[DashboardAction, ...]:
         actions: list[DashboardAction] = []
+        if workout_enabled and assessment.status == DashboardAssessmentStatus.COMPLETED:
+            actions.append(
+                DashboardAction(
+                    action_type=(
+                        DashboardActionType.CONTINUE_WORKOUT
+                        if workout and workout.status == "in_progress"
+                        else (
+                            DashboardActionType.START_WORKOUT
+                            if workout
+                            else DashboardActionType.GENERATE_WORKOUT
+                        )
+                    ),
+                    title="Open today's workout" if workout else "Create workout plan",
+                    description="Open your personalized training experience.",
+                    destination_route=workout.destination_route if workout else "/workouts",
+                    priority_reason="Workout planning is available after assessment completion.",
+                    severity=DashboardSeverity.INFO,
+                )
+            )
         if assessment.status != DashboardAssessmentStatus.UNAVAILABLE:
             action_type = (
                 DashboardActionType.START_ASSESSMENT

@@ -86,7 +86,7 @@ export const dashboardCopy = {
   },
 } as const;
 
-const actionLabels: Record<Locale, Record<DashboardActionType, string>> = {
+const actionLabels: Record<Locale, Partial<Record<DashboardActionType, string>>> = {
   en: {
     start_assessment: "Start assessment",
     resume_assessment: "Resume assessment",
@@ -94,6 +94,9 @@ const actionLabels: Record<Locale, Record<DashboardActionType, string>> = {
     complete_missing_profile_information: "Review profile setup",
     view_assessment_summary: "View assessment summary",
     continue_available_feature: "Refresh dashboard",
+    generate_workout: "Create workout plan",
+    start_workout: "Start workout",
+    continue_workout: "Continue workout",
     log_out: "Log out",
   },
   ar: {
@@ -138,7 +141,7 @@ const featureLabels: Record<Locale, Record<FeatureStatus, string>> = {
 };
 
 export const actionLabel = (type: DashboardActionType, locale: Locale) =>
-  actionLabels[locale][type];
+  actionLabels[locale][type] ?? type.replaceAll("_", " ");
 export const dashboardStatusLabel = (status: DashboardAssessmentStatus, locale: Locale) =>
   statusLabels[locale][status];
 export const featureStatusLabel = (status: FeatureStatus, locale: Locale) =>

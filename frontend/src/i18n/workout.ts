@@ -1,0 +1,36 @@
+import type { Locale } from "../contexts/LocaleContext";
+
+export const workoutCopy: Record<Locale, Record<string, string>> = {
+  en: {
+    title: "Your training plan",
+    subtitle: "Deterministic programming built from your assessment, equipment, and readiness.",
+    generate: "Generate workout",
+    today: "Today's workout",
+    start: "Start workout",
+    resume: "Resume workout",
+    history: "History",
+    dashboard: "Dashboard",
+    noPlan: "Your personalized plan is ready to be created.",
+    complete: "Finish workout",
+    completed: "Workout complete",
+    skip: "Skip exercise",
+    sets: "sets",
+    rest: "rest",
+  },
+  ar: {
+    title: "خطتك التدريبية",
+    subtitle: "برنامج حتمي مبني على تقييمك ومعداتك واستعدادك.",
+    generate: "إنشاء خطة التمرين",
+    today: "تمرين اليوم",
+    start: "ابدأ التمرين",
+    resume: "تابع التمرين",
+    history: "السجل",
+    dashboard: "لوحة التحكم",
+    noPlan: "خطتك الشخصية جاهزة للإنشاء.",
+    complete: "إنهاء التمرين",
+    completed: "اكتمل التمرين",
+    skip: "تخطي التمرين",
+    sets: "مجموعات",
+    rest: "راحة",
+  },
+};
