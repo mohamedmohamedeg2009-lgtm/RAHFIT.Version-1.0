@@ -71,9 +71,14 @@ def test_backend_configuration_starts_without_ai_key_when_ai_is_disabled_or_enab
     assert setup_required.ai_api_key is None
 
 
-def test_only_ai_availability_route_is_registered() -> None:
+def test_ai_provider_and_conversation_routes_are_registered() -> None:
     ai_paths = {route.path for route in router.routes if route.path.startswith("/ai-coach")}
-    assert ai_paths == {"/ai-coach/availability"}
+    assert ai_paths == {
+        "/ai-coach/availability",
+        "/ai-coach/conversations",
+        "/ai-coach/conversations/{conversation_id}",
+        "/ai-coach/conversations/{conversation_id}/close",
+    }
 
 
 @pytest.mark.parametrize(

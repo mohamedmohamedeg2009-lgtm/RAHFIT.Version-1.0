@@ -27,6 +27,8 @@ The [Nutrition Architecture](docs/Nutrition-Architecture.md) documents determini
 
 The [AI Provider Infrastructure](docs/AI-Provider-Infrastructure.md) documents the provider-neutral contract, safe configuration, availability states, error mapping, and test-only fake provider.
 
+The [AI Conversation Domain](docs/AI-Conversation-Domain.md) documents owner-isolated conversation persistence, lifecycle rules, trusted internal messages, bounded retention, and migration-safe indexes.
+
 ## Quality checks
 
 ```powershell
