@@ -33,6 +33,8 @@ The [Approved AI Context Builder](docs/AI-Context-Builder.md) documents purpose-
 
 The [AI Policy Layer](docs/AI-Policy-Layer.md) documents deterministic capability permissions, forbidden actions, professional-guidance decisions, and stable reason codes.
 
+The [AI Capability Classifier](docs/AI-Capability-Classifier.md) documents deterministic English, Arabic, and mixed-language intent classification, priority rules, confidence metadata, and safe unsupported routing.
+
 ## Quality checks
 
 ```powershell
