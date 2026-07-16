@@ -4,6 +4,7 @@ from enum import StrEnum
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.assessment import QuestionCategory, RiskLevel, SafetyStatus
+from app.models.nutrition import NutritionDashboardState
 from app.models.workout import WorkoutDashboardState
 
 
@@ -126,6 +127,7 @@ class DashboardView(BaseModel):
     user: DashboardUserSummary
     assessment: DashboardAssessmentSummary
     workout: WorkoutDashboardState | None = None
+    nutrition: NutritionDashboardState | None = None
     daily_priority: DashboardAction
     features: tuple[DashboardFeature, ...]
     safety_notice: DashboardSafetyNotice | None = None

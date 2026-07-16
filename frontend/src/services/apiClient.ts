@@ -1,4 +1,4 @@
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000/api/v1";
 let accessToken: string | null = null;
 let refreshHandler: (() => Promise<boolean>) | null = null;
 let refreshing: Promise<boolean> | null = null;

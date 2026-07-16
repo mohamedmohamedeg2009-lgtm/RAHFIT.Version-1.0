@@ -3,13 +3,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
+import * as React from "react";
 
 import { ProtectedRoute } from "../components/ProtectedRoute";
-import { AuthContext } from "../contexts/AuthContext";
+import { AuthContext, AuthProvider } from "../contexts/AuthContext";
 import { AuthLayout } from "../layouts/AuthLayout";
 import { LoginPage } from "../pages/auth/LoginPage";
 import { RegisterPage } from "../pages/auth/RegisterPage";
 import { apiRequest, setAccessToken, setRefreshHandler } from "../services/apiClient";
+import { authService } from "../services/authService";
 import type { AuthContextValue, AuthUser } from "../types/auth";
 
 const user: AuthUser = {
@@ -156,5 +158,102 @@ describe("api refresh boundary", () => {
 
     await expect(apiRequest("/auth/me")).rejects.toMatchObject({ status: 401 });
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("authentication integration boundary", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    window.localStorage.clear();
+    authService.clearSession();
+  });
+
+  it("register sends the configured API URL and backend request schema", async () => {
+    const fetchMock = vi.spyOn(window, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          access_token: "access",
+          refresh_token: "refresh",
+          access_token_expires_in: 1800,
+        }),
+        { status: 201 },
+      ),
+    );
+
+    await authService.register({ email: "new@example.com", password: "secure-password-123" });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, request] = fetchMock.mock.calls[0];
+    expect(String(url)).toBe("http://127.0.0.1:8000/api/v1/auth/register");
+    expect(JSON.parse(String(request?.body))).toEqual({
+      email: "new@example.com",
+      password: "secure-password-123",
+    });
+  });
+
+  it("login uses the login endpoint without an auth refresh request", async () => {
+    const fetchMock = vi.spyOn(window, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          access_token: "access",
+          refresh_token: "refresh",
+          access_token_expires_in: 1800,
+        }),
+        { status: 200 },
+      ),
+    );
+
+    await authService.login({ email: "user@example.com", password: "secure-password-123" });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(String(fetchMock.mock.calls[0][0])).toBe("http://127.0.0.1:8000/api/v1/auth/login");
+  });
+
+  it("keeps an HTTP conflict as an API error instead of a network error", async () => {
+    vi.spyOn(window, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ code: "http_error", message: "Account already exists." }), {
+        status: 409,
+      }),
+    );
+
+    await expect(
+      apiRequest("/auth/register", {
+        method: "POST",
+        body: { email: "user@example.com", password: "secure-password-123" },
+      }),
+    ).rejects.toMatchObject({ status: 409, message: "Account already exists." });
+  });
+
+  it("shows the connectivity message only for an actual fetch failure", async () => {
+    vi.spyOn(window, "fetch").mockRejectedValue(new TypeError("Failed to fetch"));
+
+    function FailureHarness() {
+      const auth = React.useContext(AuthContext);
+      return (
+        <div>
+          <button
+            onClick={() =>
+              void auth
+                ?.register({ email: "user@example.com", password: "secure-password-123" })
+                .catch(() => undefined)
+            }
+          >
+            Register now
+          </button>
+          <p>{auth?.error}</p>
+        </div>
+      );
+    }
+
+    render(
+      <AuthProvider>
+        <FailureHarness />
+      </AuthProvider>,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Register now" }));
+
+    expect(
+      await screen.findByText("We could not reach the service. Please try again."),
+    ).toBeTruthy();
   });
 });

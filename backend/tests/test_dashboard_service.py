@@ -259,6 +259,7 @@ def test_dashboard_route_returns_stable_owner_scoped_schema() -> None:
         "user",
         "assessment",
         "workout",
+        "nutrition",
         "daily_priority",
         "features",
         "safety_notice",

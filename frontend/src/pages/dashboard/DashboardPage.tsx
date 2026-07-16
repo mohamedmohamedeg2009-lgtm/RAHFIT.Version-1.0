@@ -5,6 +5,7 @@ import {
   DailyPriorityCard,
   FeatureStatusGrid,
   ProgressSnapshotCard,
+  NutritionSnapshotCard,
   QuickActions,
   SafetyNoticeCard,
 } from "../../components/dashboard/DashboardCards";
@@ -79,6 +80,7 @@ export default function DashboardPage() {
             locale={locale}
           />
         </div>
+        {dashboard.nutrition ? <NutritionSnapshotCard nutrition={dashboard.nutrition} /> : null}
         <FeatureStatusGrid features={dashboard.features} locale={locale} />
         <QuickActions actions={dashboard.quickActions} locale={locale} onLogout={leaveSession} />
         <footer className="dashboard-freshness">

@@ -17,6 +17,42 @@ import type {
   DashboardSafetyNotice,
   DashboardUserSummary,
 } from "../../types/dashboard";
+import type { DashboardData } from "../../types/dashboard";
+
+export function NutritionSnapshotCard({ nutrition }: { nutrition: DashboardData["nutrition"] }) {
+  if (!nutrition) return null;
+  return (
+    <Card className="dashboard-progress-card">
+      <div className="dashboard-section-heading">
+        <h2>Today's nutrition</h2>
+        <Link to={nutrition.destinationRoute}>Open</Link>
+      </div>
+      <LinearProgress
+        value={nutrition.caloriesConsumed}
+        max={nutrition.targetCalories}
+        label="Calories"
+      />
+      <div className="dashboard-metric-grid">
+        <MetricCard>
+          <span>Remaining</span>
+          <strong>{nutrition.caloriesRemaining}</strong>
+          <small>kcal</small>
+        </MetricCard>
+        <MetricCard>
+          <span>Meals</span>
+          <strong>
+            {nutrition.mealsCompleted} / {nutrition.totalMeals}
+          </strong>
+        </MetricCard>
+      </div>
+      <LinearProgress
+        value={nutrition.waterConsumedMl}
+        max={nutrition.waterTargetMl}
+        label="Water"
+      />
+    </Card>
+  );
+}
 
 export function DailyPriorityCard({
   priority,

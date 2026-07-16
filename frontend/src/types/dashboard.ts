@@ -88,6 +88,17 @@ export interface DashboardData {
     destinationRoute: string;
     lastActivityAt: string | null;
   } | null;
+  nutrition: {
+    planId: string;
+    targetCalories: number;
+    caloriesConsumed: number;
+    caloriesRemaining: number;
+    waterTargetMl: number;
+    waterConsumedMl: number;
+    mealsCompleted: number;
+    totalMeals: number;
+    destinationRoute: string;
+  } | null;
   dailyPriority: DashboardAction;
   features: DashboardFeature[];
   safetyNotice: DashboardSafetyNotice | null;

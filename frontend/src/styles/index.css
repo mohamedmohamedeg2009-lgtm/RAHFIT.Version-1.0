@@ -2670,3 +2670,72 @@ button:focus-visible {
     grid-template-columns: 1fr;
   }
 }
+.nutrition-page {
+  min-height: 100vh;
+  background: var(--color-background);
+}
+.nutrition-header {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-20) max(var(--space-20), calc((100% - 76rem) / 2));
+  border-bottom: 1px solid var(--color-border);
+}
+.nutrition-shell {
+  width: min(100% - 2rem, 76rem);
+  margin: auto;
+  padding-block: var(--space-48);
+}
+.nutrition-shell > h1 {
+  font-size: var(--font-display);
+  margin-block: var(--space-16) var(--space-8);
+}
+.nutrition-shell > p {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-32);
+}
+.nutrition-empty {
+  display: grid;
+  gap: var(--space-20);
+  max-width: 36rem;
+  padding: var(--space-32);
+}
+.nutrition-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-16);
+}
+.nutrition-metrics > .ds-card {
+  display: grid;
+  gap: var(--space-12);
+  padding: var(--space-20);
+}
+.nutrition-metrics strong {
+  font-size: var(--font-heading-l);
+}
+.nutrition-meals {
+  display: grid;
+  gap: var(--space-16);
+  margin-top: var(--space-32);
+}
+.nutrition-meal {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-24);
+  padding: var(--space-24);
+}
+.nutrition-meal > div:last-child {
+  display: grid;
+  justify-items: end;
+  gap: var(--space-8);
+}
+@media (max-width: 720px) {
+  .nutrition-metrics {
+    grid-template-columns: 1fr;
+  }
+  .nutrition-meal {
+    flex-direction: column;
+  }
+  .nutrition-meal > div:last-child {
+    justify-items: start;
+  }
+}

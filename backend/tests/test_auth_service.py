@@ -121,6 +121,26 @@ def test_authentication_endpoints_support_the_core_session_flow(settings: Settin
     assert current_user.status_code == 200
     assert current_user.json()["email"] == "user@example.com"
 
+    duplicate = client.post(
+        "/api/v1/auth/register",
+        json={"email": "user@example.com", "password": "secure-password-123"},
+    )
+    assert duplicate.status_code == 409
+    assert "password" not in duplicate.text.lower()
+
+    login = client.post(
+        "/api/v1/auth/login",
+        json={"email": "user@example.com", "password": "secure-password-123"},
+    )
+    assert login.status_code == 200
+
+    invalid_login = client.post(
+        "/api/v1/auth/login",
+        json={"email": "user@example.com", "password": "incorrect-password-123"},
+    )
+    assert invalid_login.status_code == 401
+    assert "password" not in invalid_login.text.lower()
+
     refreshed = client.post("/api/v1/auth/refresh", json={"refresh_token": tokens["refresh_token"]})
     assert refreshed.status_code == 200
 

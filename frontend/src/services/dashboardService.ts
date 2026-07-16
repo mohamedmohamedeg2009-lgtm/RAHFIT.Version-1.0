@@ -82,6 +82,17 @@ interface RawDashboard {
     destination_route: string;
     last_activity_at: string | null;
   } | null;
+  nutrition: {
+    plan_id: string;
+    target_calories: number;
+    calories_consumed: number;
+    calories_remaining: number;
+    water_target_ml: number;
+    water_consumed_ml: number;
+    meals_completed: number;
+    total_meals: number;
+    destination_route: string;
+  } | null;
   daily_priority: RawAction;
   features: RawFeature[];
   safety_notice: RawSafetyNotice | null;
@@ -132,6 +143,19 @@ function mapDashboard(raw: RawDashboard): DashboardData {
           completionPercentage: raw.workout.completion_percentage,
           destinationRoute: raw.workout.destination_route,
           lastActivityAt: raw.workout.last_activity_at,
+        }
+      : null,
+    nutrition: raw.nutrition
+      ? {
+          planId: raw.nutrition.plan_id,
+          targetCalories: raw.nutrition.target_calories,
+          caloriesConsumed: raw.nutrition.calories_consumed,
+          caloriesRemaining: raw.nutrition.calories_remaining,
+          waterTargetMl: raw.nutrition.water_target_ml,
+          waterConsumedMl: raw.nutrition.water_consumed_ml,
+          mealsCompleted: raw.nutrition.meals_completed,
+          totalMeals: raw.nutrition.total_meals,
+          destinationRoute: raw.nutrition.destination_route,
         }
       : null,
     dailyPriority: action(raw.daily_priority),

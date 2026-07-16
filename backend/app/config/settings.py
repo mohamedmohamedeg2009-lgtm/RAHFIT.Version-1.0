@@ -12,7 +12,9 @@ class Settings(BaseSettings):
 
     app_name: str = "RAHFIT AI API"
     app_env: Literal["development", "test", "staging", "production"] = "development"
-    debug: bool = False
+    # DEBUG is a common host/tooling variable and may contain values such as "release".
+    # A namespaced key prevents unrelated process state from breaking API startup.
+    app_debug: bool = Field(default=False, validation_alias="RAHFIT_DEBUG")
     api_v1_prefix: str = "/api/v1"
     log_level: str = "INFO"
     allowed_origins: Annotated[list[str], NoDecode] = Field(
@@ -31,6 +33,10 @@ class Settings(BaseSettings):
     jwt_refresh_token_expire_days: int = Field(default=7, gt=0)
     rate_limit_requests: int = Field(default=100, gt=0)
     rate_limit_window_seconds: int = Field(default=60, gt=0)
+
+    @property
+    def debug(self) -> bool:
+        return self.app_debug
 
     @field_validator("allowed_origins", mode="before")
     @classmethod

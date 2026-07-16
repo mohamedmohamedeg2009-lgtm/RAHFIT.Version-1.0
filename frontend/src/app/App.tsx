@@ -21,6 +21,8 @@ const WorkoutPage = lazy(() => import("../pages/workout/WorkoutPage"));
 const WorkoutPlanPage = lazy(() => import("../pages/workout/WorkoutPlanPage"));
 const WorkoutSessionPage = lazy(() => import("../pages/workout/WorkoutSessionPage"));
 const WorkoutHistoryPage = lazy(() => import("../pages/workout/WorkoutHistoryPage"));
+const NutritionPage = lazy(() => import("../pages/nutrition/NutritionPage"));
+const NutritionHistoryPage = lazy(() => import("../pages/nutrition/NutritionHistoryPage"));
 
 function AssessmentExperience() {
   return (
@@ -76,6 +78,8 @@ export function App() {
               <Route path="/workouts/history" element={<WorkoutHistoryPage />} />
               <Route path="/workouts/:planId" element={<WorkoutPlanPage />} />
               <Route path="/workouts/:planId/session/:dayId" element={<WorkoutSessionPage />} />
+              <Route path="/nutrition" element={<NutritionPage />} />
+              <Route path="/nutrition/history" element={<NutritionHistoryPage />} />
               <Route element={<AssessmentExperience />}>
                 <Route path="/assessment" element={<AssessmentWelcomePage />} />
                 <Route path="/assessment/resume/:sessionId" element={<AssessmentResumePage />} />

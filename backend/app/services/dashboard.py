@@ -18,6 +18,7 @@ from app.models.dashboard import (
     DashboardView,
     FeatureStatus,
 )
+from app.models.nutrition import NutritionDashboardState
 from app.models.user import User
 from app.models.workout import WorkoutDashboardState
 from app.services.assessment import SessionState
@@ -31,6 +32,10 @@ class DashboardAssessmentReader(Protocol):
 
 class DashboardWorkoutReader(Protocol):
     async def get_dashboard_state(self, user_id: str) -> WorkoutDashboardState | None: ...
+
+
+class DashboardNutritionReader(Protocol):
+    async def dashboard(self, user_id: str) -> NutritionDashboardState | None: ...
 
 
 class DashboardOwnershipError(Exception):
@@ -47,10 +52,12 @@ class DashboardService:
         self,
         assessment: DashboardAssessmentReader,
         workout: DashboardWorkoutReader | None = None,
+        nutrition: DashboardNutritionReader | None = None,
         clock: Callable[[], datetime] | None = None,
     ) -> None:
         self.assessment = assessment
         self.workout = workout
+        self.nutrition = nutrition
         self.clock = clock or (lambda: datetime.now(UTC))
 
     async def get_dashboard(self, user: User) -> DashboardView:
@@ -59,6 +66,7 @@ class DashboardService:
         result: AssessmentResult | None = None
         partial_data = False
         workout_state: WorkoutDashboardState | None = None
+        nutrition_state: NutritionDashboardState | None = None
         try:
             active = await self.assessment.get_active_assessment(user.id)
             if active and active.session.user_id != user.id:
@@ -76,6 +84,11 @@ class DashboardService:
         if self.workout and not partial_data:
             try:
                 workout_state = await self.workout.get_dashboard_state(user.id)
+            except Exception:
+                partial_data = True
+        if self.nutrition and not partial_data:
+            try:
+                nutrition_state = await self.nutrition.dashboard(user.id)
             except Exception:
                 partial_data = True
 
@@ -101,9 +114,15 @@ class DashboardService:
             user=user_summary,
             assessment=assessment_summary,
             workout=workout_state,
+            nutrition=nutrition_state,
             daily_priority=priority,
             features=self._features(
-                assessment_summary, workout_state, partial_data, self.workout is not None
+                assessment_summary,
+                workout_state,
+                nutrition_state,
+                partial_data,
+                self.workout is not None,
+                self.nutrition is not None,
             ),
             safety_notice=self._safety_notice(active, result),
             progress=DashboardProgressSnapshot(
@@ -313,8 +332,10 @@ class DashboardService:
     def _features(
         assessment: DashboardAssessmentSummary,
         workout: WorkoutDashboardState | None,
+        nutrition: NutritionDashboardState | None,
         partial_data: bool,
         workout_enabled: bool,
+        nutrition_enabled: bool,
     ) -> tuple[DashboardFeature, ...]:
         if partial_data:
             assessment_feature = DashboardFeature(
@@ -402,10 +423,29 @@ class DashboardService:
                 destination_route="/workouts",
             )
 
+        if not nutrition_enabled or safety_locked or not assessment_ready:
+            nutrition_feature = future_feature("nutrition", "Nutrition planning")
+        elif nutrition:
+            nutrition_feature = DashboardFeature(
+                key="nutrition",
+                title="Nutrition planning",
+                status=FeatureStatus.AVAILABLE,
+                reason=f"{nutrition.calories_remaining} calories remaining today.",
+                destination_route="/nutrition",
+            )
+        else:
+            nutrition_feature = DashboardFeature(
+                key="nutrition",
+                title="Nutrition planning",
+                status=FeatureStatus.ACTION_REQUIRED,
+                reason="Generate nutrition targets from your assessment.",
+                destination_route="/nutrition",
+            )
+
         return (
             assessment_feature,
             workout_feature,
-            future_feature("nutrition", "Nutrition planning"),
+            nutrition_feature,
             future_feature("ai_coach", "AI Coach"),
             future_feature("progress", "Progress tracking"),
             DashboardFeature(
