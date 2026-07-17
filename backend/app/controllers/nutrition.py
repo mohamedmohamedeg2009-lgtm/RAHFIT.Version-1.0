@@ -8,7 +8,6 @@ from app.controllers.auth import get_current_user
 from app.models.nutrition import NutritionPlan, NutritionProgress
 from app.models.user import User
 from app.repositories.nutrition import NutritionRepository
-from app.repositories.workouts import WorkoutRepository
 from app.schemas.nutrition import (
     CurrentNutritionResponse,
     GenerateNutritionRequest,
@@ -23,6 +22,26 @@ from app.services.nutrition import (
     NutritionService,
 )
 from app.services.nutrition_engine import NutritionGenerationError
+from app.workouts.repository import MongoWorkoutRepository
+
+
+class IntelligentWorkoutNutritionReader:
+    def __init__(self, repo: MongoWorkoutRepository) -> None:
+        self.repo = repo
+
+    async def find_current_plan(self, user_id: str) -> Any:
+        plan = await self.repo.get_active_plan(user_id)
+        if plan is None:
+            return None
+
+        class CompatibleWorkoutPlan:
+            def __init__(self, p: Any) -> None:
+                self.id = p.plan_id
+                self.goal = p.primary_goal
+                self.available_days = p.training_days_per_week
+
+        return CompatibleWorkoutPlan(plan)
+
 
 router = APIRouter(prefix="/nutrition", tags=["Nutrition"])
 
@@ -31,7 +50,11 @@ def get_nutrition_service(
     request: Request, assessment: Annotated[AssessmentService, Depends(get_assessment_service)]
 ) -> NutritionService:
     database = cast(AsyncIOMotorDatabase[dict[str, Any]], request.app.state.database.database)
-    return NutritionService(NutritionRepository(database), assessment, WorkoutRepository(database))
+    return NutritionService(
+        NutritionRepository(database),
+        assessment,
+        IntelligentWorkoutNutritionReader(MongoWorkoutRepository(database)),
+    )
 
 
 def _translate(exc: Exception) -> NoReturn:

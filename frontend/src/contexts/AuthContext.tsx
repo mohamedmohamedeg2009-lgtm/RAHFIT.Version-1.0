@@ -90,6 +90,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [authenticate],
   );
 
+  const loginWithGoogle = useCallback(async (credential: string) => {
+    setError(null);
+    try {
+      await authService.loginWithGoogle(credential);
+      setUser(await authService.getCurrentUser());
+    } catch (cause) {
+      authService.clearSession();
+      const text = userMessage(cause);
+      setError(text);
+      throw new Error(text, { cause });
+    }
+  }, []);
+
   const logout = useCallback(async () => {
     setError(null);
     try {
@@ -100,7 +113,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const clearError = useCallback(() => setError(null), []);
-  const value: AuthContextValue = { user, isLoading, error, login, register, logout, clearError };
+  const value: AuthContextValue = {
+    user,
+    isLoading,
+    error,
+    login,
+    register,
+    loginWithGoogle,
+    logout,
+    clearError,
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

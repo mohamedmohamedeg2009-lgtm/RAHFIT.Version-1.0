@@ -131,6 +131,7 @@ function authContext(overrides: Partial<AuthContextValue> = {}): AuthContextValu
     error: null,
     login: vi.fn(),
     register: vi.fn(),
+    loginWithGoogle: vi.fn(),
     logout: vi.fn().mockResolvedValue(undefined),
     clearError: vi.fn(),
     ...overrides,

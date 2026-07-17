@@ -26,7 +26,7 @@ pip install -r backend/requirements-dev.txt
 uvicorn app.main:app --app-dir backend --reload
 ```
 
-The service has no public business endpoints in Phase 1. A running MongoDB is required because startup validates connectivity.
+A running MongoDB is required because startup validates connectivity.
 
 ## Frontend
 

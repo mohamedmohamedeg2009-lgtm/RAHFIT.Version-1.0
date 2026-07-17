@@ -6,15 +6,21 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.config import Settings, get_settings
 from app.models.user import User
+from app.repositories.password_resets import PasswordResetRepository
 from app.repositories.users import UserRepository
 from app.schemas.auth import (
+    ForgotPasswordRequest,
+    GenericMessageResponse,
+    GoogleLoginRequest,
     LoginRequest,
     LogoutResponse,
     RefreshTokenRequest,
     RegisterRequest,
+    ResetPasswordRequest,
     TokenPairResponse,
     UserResponse,
 )
+from app.security.google import GoogleTokenVerifier
 from app.security.jwt import TokenPayload, TokenValidationError, decode_token
 from app.services.auth import (
     AuthenticationError,
@@ -22,6 +28,7 @@ from app.services.auth import (
     AuthService,
     EmailAlreadyRegisteredError,
 )
+from app.services.email import EmailService
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 _bearer_scheme = HTTPBearer(auto_error=False)
@@ -32,6 +39,15 @@ def get_auth_service(
 ) -> AuthService:
     database = cast(AsyncIOMotorDatabase[dict[str, Any]], request.app.state.database.database)
     return AuthService(UserRepository(database["users"]), settings)
+
+
+def get_password_reset_repository(request: Request) -> PasswordResetRepository:
+    database = cast(AsyncIOMotorDatabase[dict[str, Any]], request.app.state.database.database)
+    return PasswordResetRepository(database["password_reset_tokens"])
+
+
+def get_email_service(settings: Annotated[Settings, Depends(get_settings)]) -> EmailService:
+    return EmailService(settings)
 
 
 def _authentication_exception() -> HTTPException:
@@ -152,3 +168,74 @@ async def logout(
     except AuthenticationError as exc:
         raise _authentication_exception() from exc
     return LogoutResponse()
+
+
+@router.post(
+    "/google",
+    response_model=TokenPairResponse,
+    summary="Sign in or register with Google",
+    responses={401: {"description": "Invalid Google credential."}},
+)
+async def google_login(
+    body: GoogleLoginRequest,
+    service: Annotated[AuthService, Depends(get_auth_service)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> TokenPairResponse:
+    import jwt
+
+    verifier = GoogleTokenVerifier(settings.google_client_id)
+    try:
+        payload = await verifier.verify(body.credential)
+        result = await service.login_google(payload)
+    except (jwt.InvalidTokenError, AuthenticationError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Google authentication credentials are not valid.",
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from exc
+    return _token_response(result, settings)
+
+
+@router.post(
+    "/forgot-password",
+    response_model=GenericMessageResponse,
+    summary="Request a password reset link",
+)
+async def forgot_password(
+    body: ForgotPasswordRequest,
+    service: Annotated[AuthService, Depends(get_auth_service)],
+    resets_repo: Annotated[PasswordResetRepository, Depends(get_password_reset_repository)],
+    email_service: Annotated[EmailService, Depends(get_email_service)],
+) -> GenericMessageResponse:
+    import contextlib
+
+    with contextlib.suppress(Exception):
+        await service.forgot_password(body.email, resets_repo, email_service)
+
+    return GenericMessageResponse(
+        message="If an account exists for this email, a reset link has been sent."
+    )
+
+
+@router.post(
+    "/reset-password",
+    response_model=GenericMessageResponse,
+    summary="Reset account password using token",
+    responses={
+        400: {"description": "Invalid request parameters."},
+        401: {"description": "Invalid reset token."},
+    },
+)
+async def reset_password(
+    body: ResetPasswordRequest,
+    service: Annotated[AuthService, Depends(get_auth_service)],
+    resets_repo: Annotated[PasswordResetRepository, Depends(get_password_reset_repository)],
+) -> GenericMessageResponse:
+    try:
+        await service.reset_password(body.token, body.password, resets_repo)
+    except AuthenticationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="The password reset link is invalid or expired.",
+        ) from exc
+    return GenericMessageResponse(message="Your password has been reset successfully.")

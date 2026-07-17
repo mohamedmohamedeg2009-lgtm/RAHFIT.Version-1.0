@@ -29,6 +29,9 @@ class UserRepository:
             token_version=int(document.get("token_version", 0)),
             created_at=document["created_at"],
             updated_at=document["updated_at"],
+            provider=document.get("provider"),
+            provider_subject=document.get("provider_subject"),
+            verified_email=document.get("verified_email"),
         )
 
     async def create(self, email: str, password_hash: str) -> User:
@@ -48,6 +51,29 @@ class UserRepository:
         document["_id"] = result.inserted_id
         return self._to_user(document)
 
+    async def create_google_user(
+        self, email: str, display_name: str | None, provider_subject: str
+    ) -> User:
+        now = datetime.now(UTC)
+        document: dict[str, Any] = {
+            "email": email,
+            "password_hash": "",  # Locked password hash for oauth only user
+            "display_name": display_name,
+            "is_active": True,
+            "token_version": 0,
+            "created_at": now,
+            "updated_at": now,
+            "provider": "google",
+            "provider_subject": provider_subject,
+            "verified_email": email,
+        }
+        try:
+            result = await self.collection.insert_one(document)
+        except DuplicateKeyError as exc:
+            raise UserAlreadyExistsError from exc
+        document["_id"] = result.inserted_id
+        return self._to_user(document)
+
     async def find_by_email(self, email: str) -> User | None:
         document = await self.collection.find_one({"email": email})
         return self._to_user(document) if document else None
@@ -57,6 +83,48 @@ class UserRepository:
             return None
         document = await self.collection.find_one({"_id": ObjectId(user_id)})
         return self._to_user(document) if document else None
+
+    async def find_by_provider(self, provider: str, provider_subject: str) -> User | None:
+        document = await self.collection.find_one(
+            {
+                "provider": provider,
+                "provider_subject": provider_subject,
+            }
+        )
+        return self._to_user(document) if document else None
+
+    async def link_google_account(
+        self, user_id: str, provider_subject: str, verified_email: str
+    ) -> bool:
+        if not ObjectId.is_valid(user_id):
+            return False
+        result = await self.collection.update_one(
+            {"_id": ObjectId(user_id)},
+            {
+                "$set": {
+                    "provider": "google",
+                    "provider_subject": provider_subject,
+                    "verified_email": verified_email,
+                    "updated_at": datetime.now(UTC),
+                }
+            },
+        )
+        return result.modified_count == 1
+
+    async def update_password_and_revoke_tokens(self, user_id: str, password_hash: str) -> bool:
+        if not ObjectId.is_valid(user_id):
+            return False
+        result = await self.collection.update_one(
+            {"_id": ObjectId(user_id)},
+            {
+                "$set": {
+                    "password_hash": password_hash,
+                    "updated_at": datetime.now(UTC),
+                },
+                "$inc": {"token_version": 1},
+            },
+        )
+        return result.modified_count == 1
 
     async def increment_token_version(self, user_id: str, expected_version: int) -> User | None:
         if not ObjectId.is_valid(user_id):

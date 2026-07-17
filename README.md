@@ -16,6 +16,8 @@ Engineering foundation and production vertical slices for an AI-powered health, 
 
 ## Quick start
 
+See [Competition Evaluator Guide](COMPETITION.md) for evaluators/judges.
+
 1. Copy `.env.example` to `.env` and set a real `JWT_SECRET_KEY`.
 2. Start MongoDB locally.
 3. Create a Python 3.12 virtual environment, install `backend/requirements-dev.txt`, then run `uvicorn app.main:app --app-dir backend --reload`.
@@ -47,6 +49,8 @@ The [Intelligent Workout API Contract](docs/Intelligent-Workout-API-Contract.md)
 
 The [Intelligent Workout Frontend Integration](docs/Intelligent-Workout-Frontend.md) documents protected routes, the typed service boundary, setup and session behavior, stable error handling, accessibility, and the non-mutating adaptation experience.
 
+The [Production-Grade Authentication Upgrade](docs/Authentication-Google-and-Password-Reset.md) documents Google Identity Services integration, OpenID Connect verifiers, secure forgot/reset flows, SHA-256 token hashing, global session revocation, and database indexes.
+
 ## Quality checks
 
 ```powershell
@@ -64,6 +68,7 @@ pytest backend/tests/test_intelligent_workout_http_smoke.py -q
 Set-Location frontend
 npm run lint
 npm run format:check
+npm run test
 npm run build
 ```
 

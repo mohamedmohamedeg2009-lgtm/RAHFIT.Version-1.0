@@ -10,6 +10,8 @@ import { RegisterPage } from "../pages/auth/RegisterPage";
 import { AuthLayout } from "../layouts/AuthLayout";
 import { AssessmentLayout } from "../layouts/AssessmentLayout";
 import { useAuth } from "../hooks/useAuth";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import { useLocale } from "../contexts/LocaleContext";
 
 const AssessmentWelcomePage = lazy(() => import("../pages/assessment/AssessmentWelcomePage"));
 const AssessmentResumePage = lazy(() => import("../pages/assessment/AssessmentResumePage"));
@@ -50,6 +52,15 @@ const WorkoutPlanHistoryPage = lazy(
 const WorkoutSessionHistoryPage = lazy(
   () => import("../pages/intelligentWorkout/WorkoutSessionHistoryPage"),
 );
+const ForgotPasswordPage = lazy(() => import("../pages/auth/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("../pages/auth/ResetPasswordPage"));
+
+/** Sets document.title while a route is active. */
+function RouteTitle({ en, ar }: { en: string; ar: string }) {
+  const { locale } = useLocale();
+  useDocumentTitle(locale === "ar" ? ar : en);
+  return null;
+}
 
 function AssessmentExperience() {
   return (
@@ -75,6 +86,7 @@ function AuthOnlyRedirect() {
 }
 
 function NotFoundPage() {
+  useDocumentTitle("Page not found");
   return (
     <main className="protected-shell">
       <section className="protected-card" aria-labelledby="not-found-title">
@@ -96,50 +108,148 @@ export function App() {
         <Suspense fallback={<FullPageLoader label="Loading experience" />}>
           <Routes>
             <Route element={<AuthLayout />}>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
+              <Route
+                path="/login"
+                element={
+                  <>
+                    <RouteTitle en="Sign in" ar="تسجيل الدخول" />
+                    <LoginPage />
+                  </>
+                }
+              />
+              <Route
+                path="/register"
+                element={
+                  <>
+                    <RouteTitle en="Create account" ar="إنشاء حساب" />
+                    <RegisterPage />
+                  </>
+                }
+              />
+              <Route
+                path="/forgot-password"
+                element={
+                  <>
+                    <RouteTitle en="Forgot password" ar="نسيت كلمة المرور" />
+                    <ForgotPasswordPage />
+                  </>
+                }
+              />
+              <Route
+                path="/reset-password"
+                element={
+                  <>
+                    <RouteTitle en="Reset password" ar="إعادة تعيين كلمة المرور" />
+                    <ResetPasswordPage />
+                  </>
+                }
+              />
             </Route>
             <Route element={<ProtectedRoute />}>
-              <Route path="/app" element={<DashboardPage />} />
+              <Route
+                path="/app"
+                element={
+                  <>
+                    <RouteTitle en="Dashboard" ar="لوحة التحكم" />
+                    <DashboardPage />
+                  </>
+                }
+              />
               <Route path="/workouts" element={<WorkoutPage />} />
               <Route path="/workouts/history" element={<WorkoutHistoryPage />} />
               <Route path="/workouts/:planId" element={<WorkoutPlanPage />} />
               <Route path="/workouts/:planId/session/:dayId" element={<WorkoutSessionPage />} />
               <Route path="/nutrition" element={<NutritionPage />} />
               <Route path="/nutrition/history" element={<NutritionHistoryPage />} />
-              <Route path="/intelligent-workouts" element={<IntelligentWorkoutOverviewPage />} />
+              <Route
+                path="/intelligent-workouts"
+                element={
+                  <>
+                    <RouteTitle en="My Workout" ar="تمريني الذكي" />
+                    <IntelligentWorkoutOverviewPage />
+                  </>
+                }
+              />
               <Route
                 path="/intelligent-workouts/setup/profile"
-                element={<WorkoutProfileSetupPage />}
+                element={
+                  <>
+                    <RouteTitle en="Training Profile" ar="الملف التدريبي" />
+                    <WorkoutProfileSetupPage />
+                  </>
+                }
               />
               <Route
                 path="/intelligent-workouts/setup/health"
-                element={<WorkoutHealthSetupPage />}
+                element={
+                  <>
+                    <RouteTitle en="Health Declaration" ar="الإقرار الصحي" />
+                    <WorkoutHealthSetupPage />
+                  </>
+                }
               />
-              <Route path="/intelligent-workouts/generate" element={<WorkoutGenerationPage />} />
+              <Route
+                path="/intelligent-workouts/generate"
+                element={
+                  <>
+                    <RouteTitle en="Generate Plan" ar="إنشاء خطة" />
+                    <WorkoutGenerationPage />
+                  </>
+                }
+              />
               <Route
                 path="/intelligent-workouts/plans/:planId"
-                element={<IntelligentWorkoutPlanPage />}
+                element={
+                  <>
+                    <RouteTitle en="Training Plan" ar="خطة التدريب" />
+                    <IntelligentWorkoutPlanPage />
+                  </>
+                }
               />
               <Route
                 path="/intelligent-workouts/plans/:planId/session/:dayNumber"
-                element={<IntelligentWorkoutSessionPage />}
+                element={
+                  <>
+                    <RouteTitle en="Workout Session" ar="جلسة التمرين" />
+                    <IntelligentWorkoutSessionPage />
+                  </>
+                }
               />
               <Route
                 path="/intelligent-workouts/sessions/:sessionId"
-                element={<IntelligentWorkoutSessionPage />}
+                element={
+                  <>
+                    <RouteTitle en="Workout Session" ar="جلسة التمرين" />
+                    <IntelligentWorkoutSessionPage />
+                  </>
+                }
               />
               <Route
                 path="/intelligent-workouts/plans/:planId/adaptation"
-                element={<WorkoutAdaptationPage />}
+                element={
+                  <>
+                    <RouteTitle en="Adaptation Review" ar="مراجعة التكيف" />
+                    <WorkoutAdaptationPage />
+                  </>
+                }
               />
               <Route
                 path="/intelligent-workouts/history/plans"
-                element={<WorkoutPlanHistoryPage />}
+                element={
+                  <>
+                    <RouteTitle en="Plan History" ar="سجل الخطط" />
+                    <WorkoutPlanHistoryPage />
+                  </>
+                }
               />
               <Route
                 path="/intelligent-workouts/history/sessions"
-                element={<WorkoutSessionHistoryPage />}
+                element={
+                  <>
+                    <RouteTitle en="Session History" ar="سجل الجلسات" />
+                    <WorkoutSessionHistoryPage />
+                  </>
+                }
               />
               <Route element={<AssessmentExperience />}>
                 <Route path="/assessment" element={<AssessmentWelcomePage />} />

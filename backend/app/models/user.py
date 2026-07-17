@@ -17,3 +17,6 @@ class User(BaseModel):
     token_version: int = Field(default=0, ge=0)
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    provider: str | None = None
+    provider_subject: str | None = None
+    verified_email: str | None = None

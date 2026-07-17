@@ -184,3 +184,19 @@ async def initialize_indexes(database: AsyncIOMotorDatabase[dict[str, Any]]) -> 
         [("user_id", 1), ("generated_at", -1)],
         name="assessment_results_user_latest",
     )
+    await database["users"].create_index(
+        [("provider", 1), ("provider_subject", 1)],
+        unique=True,
+        partialFilterExpression={"is_active": True},
+        name="users_provider_subject_unique",
+    )
+    await database["password_reset_tokens"].create_index(
+        "token_hash",
+        unique=True,
+        name="password_reset_tokens_hash_unique",
+    )
+    await database["password_reset_tokens"].create_index(
+        "expires_at",
+        expireAfterSeconds=0,
+        name="password_reset_tokens_ttl",
+    )

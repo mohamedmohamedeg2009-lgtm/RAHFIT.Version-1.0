@@ -219,6 +219,15 @@ const en = {
   completeSession: "Complete session",
   abandon: "Abandon",
   sessionHistory: "Session history",
+  sessionCompletedTitle: "Session complete",
+  sessionCompletedMessage:
+    "Great effort. Your data has been recorded. Review your adaptation analysis or explore your session history.",
+  sessionAbandonedTitle: "Session abandoned",
+  sessionAbandonedMessage:
+    "This session was not completed. Your recorded data has been saved and is available in session history.",
+  viewHistory: "View session history",
+  goToOverview: "Back to overview",
+  viewAdaptation: "Review adaptation",
 } as const;
 
 type IntelligentWorkoutKey = keyof typeof en;
@@ -434,6 +443,14 @@ const ar: Record<IntelligentWorkoutKey, string> = {
   completeSession: "إكمال الجلسة",
   abandon: "ترك الجلسة",
   sessionHistory: "سجل الجلسات",
+  sessionCompletedTitle: "اكتملت الجلسة",
+  sessionCompletedMessage:
+    "أحسنت. تم تسجيل بياناتك. يمكنك مراجعة تحليل التكيف أو الاطلاع على سجل جلساتك.",
+  sessionAbandonedTitle: "تم ترك الجلسة",
+  sessionAbandonedMessage: "لم تكتمل هذه الجلسة. تم حفظ البيانات المسجلة وهي متاحة في سجل الجلسات.",
+  viewHistory: "عرض سجل الجلسات",
+  goToOverview: "العودة إلى النظرة العامة",
+  viewAdaptation: "مراجعة التكيف",
 };
 
 export const intelligentWorkoutCopy: Record<Locale, Record<IntelligentWorkoutKey, string>> = {

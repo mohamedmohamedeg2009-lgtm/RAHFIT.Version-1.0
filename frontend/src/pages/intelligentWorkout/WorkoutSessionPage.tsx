@@ -171,10 +171,7 @@ export default function IntelligentWorkoutSessionPage() {
             {day.focus} ·{" "}
             {workoutText(locale, "minutes", { count: day.estimated_duration_minutes })} ·{" "}
             {workoutText(locale, "exerciseCount", {
-              count: day.sections.reduce(
-                (count, section) => count + section.exercises.length,
-                0,
-              ),
+              count: day.sections.reduce((count, section) => count + section.exercises.length, 0),
             })}
           </p>
           <Alert variant="info" title={t("readyToBegin")}>
@@ -186,25 +183,66 @@ export default function IntelligentWorkoutSessionPage() {
         </Card>
       ) : session && day ? (
         <>
-          <SessionStatusCard session={session} />
-          {session.adaptation_flags.length ? (
-            <Alert variant="warning" title={t("reviewRecommended")}>
-              <ul>
-                {session.adaptation_flags.map((flag) => (
-                  <li key={flag}>{label(flag)}</li>
-                ))}
-              </ul>
-            </Alert>
+          {session.status === "in_progress" ? (
+            <>
+              <SessionStatusCard session={session} />
+              {session.adaptation_flags.length ? (
+                <Alert variant="warning" title={t("reviewRecommended")}>
+                  <ul>
+                    {session.adaptation_flags.map((flag) => (
+                      <li key={flag}>{label(flag)}</li>
+                    ))}
+                  </ul>
+                </Alert>
+              ) : null}
+            </>
           ) : null}
           {session.status !== "in_progress" ? (
-            <Alert
-              variant={session.status === "completed" ? "success" : "warning"}
-              title={workoutText(locale, "sessionState", {
-                status: workoutEnumLabel(session.status, locale),
-              })}
-            >
-              <p>{t("sessionReadOnly")}</p>
-            </Alert>
+            <Card className="iw-session-completion" aria-live="polite">
+              <div className="iw-completion-header">
+                <span aria-hidden="true" className="iw-completion-mark">
+                  {session.status === "completed" ? "✓" : "—"}
+                </span>
+                <h2>
+                  {session.status === "completed"
+                    ? t("sessionCompletedTitle")
+                    : t("sessionAbandonedTitle")}
+                </h2>
+              </div>
+              <p>
+                {session.status === "completed"
+                  ? t("sessionCompletedMessage")
+                  : t("sessionAbandonedMessage")}
+              </p>
+              {session.adaptation_flags.length ? (
+                <Alert variant="warning" title={t("reviewRecommended")}>
+                  <ul>
+                    {session.adaptation_flags.map((flag) => (
+                      <li key={flag}>{label(flag)}</li>
+                    ))}
+                  </ul>
+                </Alert>
+              ) : null}
+              <div className="iw-actions">
+                <Link
+                  className="ds-button ds-button-primary ds-button-md"
+                  to="/intelligent-workouts/history/sessions"
+                >
+                  {t("viewHistory")}
+                </Link>
+                {session.adaptation_flags.length ? (
+                  <Link
+                    className="ds-button ds-button-outline ds-button-md"
+                    to={`/intelligent-workouts/plans/${session.plan_id}/adaptation`}
+                  >
+                    {t("viewAdaptation")}
+                  </Link>
+                ) : null}
+                <Link className="ds-button ds-button-ghost ds-button-md" to="/intelligent-workouts">
+                  {t("goToOverview")}
+                </Link>
+              </div>
+            </Card>
           ) : null}
           <div className="iw-session-exercises">
             {exercises.map((exercise) => {

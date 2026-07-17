@@ -4,9 +4,12 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FormAlert } from "../../components/auth/FormAlert";
 import { PasswordField } from "../../components/auth/PasswordField";
 import { useAuth } from "../../hooks/useAuth";
+import { GoogleSignInButton } from "../../components/auth/GoogleSignInButton";
+import { useLocale } from "../../contexts/LocaleContext";
 
 export function LoginPage() {
   const { login, error, clearError, isLoading } = useAuth();
+  const { locale } = useLocale();
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState("");
@@ -42,6 +45,8 @@ export function LoginPage() {
     }
   };
 
+  const hasGoogle = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID);
+
   return (
     <section className="auth-card" aria-labelledby="login-title">
       <div className="mobile-brand">
@@ -50,6 +55,12 @@ export function LoginPage() {
       <p className="eyebrow">WELCOME BACK</p>
       <h2 id="login-title">Let’s keep your momentum.</h2>
       <p className="muted-text">Sign in to continue your coaching journey.</p>
+      <GoogleSignInButton />
+      {hasGoogle ? (
+        <div className="auth-divider">
+          {locale === "ar" ? "أو المتابعة بالبريد الإلكتروني" : "or continue with email"}
+        </div>
+      ) : null}
       <FormAlert message={error} />
       {fieldError ? <FormAlert message={fieldError} /> : null}
       <form onSubmit={(event) => void submit(event)} noValidate>
@@ -70,6 +81,25 @@ export function LoginPage() {
           onChange={setPassword}
           autoComplete="current-password"
         />
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginBottom: "1.5rem",
+            marginTop: "-0.5rem",
+          }}
+        >
+          <Link
+            to="/forgot-password"
+            style={{
+              fontSize: "0.875rem",
+              color: "var(--color-primary)",
+              textDecoration: "none",
+            }}
+          >
+            {locale === "ar" ? "هل نسيت كلمة المرور؟" : "Forgot password?"}
+          </Link>
+        </div>
         <button
           className="button button-primary button-full"
           type="submit"

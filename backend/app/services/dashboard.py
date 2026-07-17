@@ -315,7 +315,7 @@ class DashboardService:
                 action_type=DashboardActionType.GENERATE_WORKOUT,
                 title="Create your workout plan",
                 description="Use your completed assessment to build a deterministic plan.",
-                destination_route="/workouts",
+                destination_route="/intelligent-workouts",
                 priority_reason="Your assessment is complete and no active workout plan exists.",
                 severity=DashboardSeverity.INFO,
             )
@@ -440,7 +440,7 @@ class DashboardService:
                 title="Workout planning",
                 status=FeatureStatus.ACTION_REQUIRED,
                 reason="Generate a plan from your completed assessment.",
-                destination_route="/workouts",
+                destination_route="/intelligent-workouts",
             )
 
         if not nutrition_enabled or safety_locked or not assessment_ready:
@@ -563,7 +563,9 @@ class DashboardService:
                     ),
                     title="Open today's workout" if workout else "Create workout plan",
                     description="Open your personalized training experience.",
-                    destination_route=workout.destination_route if workout else "/workouts",
+                    destination_route=(
+                        workout.destination_route if workout else "/intelligent-workouts"
+                    ),
                     priority_reason="Workout planning is available after assessment completion.",
                     severity=DashboardSeverity.INFO,
                 )

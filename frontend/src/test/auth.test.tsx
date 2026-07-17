@@ -6,6 +6,17 @@ import "@testing-library/jest-dom/vitest";
 import * as React from "react";
 
 import { ProtectedRoute } from "../components/ProtectedRoute";
+
+vi.mock("../contexts/LocaleContext", () => {
+  return {
+    useLocale: () => ({
+      locale: "en",
+      setLocale: vi.fn(),
+    }),
+    LocaleProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+});
+
 import { AuthContext, AuthProvider } from "../contexts/AuthContext";
 import { AuthLayout } from "../layouts/AuthLayout";
 import { LoginPage } from "../pages/auth/LoginPage";
@@ -33,6 +44,7 @@ function context(overrides: Partial<AuthContextValue> = {}): AuthContextValue {
     error: null,
     login: vi.fn(),
     register: vi.fn(),
+    loginWithGoogle: vi.fn(),
     logout: vi.fn(),
     clearError: vi.fn(),
     ...overrides,

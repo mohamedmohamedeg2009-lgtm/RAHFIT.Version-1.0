@@ -607,6 +607,56 @@ describe("intelligent workout screens", () => {
     expect(screen.queryByRole("button", { name: "Save progress" })).not.toBeInTheDocument();
   });
 
+  it("completed session shows completion card and actions", async () => {
+    vi.spyOn(intelligentWorkoutService, "getSession").mockResolvedValue({
+      ...session,
+      status: "completed",
+      completion_percentage: 85,
+      adaptation_flags: [],
+      completed_at: "2026-07-17T11:00:00Z",
+    });
+    vi.spyOn(intelligentWorkoutService, "getPlan").mockResolvedValue(plan);
+    renderRoute(
+      <IntelligentWorkoutSessionPage />,
+      "/intelligent-workouts/sessions/session-1",
+      "/intelligent-workouts/sessions/:sessionId",
+    );
+    expect(await screen.findByText("Session complete")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Great effort. Your data has been recorded. Review your adaptation analysis or explore your session history.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "View session history" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Back to overview" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Review adaptation" })).not.toBeInTheDocument();
+  });
+
+  it("abandoned session shows completion card and actions", async () => {
+    vi.spyOn(intelligentWorkoutService, "getSession").mockResolvedValue({
+      ...session,
+      status: "abandoned",
+      completion_percentage: 20,
+      adaptation_flags: ["pain_reported"],
+      completed_at: "2026-07-17T11:00:00Z",
+    });
+    vi.spyOn(intelligentWorkoutService, "getPlan").mockResolvedValue(plan);
+    renderRoute(
+      <IntelligentWorkoutSessionPage />,
+      "/intelligent-workouts/sessions/session-1",
+      "/intelligent-workouts/sessions/:sessionId",
+    );
+    expect(await screen.findByText("Session abandoned")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "This session was not completed. Your recorded data has been saved and is available in session history.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "View session history" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Review adaptation" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Back to overview" })).toBeInTheDocument();
+  });
+
   it("displays adaptation as guidance without applying it", async () => {
     const analyze = vi.spyOn(intelligentWorkoutService, "analyzeAdaptation").mockResolvedValue({
       recommendation_code: "maintain",

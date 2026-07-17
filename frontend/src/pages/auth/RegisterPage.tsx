@@ -4,11 +4,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { FormAlert } from "../../components/auth/FormAlert";
 import { PasswordField } from "../../components/auth/PasswordField";
 import { useAuth } from "../../hooks/useAuth";
+import { GoogleSignInButton } from "../../components/auth/GoogleSignInButton";
+import { useLocale } from "../../contexts/LocaleContext";
 
 const passwordHint = "Use 12–128 characters. A longer, memorable phrase is best.";
 
 export function RegisterPage() {
   const { register, error, clearError, isLoading } = useAuth();
+  const { locale } = useLocale();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,6 +47,8 @@ export function RegisterPage() {
     }
   };
 
+  const hasGoogle = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID);
+
   return (
     <section className="auth-card" aria-labelledby="register-title">
       <div className="mobile-brand">
@@ -52,6 +57,12 @@ export function RegisterPage() {
       <p className="eyebrow">YOUR NEXT CHAPTER</p>
       <h2 id="register-title">Build a stronger routine.</h2>
       <p className="muted-text">Create your account. We’ll tailor the next steps later.</p>
+      <GoogleSignInButton />
+      {hasGoogle ? (
+        <div className="auth-divider">
+          {locale === "ar" ? "أو المتابعة بالبريد الإلكتروني" : "or continue with email"}
+        </div>
+      ) : null}
       <FormAlert message={error} />
       {fieldError ? <FormAlert message={fieldError} /> : null}
       <form onSubmit={(event) => void submit(event)} noValidate>

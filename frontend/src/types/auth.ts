@@ -19,6 +19,7 @@ export interface AuthContextValue {
   error: string | null;
   login: (credentials: AuthCredentials) => Promise<void>;
   register: (credentials: AuthCredentials) => Promise<void>;
+  loginWithGoogle: (credential: string) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
 }
