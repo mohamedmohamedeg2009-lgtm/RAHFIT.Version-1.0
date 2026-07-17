@@ -1,6 +1,6 @@
 import { createContext, useCallback, useEffect, useState, type ReactNode } from "react";
 
-import { ApiError, setRefreshHandler } from "../services/apiClient";
+import { ApiConnectionError, ApiError, setRefreshHandler } from "../services/apiClient";
 import { authService } from "../services/authService";
 import type { AuthContextValue, AuthCredentials, AuthUser } from "../types/auth";
 
@@ -8,12 +8,21 @@ import type { AuthContextValue, AuthCredentials, AuthUser } from "../types/auth"
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
 function userMessage(error: unknown): string {
+  if (error instanceof ApiConnectionError) {
+    return error.code === "request_timeout"
+      ? "The service took too long to respond. Please try again."
+      : "We could not reach the service. Please try again.";
+  }
   if (error instanceof ApiError) {
+    if (error.status === 409) return "An account already exists for this email.";
+    if (error.status === 422 || error.code === "validation_error") {
+      return "Please check your email and password and try again.";
+    }
     if (error.status === 429) return "Too many attempts. Please try again shortly.";
     if (error.status >= 500) return "The service is temporarily unavailable. Please try again.";
     return error.message;
   }
-  return "We could not reach the service. Please try again.";
+  return "Something went wrong while processing your request. Please try again.";
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {

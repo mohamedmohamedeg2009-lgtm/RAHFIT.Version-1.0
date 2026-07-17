@@ -23,6 +23,33 @@ const WorkoutSessionPage = lazy(() => import("../pages/workout/WorkoutSessionPag
 const WorkoutHistoryPage = lazy(() => import("../pages/workout/WorkoutHistoryPage"));
 const NutritionPage = lazy(() => import("../pages/nutrition/NutritionPage"));
 const NutritionHistoryPage = lazy(() => import("../pages/nutrition/NutritionHistoryPage"));
+const IntelligentWorkoutOverviewPage = lazy(
+  () => import("../pages/intelligentWorkout/WorkoutOverviewPage"),
+);
+const WorkoutProfileSetupPage = lazy(
+  () => import("../pages/intelligentWorkout/WorkoutProfileSetupPage"),
+);
+const WorkoutHealthSetupPage = lazy(
+  () => import("../pages/intelligentWorkout/WorkoutHealthSetupPage"),
+);
+const WorkoutGenerationPage = lazy(
+  () => import("../pages/intelligentWorkout/WorkoutGenerationPage"),
+);
+const IntelligentWorkoutPlanPage = lazy(
+  () => import("../pages/intelligentWorkout/WorkoutPlanDetailPage"),
+);
+const IntelligentWorkoutSessionPage = lazy(
+  () => import("../pages/intelligentWorkout/WorkoutSessionPage"),
+);
+const WorkoutAdaptationPage = lazy(
+  () => import("../pages/intelligentWorkout/WorkoutAdaptationPage"),
+);
+const WorkoutPlanHistoryPage = lazy(
+  () => import("../pages/intelligentWorkout/WorkoutPlanHistoryPage"),
+);
+const WorkoutSessionHistoryPage = lazy(
+  () => import("../pages/intelligentWorkout/WorkoutSessionHistoryPage"),
+);
 
 function AssessmentExperience() {
   return (
@@ -80,6 +107,40 @@ export function App() {
               <Route path="/workouts/:planId/session/:dayId" element={<WorkoutSessionPage />} />
               <Route path="/nutrition" element={<NutritionPage />} />
               <Route path="/nutrition/history" element={<NutritionHistoryPage />} />
+              <Route path="/intelligent-workouts" element={<IntelligentWorkoutOverviewPage />} />
+              <Route
+                path="/intelligent-workouts/setup/profile"
+                element={<WorkoutProfileSetupPage />}
+              />
+              <Route
+                path="/intelligent-workouts/setup/health"
+                element={<WorkoutHealthSetupPage />}
+              />
+              <Route path="/intelligent-workouts/generate" element={<WorkoutGenerationPage />} />
+              <Route
+                path="/intelligent-workouts/plans/:planId"
+                element={<IntelligentWorkoutPlanPage />}
+              />
+              <Route
+                path="/intelligent-workouts/plans/:planId/session/:dayNumber"
+                element={<IntelligentWorkoutSessionPage />}
+              />
+              <Route
+                path="/intelligent-workouts/sessions/:sessionId"
+                element={<IntelligentWorkoutSessionPage />}
+              />
+              <Route
+                path="/intelligent-workouts/plans/:planId/adaptation"
+                element={<WorkoutAdaptationPage />}
+              />
+              <Route
+                path="/intelligent-workouts/history/plans"
+                element={<WorkoutPlanHistoryPage />}
+              />
+              <Route
+                path="/intelligent-workouts/history/sessions"
+                element={<WorkoutSessionHistoryPage />}
+              />
               <Route element={<AssessmentExperience />}>
                 <Route path="/assessment" element={<AssessmentWelcomePage />} />
                 <Route path="/assessment/resume/:sessionId" element={<AssessmentResumePage />} />

@@ -30,6 +30,12 @@ USER_INTELLIGENCE_INDEXES: tuple[tuple[str, str], ...] = (
 )
 INTELLIGENT_WORKOUT_PLAN_COLLECTION = "intelligent_workout_plans"
 INTELLIGENT_WORKOUT_SESSION_COLLECTION = "intelligent_workout_sessions"
+INTELLIGENT_WORKOUT_GENERATION_INDEX = "intelligent_workout_plans_generation_history"
+INTELLIGENT_WORKOUT_GENERATION_KEYS: tuple[tuple[str, int], ...] = (
+    ("user_id", 1),
+    ("generation_metadata.generation_key", 1),
+    ("version", -1),
+)
 
 
 async def ensure_intelligent_workout_indexes(database: Any) -> None:
@@ -54,9 +60,10 @@ async def ensure_intelligent_workout_indexes(database: Any) -> None:
         [("user_id", 1), ("status", 1), ("generated_at", -1)],
         name="intelligent_workout_plans_owner_status",
     )
-    await plans.create_index(
-        [("user_id", 1), ("generation_metadata.generation_key", 1), ("version", -1)],
-        name="intelligent_workout_plans_generation_history",
+    await ensure_named_index(
+        plans,
+        INTELLIGENT_WORKOUT_GENERATION_KEYS,
+        INTELLIGENT_WORKOUT_GENERATION_INDEX,
     )
     await sessions.create_index(
         "session_id",

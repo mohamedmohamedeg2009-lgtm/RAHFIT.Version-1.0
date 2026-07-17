@@ -298,9 +298,19 @@ class FakeIndexCollection:
     def __init__(self) -> None:
         self.calls: list[tuple[object, dict[str, object]]] = []
         self.last_query: dict[str, object] | None = None
+        self.indexes: dict[str, dict[str, object]] = {}
 
     async def create_index(self, keys: object, **options: object) -> None:
         self.calls.append((keys, options))
+        name = str(options.get("name", ""))
+        if name:
+            self.indexes[name] = {"key": keys, **options}
+
+    async def index_information(self) -> dict[str, dict[str, object]]:
+        return dict(self.indexes)
+
+    async def drop_index(self, name: str) -> None:
+        self.indexes.pop(name, None)
 
     async def find_one(self, query: dict[str, object]) -> None:
         self.last_query = query

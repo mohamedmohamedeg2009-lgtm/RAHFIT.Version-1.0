@@ -1,4 +1,25 @@
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000/api/v1";
+const localApiBaseUrl = "http://127.0.0.1:8000/api/v1";
+
+export function normalizeApiBaseUrl(value: string | undefined): string {
+  const candidate = value?.trim() || localApiBaseUrl;
+  let parsed: URL;
+  try {
+    parsed = new URL(candidate);
+  } catch {
+    throw new Error("VITE_API_BASE_URL must be a valid absolute URL.");
+  }
+  if (!(["http:", "https:"] as string[]).includes(parsed.protocol)) {
+    throw new Error("VITE_API_BASE_URL must use HTTP or HTTPS.");
+  }
+  const normalizedPath = parsed.pathname.replace(/\/+$/, "");
+  if (!normalizedPath.endsWith("/api/v1")) {
+    throw new Error("VITE_API_BASE_URL must include the /api/v1 prefix.");
+  }
+  parsed.pathname = normalizedPath;
+  return parsed.toString().replace(/\/$/, "");
+}
+
+const baseUrl = normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL);
 let accessToken: string | null = null;
 let refreshHandler: (() => Promise<boolean>) | null = null;
 let refreshing: Promise<boolean> | null = null;
@@ -8,6 +29,14 @@ export class ApiError extends Error {
     public readonly status: number,
     public readonly code = "request_failed",
     public readonly details: Array<Record<string, unknown>> = [],
+  ) {
+    super(message);
+  }
+}
+export class ApiConnectionError extends Error {
+  constructor(
+    message: string,
+    public readonly code: "network_or_cors_error" | "request_timeout",
   ) {
     super(message);
   }
@@ -67,6 +96,12 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
       );
     }
     return payload as T;
+  } catch (cause) {
+    if (cause instanceof ApiError || cause instanceof ApiConnectionError) throw cause;
+    if (cause instanceof DOMException && cause.name === "AbortError") {
+      throw new ApiConnectionError("The request timed out.", "request_timeout");
+    }
+    throw new ApiConnectionError("The API could not be reached.", "network_or_cors_error");
   } finally {
     window.clearTimeout(timeout);
   }

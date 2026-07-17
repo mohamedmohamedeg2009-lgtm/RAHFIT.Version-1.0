@@ -2670,6 +2670,288 @@ button:focus-visible {
     grid-template-columns: 1fr;
   }
 }
+
+/* Intelligent workout integration */
+.iw-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at 88% 4%,
+      color-mix(in srgb, var(--color-ai) 11%, transparent),
+      transparent 34rem
+    ),
+    var(--color-background);
+}
+.iw-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  min-height: 4.5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-24);
+  padding-inline: max(var(--space-24), calc((100% - 78rem) / 2));
+  border-bottom: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-background) 90%, transparent);
+  backdrop-filter: blur(18px);
+}
+.iw-topbar nav,
+.iw-actions,
+.iw-inline,
+.iw-alert-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-12);
+}
+.iw-topbar nav a {
+  padding: var(--space-8) var(--space-4);
+  color: var(--color-text-secondary);
+  font-weight: 650;
+}
+.iw-topbar nav a:hover,
+.iw-topbar nav a.active {
+  color: var(--color-primary);
+}
+.iw-shell {
+  width: min(100% - 2rem, 78rem);
+  margin-inline: auto;
+  padding-block: var(--space-48) var(--space-64);
+}
+.iw-hero {
+  max-width: 52rem;
+  margin-bottom: var(--space-32);
+}
+.iw-hero h1 {
+  margin-block: var(--space-16) var(--space-8);
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  letter-spacing: -0.045em;
+}
+.iw-hero p,
+.iw-day-card p,
+.iw-history-card p,
+.iw-session-exercise > p {
+  color: var(--color-text-secondary);
+}
+.iw-list,
+.iw-section,
+.iw-setup-form,
+.iw-record-list,
+.iw-session-exercises,
+.iw-safety {
+  display: grid;
+  gap: var(--space-16);
+}
+.iw-section,
+.iw-actions,
+.iw-safety,
+.iw-session-exercises {
+  margin-top: var(--space-32);
+}
+.iw-plan-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-20);
+  padding: var(--space-24);
+}
+.iw-plan-summary > div {
+  display: grid;
+  gap: var(--space-4);
+}
+.iw-plan-summary span:first-child,
+.iw-session-status span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-body-sm);
+}
+.iw-day-card,
+.iw-history-card,
+.iw-session-exercise > header,
+.iw-record-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-20);
+}
+.iw-day-card,
+.iw-history-card,
+.iw-form-card,
+.iw-explanation,
+.iw-section-card,
+.iw-session-exercise,
+.iw-session-notes,
+.iw-setup-form > .ds-card {
+  padding: var(--space-24);
+}
+.iw-day-card h3,
+.iw-history-card h2,
+.iw-session-exercise h2,
+.iw-record h3 {
+  margin-block: var(--space-12) var(--space-4);
+}
+.iw-badge-warning {
+  color: var(--color-warning);
+  border-color: color-mix(in srgb, var(--color-warning) 40%, var(--color-border));
+}
+.iw-empty-card {
+  padding: var(--space-40);
+}
+.iw-form-card {
+  display: grid;
+  max-width: 46rem;
+  gap: var(--space-24);
+}
+.iw-section-card > h3 {
+  padding-bottom: var(--space-12);
+  border-bottom: 1px solid var(--color-border);
+}
+.iw-exercise {
+  padding-block: var(--space-20);
+  border-bottom: 1px solid var(--color-border);
+}
+.iw-exercise:last-child {
+  border-bottom: 0;
+}
+.iw-exercise dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-24);
+}
+.iw-exercise dl div {
+  display: grid;
+  gap: var(--space-4);
+}
+.iw-exercise dt {
+  color: var(--color-text-secondary);
+  font-size: var(--font-body-sm);
+}
+.iw-exercise dd {
+  margin: 0;
+  font-weight: 750;
+}
+.iw-setup-form fieldset {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+.iw-setup-form legend {
+  margin-bottom: var(--space-20);
+  font-size: var(--font-heading-m);
+  font-weight: 750;
+}
+.iw-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-16);
+}
+.iw-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-8);
+  margin-block: var(--space-16);
+}
+.iw-form-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+.iw-record {
+  padding: var(--space-16);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.iw-session-status {
+  position: sticky;
+  top: 5.5rem;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-20);
+  padding: var(--space-20);
+}
+.iw-session-status > div {
+  display: grid;
+}
+.iw-set-table {
+  display: grid;
+  gap: var(--space-8);
+  margin-block: var(--space-20);
+}
+.iw-set-row {
+  display: grid;
+  grid-template-columns: 4rem minmax(8rem, 1fr) repeat(3, minmax(7rem, 1fr));
+  align-items: end;
+  gap: var(--space-12);
+  padding: var(--space-12);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.iw-set-row > strong {
+  align-self: center;
+}
+.iw-pain-fields,
+.iw-session-notes {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1fr) 2fr;
+  align-items: start;
+  gap: var(--space-16);
+}
+.iw-sticky-actions {
+  position: sticky;
+  bottom: var(--space-16);
+  z-index: 10;
+  padding: var(--space-12);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--color-background) 94%, transparent);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(18px);
+}
+@media (max-width: 900px) {
+  .iw-set-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .iw-set-row > strong {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 720px) {
+  .iw-topbar {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: var(--space-12) var(--space-16);
+  }
+  .iw-topbar nav {
+    width: 100%;
+    overflow-x: auto;
+  }
+  .iw-plan-summary,
+  .iw-form-grid,
+  .iw-choice-grid,
+  .iw-session-status,
+  .iw-pain-fields,
+  .iw-session-notes {
+    grid-template-columns: 1fr;
+  }
+  .iw-day-card,
+  .iw-history-card,
+  .iw-session-exercise > header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .iw-day-card .ds-button {
+    width: 100%;
+  }
+  .iw-session-status {
+    top: 8.5rem;
+  }
+}
+@media (max-width: 480px) {
+  .iw-set-row {
+    grid-template-columns: 1fr;
+  }
+}
 .nutrition-page {
   min-height: 100vh;
   background: var(--color-background);

@@ -30,6 +30,9 @@ export function DashboardHeader({ displayName, email }: DashboardHeaderProps) {
           </span>
         </Link>
         <nav className="dashboard-controls" aria-label={copy.dashboard}>
+          <Link className="ds-button ds-button-ghost ds-button-sm" to="/intelligent-workouts">
+            Training
+          </Link>
           <Button variant="ghost" size="sm" onClick={toggleLocale} aria-label={copy.language}>
             {copy.language}
           </Button>

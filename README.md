@@ -45,6 +45,8 @@ The [Workout Engine](docs/Workout-Engine.md) defines the versioned Python exerci
 
 The [Intelligent Workout API Contract](docs/Intelligent-Workout-API-Contract.md) is the frontend-facing source for stable operation IDs, authenticated setup, request/response types, error handling, lifecycle rules, and the repeatable HTTP smoke-test workflow.
 
+The [Intelligent Workout Frontend Integration](docs/Intelligent-Workout-Frontend.md) documents protected routes, the typed service boundary, setup and session behavior, stable error handling, accessibility, and the non-mutating adaptation experience.
+
 ## Quality checks
 
 ```powershell

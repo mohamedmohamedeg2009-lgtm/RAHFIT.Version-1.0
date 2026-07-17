@@ -3,9 +3,12 @@ import pytest
 from app.database.indexes import (
     AI_CONVERSATION_INDEXES,
     AI_MESSAGE_INDEXES,
+    INTELLIGENT_WORKOUT_GENERATION_INDEX,
+    INTELLIGENT_WORKOUT_GENERATION_KEYS,
     USER_INTELLIGENCE_INDEXES,
     WORKOUT_SESSION_INDEX,
     ensure_ai_conversation_indexes,
+    ensure_intelligent_workout_indexes,
     ensure_named_index,
     ensure_user_intelligence_indexes,
     ensure_workout_session_index,
@@ -76,6 +79,8 @@ class FakeIndexDatabase:
             "ai_messages": FakeNamedIndexCollection(),
             "user_profiles": FakeNamedIndexCollection(),
             "health_profiles": FakeNamedIndexCollection(),
+            "intelligent_workout_plans": FakeNamedIndexCollection(),
+            "intelligent_workout_sessions": FakeNamedIndexCollection(),
         }
 
     def __getitem__(self, name: str) -> FakeNamedIndexCollection:
@@ -110,6 +115,26 @@ async def test_same_name_ai_index_drift_is_replaced_without_dropping_other_index
     assert collection.dropped == ["ai_conversations_owner_activity"]
     assert "unrelated_index" in collection.indexes
     assert collection.indexes["ai_conversations_owner_activity"]["key"] == expected
+
+
+@pytest.mark.asyncio
+async def test_legacy_intelligent_workout_generation_index_is_migrated_safely() -> None:
+    database = FakeIndexDatabase()
+    plans = database["intelligent_workout_plans"]
+    plans.indexes = {
+        INTELLIGENT_WORKOUT_GENERATION_INDEX: {
+            "key": [("user_id", 1), ("metadata.generation_key", 1), ("version", -1)]
+        },
+        "unrelated_index": {"key": [("keep", 1)]},
+    }
+
+    await ensure_intelligent_workout_indexes(database)
+
+    assert plans.dropped == [INTELLIGENT_WORKOUT_GENERATION_INDEX]
+    assert plans.indexes[INTELLIGENT_WORKOUT_GENERATION_INDEX]["key"] == list(
+        INTELLIGENT_WORKOUT_GENERATION_KEYS
+    )
+    assert "unrelated_index" in plans.indexes
 
 
 @pytest.mark.asyncio

@@ -1,6 +1,6 @@
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 import * as React from "react";
@@ -10,7 +10,12 @@ import { AuthContext, AuthProvider } from "../contexts/AuthContext";
 import { AuthLayout } from "../layouts/AuthLayout";
 import { LoginPage } from "../pages/auth/LoginPage";
 import { RegisterPage } from "../pages/auth/RegisterPage";
-import { apiRequest, setAccessToken, setRefreshHandler } from "../services/apiClient";
+import {
+  apiRequest,
+  normalizeApiBaseUrl,
+  setAccessToken,
+  setRefreshHandler,
+} from "../services/apiClient";
 import { authService } from "../services/authService";
 import type { AuthContextValue, AuthUser } from "../types/auth";
 
@@ -32,6 +37,29 @@ function context(overrides: Partial<AuthContextValue> = {}): AuthContextValue {
     clearError: vi.fn(),
     ...overrides,
   };
+}
+
+async function submitRegistration(): Promise<void> {
+  const actions = userEvent.setup();
+  const button = screen.getByRole("button", { name: "Create account" });
+  await waitFor(() => expect(button).not.toBeDisabled());
+  await actions.type(screen.getByLabelText("Email address"), "new@example.com");
+  await actions.type(screen.getByLabelText("Password"), "secure-password-123");
+  await actions.type(screen.getByLabelText("Confirm password"), "secure-password-123");
+  await actions.click(button);
+}
+
+function renderRegistration(): void {
+  render(
+    <AuthProvider>
+      <MemoryRouter initialEntries={["/register"]}>
+        <Routes>
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/app" element={<p>Registration complete</p>} />
+        </Routes>
+      </MemoryRouter>
+    </AuthProvider>,
+  );
 }
 
 describe("authentication pages", () => {
@@ -185,6 +213,7 @@ describe("authentication integration boundary", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, request] = fetchMock.mock.calls[0];
     expect(String(url)).toBe("http://127.0.0.1:8000/api/v1/auth/register");
+    expect(request?.method).toBe("POST");
     expect(JSON.parse(String(request?.body))).toEqual({
       email: "new@example.com",
       password: "secure-password-123",
@@ -222,6 +251,94 @@ describe("authentication integration boundary", () => {
         body: { email: "user@example.com", password: "secure-password-123" },
       }),
     ).rejects.toMatchObject({ status: 409, message: "Account already exists." });
+  });
+
+  it("normalizes the documented API base URL without duplicating separators", () => {
+    expect(normalizeApiBaseUrl(undefined)).toBe("http://127.0.0.1:8000/api/v1");
+    expect(normalizeApiBaseUrl("http://localhost:8000/api/v1/")).toBe(
+      "http://localhost:8000/api/v1",
+    );
+    expect(() => normalizeApiBaseUrl("http://localhost:8000")).toThrow("/api/v1");
+    expect(() => normalizeApiBaseUrl("not-a-url")).toThrow("valid absolute URL");
+  });
+
+  it("completes registration and loads the created current user", async () => {
+    vi.spyOn(window, "fetch")
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            access_token: "access",
+            refresh_token: "refresh",
+            access_token_expires_in: 1800,
+          }),
+          { status: 201, headers: { "Content-Type": "application/json" } },
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify(user), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      );
+    renderRegistration();
+
+    await submitRegistration();
+
+    expect(await screen.findByText("Registration complete")).toBeInTheDocument();
+  });
+
+  it("displays the duplicate-email conflict safely", async () => {
+    vi.spyOn(window, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          code: "http_error",
+          message: "An account already exists for this email.",
+        }),
+        { status: 409, headers: { "Content-Type": "application/json" } },
+      ),
+    );
+    renderRegistration();
+
+    await submitRegistration();
+
+    expect(
+      await screen.findByText("An account already exists for this email."),
+    ).toBeInTheDocument();
+  });
+
+  it("displays backend validation separately from connectivity failures", async () => {
+    vi.spyOn(window, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({ code: "validation_error", message: "Invalid request input." }),
+        { status: 422, headers: { "Content-Type": "application/json" } },
+      ),
+    );
+    renderRegistration();
+
+    await submitRegistration();
+
+    expect(
+      await screen.findByText("Please check your email and password and try again."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/could not reach/i)).not.toBeInTheDocument();
+  });
+
+  it("does not classify a backend 500 response as a network failure", async () => {
+    vi.spyOn(window, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ code: "internal_error", message: "Internal detail" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+    renderRegistration();
+
+    await submitRegistration();
+
+    expect(
+      await screen.findByText("The service is temporarily unavailable. Please try again."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/could not reach/i)).not.toBeInTheDocument();
+    expect(screen.queryByText("Internal detail")).not.toBeInTheDocument();
   });
 
   it("shows the connectivity message only for an actual fetch failure", async () => {
