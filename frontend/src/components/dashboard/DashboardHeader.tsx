@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Sun, Moon, Globe, LogOut, Heart } from "lucide-react";
 
 import { Button } from "../ui";
 import { useLocale } from "../../contexts/LocaleContext";
@@ -17,49 +18,69 @@ export function DashboardHeader({ displayName, email }: DashboardHeaderProps) {
   const { logout } = useAuth();
   const copy = dashboardCopy[locale];
 
+  const getInitials = (name: string) => {
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
-    <>
-      <header className="dashboard-topbar">
-        <Link className="dashboard-brand" to="/app" aria-label={`${copy.brand} ${copy.dashboard}`}>
-          <span className="dashboard-brand-mark" aria-hidden="true">
-            R
-          </span>
-          <span>
-            <strong>{copy.brand}</strong>
-            <small>{copy.dashboard}</small>
-          </span>
-        </Link>
-        <nav className="dashboard-controls" aria-label={copy.dashboard}>
-          <Link className="ds-button ds-button-ghost ds-button-sm" to="/intelligent-workouts">
-            Training
-          </Link>
-          <Button variant="ghost" size="sm" onClick={toggleLocale} aria-label={copy.language}>
-            {copy.language}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleTheme}
-            aria-label={copy.theme}
-            aria-pressed={theme === "dark"}
-          >
-            <span aria-hidden="true">{theme === "dark" ? "☀" : "◐"}</span>
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => void logout().catch(() => undefined)}>
-            {copy.signOut}
-          </Button>
-        </nav>
-      </header>
-      <header className="dashboard-welcome">
-        <div>
-          <span className="dashboard-eyebrow">{copy.dashboard}</span>
-          <h1>
-            {copy.greeting}, <span>{displayName}</span>
-          </h1>
-          <p>{copy.context}</p>
+    <header className="dashboard-topbar">
+      <Link className="dashboard-brand" to="/app" aria-label={`${copy.brand} ${copy.dashboard}`}>
+        <div className="dashboard-brand-mark" aria-hidden="true">
+          <Heart size={20} fill="#ffffff" color="#ffffff" style={{ transform: "rotate(-10deg)" }} />
         </div>
-        {email ? <span className="dashboard-account-label">{email}</span> : null}
-      </header>
-    </>
+        <span>
+          <strong style={{ letterSpacing: "0.05em", fontWeight: 800 }}>{copy.brand}</strong>
+          <small style={{ fontWeight: 600 }}>{copy.dashboard}</small>
+        </span>
+      </Link>
+      <nav className="dashboard-controls" aria-label={copy.dashboard}>
+        <Link 
+          className="ds-button ds-button-ghost ds-button-sm" 
+          to="/intelligent-workouts"
+          style={{ fontWeight: 700 }}
+        >
+          {locale === "ar" ? "التدريب الذكي" : "Training"}
+        </Link>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={toggleLocale} 
+          aria-label={copy.language}
+          style={{ display: "flex", alignItems: "center", gap: "6px" }}
+        >
+          <Globe size={18} />
+          <span style={{ fontSize: "14px", fontWeight: 700 }}>{copy.language}</span>
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={toggleTheme}
+          aria-label={copy.theme}
+          aria-pressed={theme === "dark"}
+        >
+          {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+        </Button>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => void logout().catch(() => undefined)}
+          aria-label={copy.signOut}
+        >
+          <LogOut size={18} />
+        </Button>
+        <div className="header-user-info" style={{ marginLeft: locale === "en" ? "12px" : "0", marginRight: locale === "ar" ? "12px" : "0" }}>
+          <div className="header-avatar" title={email}>
+            {getInitials(displayName)}
+          </div>
+        </div>
+      </nav>
+    </header>
   );
 }
+

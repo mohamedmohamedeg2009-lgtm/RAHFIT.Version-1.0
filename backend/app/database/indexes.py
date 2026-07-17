@@ -1,4 +1,4 @@
-from collections.abc import Sequence
+﻿from collections.abc import Sequence
 from typing import Any
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
@@ -187,7 +187,11 @@ async def initialize_indexes(database: AsyncIOMotorDatabase[dict[str, Any]]) -> 
     await database["users"].create_index(
         [("provider", 1), ("provider_subject", 1)],
         unique=True,
-        partialFilterExpression={"is_active": True},
+        partialFilterExpression={
+            "is_active": True,
+            "provider": {"$type": "string"},
+            "provider_subject": {"$type": "string"},
+        },
         name="users_provider_subject_unique",
     )
     await database["password_reset_tokens"].create_index(
@@ -199,4 +203,27 @@ async def initialize_indexes(database: AsyncIOMotorDatabase[dict[str, Any]]) -> 
         "expires_at",
         expireAfterSeconds=0,
         name="password_reset_tokens_ttl",
+    )
+    await ensure_ai_decision_indexes(database)
+
+
+async def ensure_ai_decision_indexes(database: Any) -> None:
+    decisions = database["ai_decisions"]
+    await decisions.create_index(
+        [("user_id", 1), ("effective_date", 1)],
+        unique=True,
+        partialFilterExpression={
+            "is_active": True,
+            "provider": {"$type": "string"},
+            "provider_subject": {"$type": "string"},
+        },
+        name="ai_decisions_one_active_per_user_date",
+    )
+    await decisions.create_index(
+        [("user_id", 1), ("metadata.created_at", -1)],
+        name="ai_decisions_owner_history",
+    )
+    await decisions.create_index(
+        [("metadata.engine_version", 1), ("status", 1)],
+        name="ai_decisions_version_status",
     )

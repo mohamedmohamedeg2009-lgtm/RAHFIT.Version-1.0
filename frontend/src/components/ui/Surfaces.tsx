@@ -39,16 +39,28 @@ export function AICoachCard(props: CardProps) {
   return <VariantCard variant="ai" {...props} />;
 }
 
-interface LabelProps {
+interface LabelProps extends HTMLAttributes<HTMLSpanElement> {
   children: ReactNode;
   className?: string;
 }
-export function Badge({ children, className = "" }: LabelProps) {
-  return <span className={`ds-badge ${className}`}>{children}</span>;
+export function Badge({ children, className = "", ...props }: LabelProps) {
+  return (
+    <span className={`ds-badge ${className}`} {...props}>
+      {children}
+    </span>
+  );
 }
-export function Tag({ children, className = "" }: LabelProps) {
-  return <span className={`ds-tag ${className}`}>{children}</span>;
+export function Tag({ children, className = "", ...props }: LabelProps) {
+  return (
+    <span className={`ds-tag ${className}`} {...props}>
+      {children}
+    </span>
+  );
 }
-export function Chip({ children, className = "" }: LabelProps) {
-  return <span className={`ds-chip ${className}`}>{children}</span>;
+export function Chip({ children, className = "", ...props }: LabelProps) {
+  return (
+    <span className={`ds-chip ${className}`} {...props}>
+      {children}
+    </span>
+  );
 }

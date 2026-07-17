@@ -56,7 +56,6 @@ class GoogleTokenVerifier:
 
             public_key: Any = RSAAlgorithm.from_jwk(jwk)
 
-
             # Decode and verify token signature, expiration, issuer, audience
             payload = jwt.decode(
                 id_token,

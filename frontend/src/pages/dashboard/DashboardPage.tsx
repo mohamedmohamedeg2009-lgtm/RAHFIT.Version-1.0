@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 import {
   AssessmentSummaryCard,
@@ -10,6 +11,7 @@ import {
   SafetyNoticeCard,
 } from "../../components/dashboard/DashboardCards";
 import { DashboardHeader } from "../../components/dashboard/DashboardHeader";
+import { DashboardHero } from "../../components/dashboard/DashboardHero";
 import { DashboardErrorState, DashboardSkeleton } from "../../components/dashboard/DashboardStates";
 import { Alert } from "../../components/ui";
 import { useLocale } from "../../contexts/LocaleContext";
@@ -62,16 +64,28 @@ export default function DashboardPage() {
   return (
     <div className="dashboard-page">
       <DashboardHeader displayName={dashboard.user.displayName} email={user?.email} />
-      <main className="dashboard-shell">
+      <motion.main
+        className="dashboard-shell"
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        style={{ marginTop: "24px" }}
+      >
         {dashboard.metadata.partialData ? (
           <Alert variant="warning" title={copy.partialTitle}>
             <p>{copy.partialBody}</p>
           </Alert>
         ) : null}
+
+        {/* Premium Health Overview Hero Header */}
+        <DashboardHero data={dashboard} locale={locale} />
+
         <DailyPriorityCard priority={dashboard.dailyPriority} locale={locale} onRefresh={load} />
+
         {dashboard.safetyNotice ? (
           <SafetyNoticeCard notice={dashboard.safetyNotice} locale={locale} />
         ) : null}
+
         <div className="dashboard-primary-grid">
           <AssessmentSummaryCard assessment={dashboard.assessment} locale={locale} />
           <ProgressSnapshotCard
@@ -80,14 +94,21 @@ export default function DashboardPage() {
             locale={locale}
           />
         </div>
-        {dashboard.nutrition ? <NutritionSnapshotCard nutrition={dashboard.nutrition} /> : null}
+
+        {dashboard.nutrition ? (
+          <NutritionSnapshotCard nutrition={dashboard.nutrition} />
+        ) : null}
+
         <FeatureStatusGrid features={dashboard.features} locale={locale} />
+
         <QuickActions actions={dashboard.quickActions} locale={locale} onLogout={leaveSession} />
+
         <footer className="dashboard-freshness">
           <span>{dashboard.metadata.dataFreshness}</span>
           <span>Dashboard v{dashboard.metadata.dashboardVersion}</span>
         </footer>
-      </main>
+      </motion.main>
     </div>
   );
 }
+

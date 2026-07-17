@@ -39,7 +39,6 @@ class UserStore(Protocol):
     async def increment_token_version(self, user_id: str, expected_version: int) -> User | None: ...
 
 
-
 @dataclass(frozen=True)
 class AuthResult:
     user: User
