@@ -51,6 +51,8 @@ export const intelligentWorkoutService = {
     }),
   updateProfile: (body: UserProfileRequest) =>
     apiRequest<void>("/profile", { method: "PUT", body }),
+  getProfile: () => apiRequest<UserProfileRequest>("/user-intelligence/profile"),
   updateHealthProfile: (body: HealthProfileRequest) =>
     apiRequest<void>("/health-profile", { method: "PUT", body }),
+  getHealthProfile: () => apiRequest<HealthProfileRequest>("/user-intelligence/health"),
 };

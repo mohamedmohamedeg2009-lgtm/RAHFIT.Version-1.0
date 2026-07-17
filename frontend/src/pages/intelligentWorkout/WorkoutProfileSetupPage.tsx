@@ -1,15 +1,17 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
   IntelligentWorkoutShell,
   WorkoutErrorAlert,
 } from "../../components/intelligentWorkout/WorkoutExperience";
-import { label } from "../../components/intelligentWorkout/utils";
-import { Button, Card, Checkbox, Input, Select } from "../../components/ui";
+import { Alert, Button, Card, Checkbox, Input, Select, Skeleton } from "../../components/ui";
+import { ApiError } from "../../services/apiClient";
 import { intelligentWorkoutService } from "../../services/intelligentWorkoutService";
 import { mapWorkoutError, type WorkoutClientError } from "../../services/workoutErrorMapper";
 import type { Equipment, TrainingGoal, UserProfileRequest } from "../../types/intelligentWorkout";
+import { useLocale } from "../../contexts/LocaleContext";
+import { workoutEnumLabel, workoutText } from "../../i18n/intelligentWorkout";
 
 const goals: TrainingGoal[] = [
   "fat_loss",
@@ -44,38 +46,70 @@ const allergies = [
   "shellfish",
   "gluten",
 ] as const;
+const defaultForm = {
+  fullName: "",
+  age: 18,
+  gender: "prefer_not_to_say" as UserProfileRequest["identity"]["gender"],
+  country: "",
+  height: 170,
+  weight: 70,
+  bodyFat: "",
+  primaryGoal: "general_fitness" as TrainingGoal,
+  secondaryGoal: "",
+  targetWeight: "",
+  targetDate: "",
+  experience: "beginner" as UserProfileRequest["training"]["experience"],
+  availableDays: 3,
+  sessionDuration: 45,
+  workoutLocation: "commercial_gym" as UserProfileRequest["training"]["workout_location"],
+  equipment: ["bodyweight"] as Equipment[],
+  sleep: 8,
+  stress: 5,
+  activity: "moderate" as UserProfileRequest["lifestyle"]["activity_level"],
+  water: 2000,
+  preferences: [] as UserProfileRequest["nutrition"]["dietary_preferences"],
+  allergies: [] as UserProfileRequest["nutrition"]["allergies"],
+  restrictions: "",
+};
+type ProfileForm = typeof defaultForm;
 
 export default function WorkoutProfileSetupPage() {
+  const { locale } = useLocale();
+  const t = (key: Parameters<typeof workoutText>[1]) => workoutText(locale, key);
+  const option = (value: string) => ({ value, label: workoutEnumLabel(value, locale) });
   const navigate = useNavigate();
+  const dirty = useRef(false);
+  const [loading, setLoading] = useState(true);
+  const [hasExisting, setHasExisting] = useState<boolean | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<WorkoutClientError | null>(null);
-  const [form, setForm] = useState({
-    fullName: "",
-    age: 18,
-    gender: "prefer_not_to_say" as UserProfileRequest["identity"]["gender"],
-    country: "",
-    height: 170,
-    weight: 70,
-    bodyFat: "",
-    primaryGoal: "general_fitness" as TrainingGoal,
-    secondaryGoal: "",
-    targetWeight: "",
-    targetDate: "",
-    experience: "beginner" as UserProfileRequest["training"]["experience"],
-    availableDays: 3,
-    sessionDuration: 45,
-    workoutLocation: "commercial_gym" as UserProfileRequest["training"]["workout_location"],
-    equipment: ["bodyweight"] as Equipment[],
-    sleep: 8,
-    stress: 5,
-    activity: "moderate" as UserProfileRequest["lifestyle"]["activity_level"],
-    water: 2000,
-    preferences: [] as UserProfileRequest["nutrition"]["dietary_preferences"],
-    allergies: [] as UserProfileRequest["nutrition"]["allergies"],
-    restrictions: "",
-  });
+  const [form, setForm] = useState<ProfileForm>(defaultForm);
+  useEffect(() => {
+    let active = true;
+    void intelligentWorkoutService
+      .getProfile()
+      .then((profile) => {
+        if (!active) return;
+        setHasExisting(true);
+        if (!dirty.current) setForm(profileToForm(profile));
+      })
+      .catch((cause: unknown) => {
+        if (!active) return;
+        if (cause instanceof ApiError && cause.status === 404) setHasExisting(false);
+        else setError(mapWorkoutError(cause, locale));
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [locale]);
   const update = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
-    setForm((current) => ({ ...current, [key]: value }));
+    setForm((current) => {
+      dirty.current = true;
+      return { ...current, [key]: value };
+    });
   const toggle = <T extends string>(items: T[], item: T) =>
     items.includes(item) ? items.filter((value) => value !== item) : [...items, item];
   const submit = async (event: FormEvent) => {
@@ -124,260 +158,304 @@ export default function WorkoutProfileSetupPage() {
     };
     try {
       await intelligentWorkoutService.updateProfile(payload);
+      await intelligentWorkoutService.getProfile();
       navigate("/intelligent-workouts/setup/health", { state: { profileSaved: true } });
     } catch (cause) {
-      setError(mapWorkoutError(cause));
+      setError(mapWorkoutError(cause, locale));
     } finally {
       setSaving(false);
     }
   };
   return (
-    <IntelligentWorkoutShell
-      title="Training profile"
-      description="Provide the source information the backend needs to make safe, personalized workout decisions."
-    >
+    <IntelligentWorkoutShell title={t("profileTitle")} description={t("profileDescription")}>
       {error ? <WorkoutErrorAlert error={error} /> : null}
-      <form className="iw-setup-form" onSubmit={(event) => void submit(event)}>
-        <Card>
-          <fieldset>
-            <legend>Identity</legend>
-            <div className="iw-form-grid">
-              <Input
-                label="Full name"
-                required
-                minLength={2}
-                maxLength={120}
-                value={form.fullName}
-                onChange={(event) => update("fullName", event.target.value)}
-              />
-              <Input
-                label="Age"
-                required
-                type="number"
-                min={13}
-                max={100}
-                value={form.age}
-                onChange={(event) => update("age", Number(event.target.value))}
-              />
-              <Select
-                label="Gender"
-                value={form.gender}
-                onChange={(event) => update("gender", event.target.value as typeof form.gender)}
-                options={["male", "female", "non_binary", "prefer_not_to_say"].map(option)}
-              />
-              <Input
-                label="Country code"
-                hint="Two-letter ISO code, for example EG or KW"
-                required
-                minLength={2}
-                maxLength={2}
-                value={form.country}
-                onChange={(event) => update("country", event.target.value)}
-              />
-            </div>
-          </fieldset>
+      {loading ? (
+        <Card aria-live="polite" aria-busy="true">
+          <span className="sr-only">{t("loadingSavedProfile")}</span>
+          <Skeleton height="12rem" />
         </Card>
-        <Card>
-          <fieldset>
-            <legend>Body</legend>
-            <div className="iw-form-grid">
-              <Input
-                label="Height (cm)"
-                required
-                type="number"
-                min={100}
-                max={250}
-                step="0.1"
-                value={form.height}
-                onChange={(event) => update("height", Number(event.target.value))}
-              />
-              <Input
-                label="Weight (kg)"
-                required
-                type="number"
-                min={30}
-                max={350}
-                step="0.1"
-                value={form.weight}
-                onChange={(event) => update("weight", Number(event.target.value))}
-              />
-              <Input
-                label="Body fat % (optional)"
-                type="number"
-                min={2}
-                max={70}
-                step="0.1"
-                value={form.bodyFat}
-                onChange={(event) => update("bodyFat", event.target.value)}
-              />
-            </div>
-          </fieldset>
-        </Card>
-        <Card>
-          <fieldset>
-            <legend>Goals</legend>
-            <div className="iw-form-grid">
-              <Select
-                label="Primary goal"
-                value={form.primaryGoal}
-                onChange={(event) => update("primaryGoal", event.target.value as TrainingGoal)}
-                options={goals.map(option)}
-              />
-              <Select
-                label="Secondary goal (optional)"
-                value={form.secondaryGoal}
-                onChange={(event) => update("secondaryGoal", event.target.value)}
-                options={[
-                  { label: "None", value: "" },
-                  ...goals.filter((goal) => goal !== form.primaryGoal).map(option),
-                ]}
-              />
-              <Input
-                label="Target weight (kg)"
-                type="number"
-                min={30}
-                max={350}
-                step="0.1"
-                value={form.targetWeight}
-                onChange={(event) => update("targetWeight", event.target.value)}
-              />
-              <Input
-                label="Target date"
-                type="date"
-                value={form.targetDate}
-                onChange={(event) => update("targetDate", event.target.value)}
-              />
-            </div>
-            <p className="ds-field-hint">
-              Target weight and target date must be supplied together.
-            </p>
-          </fieldset>
-        </Card>
-        <Card>
-          <fieldset>
-            <legend>Training</legend>
-            <div className="iw-form-grid">
-              <Select
-                label="Experience"
-                value={form.experience}
-                onChange={(event) =>
-                  update("experience", event.target.value as typeof form.experience)
-                }
-                options={["beginner", "intermediate", "advanced"].map(option)}
-              />
-              <Input
-                label="Available days / week"
-                type="number"
-                min={1}
-                max={7}
-                value={form.availableDays}
-                onChange={(event) => update("availableDays", Number(event.target.value))}
-              />
-              <Input
-                label="Session duration (minutes)"
-                type="number"
-                min={15}
-                max={180}
-                value={form.sessionDuration}
-                onChange={(event) => update("sessionDuration", Number(event.target.value))}
-              />
-              <Select
-                label="Workout location"
-                value={form.workoutLocation}
-                onChange={(event) =>
-                  update("workoutLocation", event.target.value as typeof form.workoutLocation)
-                }
-                options={["commercial_gym", "home_gym", "bodyweight_only", "outdoor"].map(option)}
-              />
-            </div>
-            <div className="iw-choice-grid" role="group" aria-label="Available equipment">
-              {equipment.map((item) => (
-                <Checkbox
-                  key={item}
-                  label={label(item)}
-                  checked={form.equipment.includes(item)}
-                  onChange={() => update("equipment", toggle(form.equipment, item))}
+      ) : (
+        <>
+          {hasExisting === false ? (
+            <Alert variant="info" title={t("noSavedProfile")}>
+              <p>{t("noSavedProfileDescription")}</p>
+            </Alert>
+          ) : hasExisting ? (
+            <Alert variant="success" title={t("savedProfileLoaded")}>
+              <p>{t("savedProfileLoadedDescription")}</p>
+            </Alert>
+          ) : null}
+          <form className="iw-setup-form" onSubmit={(event) => void submit(event)}>
+            <Card>
+              <fieldset>
+                <legend>{t("identity")}</legend>
+                <div className="iw-form-grid">
+                  <Input
+                    label={t("fullName")}
+                    required
+                    minLength={2}
+                    maxLength={120}
+                    value={form.fullName}
+                    onChange={(event) => update("fullName", event.target.value)}
+                  />
+                  <Input
+                    label={t("age")}
+                    required
+                    type="number"
+                    min={13}
+                    max={100}
+                    value={form.age}
+                    onChange={(event) => update("age", Number(event.target.value))}
+                  />
+                  <Select
+                    label={t("gender")}
+                    value={form.gender}
+                    onChange={(event) => update("gender", event.target.value as typeof form.gender)}
+                    options={["male", "female", "non_binary", "prefer_not_to_say"].map(option)}
+                  />
+                  <Input
+                    label={t("countryCode")}
+                    hint={t("countryHint")}
+                    required
+                    minLength={2}
+                    maxLength={2}
+                    value={form.country}
+                    onChange={(event) => update("country", event.target.value)}
+                  />
+                </div>
+              </fieldset>
+            </Card>
+            <Card>
+              <fieldset>
+                <legend>{t("body")}</legend>
+                <div className="iw-form-grid">
+                  <Input
+                    label={t("height")}
+                    required
+                    type="number"
+                    min={100}
+                    max={250}
+                    step="0.1"
+                    value={form.height}
+                    onChange={(event) => update("height", Number(event.target.value))}
+                  />
+                  <Input
+                    label={t("weight")}
+                    required
+                    type="number"
+                    min={30}
+                    max={350}
+                    step="0.1"
+                    value={form.weight}
+                    onChange={(event) => update("weight", Number(event.target.value))}
+                  />
+                  <Input
+                    label={t("bodyFat")}
+                    type="number"
+                    min={2}
+                    max={70}
+                    step="0.1"
+                    value={form.bodyFat}
+                    onChange={(event) => update("bodyFat", event.target.value)}
+                  />
+                </div>
+              </fieldset>
+            </Card>
+            <Card>
+              <fieldset>
+                <legend>{t("goals")}</legend>
+                <div className="iw-form-grid">
+                  <Select
+                    label={t("primaryGoal")}
+                    value={form.primaryGoal}
+                    onChange={(event) => update("primaryGoal", event.target.value as TrainingGoal)}
+                    options={goals.map(option)}
+                  />
+                  <Select
+                    label={t("secondaryGoal")}
+                    value={form.secondaryGoal}
+                    onChange={(event) => update("secondaryGoal", event.target.value)}
+                    options={[
+                      { label: t("none"), value: "" },
+                      ...goals.filter((goal) => goal !== form.primaryGoal).map(option),
+                    ]}
+                  />
+                  <Input
+                    label={t("targetWeight")}
+                    type="number"
+                    min={30}
+                    max={350}
+                    step="0.1"
+                    value={form.targetWeight}
+                    onChange={(event) => update("targetWeight", event.target.value)}
+                  />
+                  <Input
+                    label={t("targetDate")}
+                    type="date"
+                    value={form.targetDate}
+                    onChange={(event) => update("targetDate", event.target.value)}
+                  />
+                </div>
+                <p className="ds-field-hint">{t("targetPairHint")}</p>
+              </fieldset>
+            </Card>
+            <Card>
+              <fieldset>
+                <legend>{t("training")}</legend>
+                <div className="iw-form-grid">
+                  <Select
+                    label={t("experience")}
+                    value={form.experience}
+                    onChange={(event) =>
+                      update("experience", event.target.value as typeof form.experience)
+                    }
+                    options={["beginner", "intermediate", "advanced"].map(option)}
+                  />
+                  <Input
+                    label={t("availableDays")}
+                    type="number"
+                    min={1}
+                    max={7}
+                    value={form.availableDays}
+                    onChange={(event) => update("availableDays", Number(event.target.value))}
+                  />
+                  <Input
+                    label={t("sessionDuration")}
+                    type="number"
+                    min={15}
+                    max={180}
+                    value={form.sessionDuration}
+                    onChange={(event) => update("sessionDuration", Number(event.target.value))}
+                  />
+                  <Select
+                    label={t("workoutLocation")}
+                    value={form.workoutLocation}
+                    onChange={(event) =>
+                      update("workoutLocation", event.target.value as typeof form.workoutLocation)
+                    }
+                    options={["commercial_gym", "home_gym", "bodyweight_only", "outdoor"].map(
+                      option,
+                    )}
+                  />
+                </div>
+                <div className="iw-choice-grid" role="group" aria-label={t("availableEquipment")}>
+                  {equipment.map((item) => (
+                    <Checkbox
+                      key={item}
+                      label={workoutEnumLabel(item, locale)}
+                      checked={form.equipment.includes(item)}
+                      onChange={() => update("equipment", toggle(form.equipment, item))}
+                    />
+                  ))}
+                </div>
+              </fieldset>
+            </Card>
+            <Card>
+              <fieldset>
+                <legend>{t("lifestyleNutrition")}</legend>
+                <div className="iw-form-grid">
+                  <Input
+                    label={t("sleep")}
+                    type="number"
+                    min={0}
+                    max={24}
+                    step="0.5"
+                    value={form.sleep}
+                    onChange={(event) => update("sleep", Number(event.target.value))}
+                  />
+                  <Input
+                    label={t("stress")}
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={form.stress}
+                    onChange={(event) => update("stress", Number(event.target.value))}
+                  />
+                  <Select
+                    label={t("activityLevel")}
+                    value={form.activity}
+                    onChange={(event) =>
+                      update("activity", event.target.value as typeof form.activity)
+                    }
+                    options={["sedentary", "light", "moderate", "very_active", "extra_active"].map(
+                      option,
+                    )}
+                  />
+                  <Input
+                    label={t("dailyWater")}
+                    type="number"
+                    min={0}
+                    max={10000}
+                    value={form.water}
+                    onChange={(event) => update("water", Number(event.target.value))}
+                  />
+                </div>
+                <h3>{t("dietaryPreferences")}</h3>
+                <div className="iw-choice-grid">
+                  {preferences.map((item) => (
+                    <Checkbox
+                      key={item}
+                      label={workoutEnumLabel(item, locale)}
+                      checked={form.preferences.includes(item)}
+                      onChange={() => update("preferences", toggle([...form.preferences], item))}
+                    />
+                  ))}
+                </div>
+                <h3>{t("allergies")}</h3>
+                <div className="iw-choice-grid">
+                  {allergies.map((item) => (
+                    <Checkbox
+                      key={item}
+                      label={workoutEnumLabel(item, locale)}
+                      checked={form.allergies.includes(item)}
+                      onChange={() => update("allergies", toggle([...form.allergies], item))}
+                    />
+                  ))}
+                </div>
+                <Input
+                  label={t("otherRestrictions")}
+                  hint={t("restrictionsHint")}
+                  value={form.restrictions}
+                  onChange={(event) => update("restrictions", event.target.value)}
                 />
-              ))}
+              </fieldset>
+            </Card>
+            <div className="iw-form-footer">
+              <Button size="lg" loading={saving} type="submit">
+                {t("saveContinue")}
+              </Button>
             </div>
-          </fieldset>
-        </Card>
-        <Card>
-          <fieldset>
-            <legend>Lifestyle and nutrition</legend>
-            <div className="iw-form-grid">
-              <Input
-                label="Sleep (hours)"
-                type="number"
-                min={0}
-                max={24}
-                step="0.5"
-                value={form.sleep}
-                onChange={(event) => update("sleep", Number(event.target.value))}
-              />
-              <Input
-                label="Stress level (1–10)"
-                type="number"
-                min={1}
-                max={10}
-                value={form.stress}
-                onChange={(event) => update("stress", Number(event.target.value))}
-              />
-              <Select
-                label="Activity level"
-                value={form.activity}
-                onChange={(event) => update("activity", event.target.value as typeof form.activity)}
-                options={["sedentary", "light", "moderate", "very_active", "extra_active"].map(
-                  option,
-                )}
-              />
-              <Input
-                label="Daily water (ml)"
-                type="number"
-                min={0}
-                max={10000}
-                value={form.water}
-                onChange={(event) => update("water", Number(event.target.value))}
-              />
-            </div>
-            <h3>Dietary preferences</h3>
-            <div className="iw-choice-grid">
-              {preferences.map((item) => (
-                <Checkbox
-                  key={item}
-                  label={label(item)}
-                  checked={form.preferences.includes(item)}
-                  onChange={() => update("preferences", toggle([...form.preferences], item))}
-                />
-              ))}
-            </div>
-            <h3>Allergies</h3>
-            <div className="iw-choice-grid">
-              {allergies.map((item) => (
-                <Checkbox
-                  key={item}
-                  label={label(item)}
-                  checked={form.allergies.includes(item)}
-                  onChange={() => update("allergies", toggle([...form.allergies], item))}
-                />
-              ))}
-            </div>
-            <Input
-              label="Other dietary restrictions"
-              hint="Comma-separated; leave blank if none"
-              value={form.restrictions}
-              onChange={(event) => update("restrictions", event.target.value)}
-            />
-          </fieldset>
-        </Card>
-        <div className="iw-form-footer">
-          <Button size="lg" loading={saving} type="submit">
-            Save and continue
-          </Button>
-        </div>
-      </form>
+          </form>
+        </>
+      )}
     </IntelligentWorkoutShell>
   );
 }
 
-const option = (value: string) => ({ value, label: label(value) });
+function profileToForm(profile: UserProfileRequest): ProfileForm {
+  return {
+    fullName: profile.identity.full_name,
+    age: profile.identity.age,
+    gender: profile.identity.gender,
+    country: profile.identity.country,
+    height: profile.body.height_cm,
+    weight: profile.body.weight_kg,
+    bodyFat: profile.body.body_fat_percentage?.toString() ?? "",
+    primaryGoal: profile.goals.primary_goal,
+    secondaryGoal: profile.goals.secondary_goal ?? "",
+    targetWeight: profile.goals.target_weight_kg?.toString() ?? "",
+    targetDate: profile.goals.target_date ?? "",
+    experience: profile.training.experience,
+    availableDays: profile.training.available_days,
+    sessionDuration: profile.training.session_duration_minutes,
+    workoutLocation: profile.training.workout_location,
+    equipment: [...profile.training.available_equipment],
+    sleep: profile.lifestyle.sleep_hours,
+    stress: profile.lifestyle.stress_level,
+    activity: profile.lifestyle.activity_level,
+    water: profile.lifestyle.daily_water_ml,
+    preferences: [...profile.nutrition.dietary_preferences],
+    allergies: [...profile.nutrition.allergies],
+    restrictions: profile.nutrition.dietary_restrictions.join(", "),
+  };
+}

@@ -2,6 +2,7 @@ from pydantic import BaseModel, ConfigDict
 
 from app.health.models import (
     ChronicConditionRecord,
+    HealthProfile,
     InjuryRecord,
     MobilityLimitationRecord,
     PainAreaRecord,
@@ -19,3 +20,17 @@ class HealthProfileUpdateRequest(BaseModel):
     pain_areas: tuple[PainAreaRecord, ...]
     mobility_limitations: tuple[MobilityLimitationRecord, ...]
     surgery_history: tuple[SurgeryRecord, ...]
+
+
+class HealthProfileReadResponse(HealthProfileUpdateRequest):
+    """Client-safe health projection that deliberately excludes private notes."""
+
+    @classmethod
+    def from_domain(cls, profile: HealthProfile) -> "HealthProfileReadResponse":
+        return cls(
+            injuries=profile.injuries,
+            chronic_conditions=profile.chronic_conditions,
+            pain_areas=profile.pain_areas,
+            mobility_limitations=profile.mobility_limitations,
+            surgery_history=profile.surgery_history,
+        )

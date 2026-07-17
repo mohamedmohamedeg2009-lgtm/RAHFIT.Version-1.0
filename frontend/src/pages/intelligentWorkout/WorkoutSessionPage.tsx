@@ -7,7 +7,6 @@ import {
   SessionStatusCard,
   WorkoutErrorAlert,
 } from "../../components/intelligentWorkout/WorkoutExperience";
-import { label } from "../../components/intelligentWorkout/utils";
 import {
   Alert,
   Button,
@@ -28,8 +27,13 @@ import type {
   WorkoutPlanResponse,
   WorkoutSessionResponse,
 } from "../../types/intelligentWorkout";
+import { useLocale } from "../../contexts/LocaleContext";
+import { workoutEnumLabel, workoutText } from "../../i18n/intelligentWorkout";
 
 export default function IntelligentWorkoutSessionPage() {
+  const { locale } = useLocale();
+  const t = (key: Parameters<typeof workoutText>[1]) => workoutText(locale, key);
+  const label = (value: string) => workoutEnumLabel(value, locale);
   const { planId = "", dayNumber = "", sessionId = "" } = useParams();
   const [plan, setPlan] = useState<WorkoutPlanResponse | null>(null);
   const [session, setSession] = useState<WorkoutSessionResponse | null>(null);
@@ -76,11 +80,11 @@ export default function IntelligentWorkoutSessionPage() {
         ),
       );
     } catch (cause) {
-      setError(mapWorkoutError(cause));
+      setError(mapWorkoutError(cause, locale));
     } finally {
       setLoading(false);
     }
-  }, [dayNumber, planId, sessionId]);
+  }, [dayNumber, locale, planId, sessionId]);
   useEffect(() => {
     // Initial route loading synchronizes the protected screen with its server resource.
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -105,7 +109,7 @@ export default function IntelligentWorkoutSessionPage() {
           .map((exercise) => mergeEntry(exercise)),
       );
     } catch (cause) {
-      setError(mapWorkoutError(cause));
+      setError(mapWorkoutError(cause, locale));
     } finally {
       setSaving(false);
     }
@@ -124,7 +128,7 @@ export default function IntelligentWorkoutSessionPage() {
       });
       setSession(updated);
     } catch (cause) {
-      setError(mapWorkoutError(cause));
+      setError(mapWorkoutError(cause, locale));
     } finally {
       setSaving(false);
     }
@@ -136,7 +140,7 @@ export default function IntelligentWorkoutSessionPage() {
     try {
       setAdaptation(await intelligentWorkoutService.analyzeAdaptation(session.plan_id));
     } catch (cause) {
-      setError(mapWorkoutError(cause));
+      setError(mapWorkoutError(cause, locale));
     } finally {
       setSaving(false);
     }
@@ -151,36 +155,40 @@ export default function IntelligentWorkoutSessionPage() {
 
   return (
     <IntelligentWorkoutShell
-      title={day?.title ?? "Workout session"}
-      description="Record an honest progress snapshot. Completion, safety flags, and lifecycle rules are calculated by the backend."
+      title={day?.title ?? t("workoutSession")}
+      description={t("sessionDescription")}
     >
       {error ? <WorkoutErrorAlert error={error} onRetry={() => void load()} /> : null}
       {loading ? (
-        <Card>
+        <Card aria-live="polite" aria-busy="true">
+          <span className="sr-only">{t("loadingSession")}</span>
           <Skeleton height="14rem" />
         </Card>
       ) : plan && day && !session ? (
         <Card className="iw-form-card">
           <h2>{day.title}</h2>
           <p>
-            {day.focus} · {day.estimated_duration_minutes} minutes ·{" "}
-            {day.sections.reduce((count, section) => count + section.exercises.length, 0)} exercises
+            {day.focus} ·{" "}
+            {workoutText(locale, "minutes", { count: day.estimated_duration_minutes })} ·{" "}
+            {workoutText(locale, "exerciseCount", {
+              count: day.sections.reduce(
+                (count, section) => count + section.exercises.length,
+                0,
+              ),
+            })}
           </p>
-          <Alert variant="info" title="Ready to begin?">
-            <p>
-              Starting creates one server-owned session. Review the plan and safety guidance before
-              you continue.
-            </p>
+          <Alert variant="info" title={t("readyToBegin")}>
+            <p>{t("readyToBeginDescription")}</p>
           </Alert>
           <Button size="lg" loading={saving} onClick={() => void start()}>
-            Start workout session
+            {t("startWorkoutSession")}
           </Button>
         </Card>
       ) : session && day ? (
         <>
           <SessionStatusCard session={session} />
           {session.adaptation_flags.length ? (
-            <Alert variant="warning" title="Review recommended">
+            <Alert variant="warning" title={t("reviewRecommended")}>
               <ul>
                 {session.adaptation_flags.map((flag) => (
                   <li key={flag}>{label(flag)}</li>
@@ -191,9 +199,11 @@ export default function IntelligentWorkoutSessionPage() {
           {session.status !== "in_progress" ? (
             <Alert
               variant={session.status === "completed" ? "success" : "warning"}
-              title={`Session ${session.status}`}
+              title={workoutText(locale, "sessionState", {
+                status: workoutEnumLabel(session.status, locale),
+              })}
             >
-              <p>This session is closed and shown read-only.</p>
+              <p>{t("sessionReadOnly")}</p>
             </Alert>
           ) : null}
           <div className="iw-session-exercises">
@@ -206,13 +216,13 @@ export default function IntelligentWorkoutSessionPage() {
                     <div>
                       <h2>{exercise.exercise_name}</h2>
                       <p>
-                        {exercise.prescription.sets} sets · {exercise.prescription.min_reps}–
-                        {exercise.prescription.max_reps} reps · RPE {exercise.prescription.rpe_min}–
-                        {exercise.prescription.rpe_max}
+                        {exercise.prescription.sets} {t("sets")} · {exercise.prescription.min_reps}–
+                        {exercise.prescription.max_reps} {t("reps")} · RPE{" "}
+                        {exercise.prescription.rpe_min}–{exercise.prescription.rpe_max}
                       </p>
                     </div>
                     <Checkbox
-                      label="Skip exercise"
+                      label={t("skipExercise")}
                       checked={entry.skipped ?? false}
                       disabled={session.status !== "in_progress"}
                       onChange={(event) =>
@@ -227,13 +237,17 @@ export default function IntelligentWorkoutSessionPage() {
                   <div
                     className="iw-set-table"
                     role="group"
-                    aria-label={`${exercise.exercise_name} sets`}
+                    aria-label={workoutText(locale, "exerciseSets", {
+                      name: exercise.exercise_name,
+                    })}
                   >
                     {entry.completed_sets.map((set, setIndex) => (
                       <div className="iw-set-row" key={set.set_number}>
-                        <strong>Set {set.set_number}</strong>
+                        <strong>
+                          {workoutText(locale, "setNumber", { count: set.set_number })}
+                        </strong>
                         <Checkbox
-                          label="Completed"
+                          label={t("completed")}
                           checked={set.completed}
                           disabled={session.status !== "in_progress" || entry.skipped}
                           onChange={(event) =>
@@ -248,8 +262,10 @@ export default function IntelligentWorkoutSessionPage() {
                           }
                         />
                         <Input
-                          aria-label={`Set ${set.set_number} repetitions`}
-                          label="Reps"
+                          aria-label={workoutText(locale, "setRepetitions", {
+                            count: set.set_number,
+                          })}
+                          label={t("reps")}
                           type="number"
                           min={0}
                           max={100}
@@ -265,8 +281,8 @@ export default function IntelligentWorkoutSessionPage() {
                           }
                         />
                         <Input
-                          aria-label={`Set ${set.set_number} load in kilograms`}
-                          label="Load (kg)"
+                          aria-label={workoutText(locale, "setLoad", { count: set.set_number })}
+                          label={t("loadKg")}
                           type="number"
                           min={0}
                           max={1000}
@@ -283,7 +299,9 @@ export default function IntelligentWorkoutSessionPage() {
                           }
                         />
                         <Select
-                          aria-label={`Set ${set.set_number} perceived exertion`}
+                          aria-label={workoutText(locale, "setExertion", {
+                            count: set.set_number,
+                          })}
                           label="RPE"
                           disabled={session.status !== "in_progress" || entry.skipped}
                           value={set.perceived_exertion ?? ""}
@@ -296,7 +314,7 @@ export default function IntelligentWorkoutSessionPage() {
                             )
                           }
                           options={[
-                            { value: "", label: "Not set" },
+                            { value: "", label: t("notSet") },
                             ...Array.from({ length: 10 }, (_, index) => ({
                               value: String(index + 1),
                               label: String(index + 1),
@@ -308,7 +326,7 @@ export default function IntelligentWorkoutSessionPage() {
                   </div>
                   <div className="iw-pain-fields">
                     <Checkbox
-                      label="I experienced pain"
+                      label={t("painExperienced")}
                       checked={entry.pain_reported ?? false}
                       disabled={session.status !== "in_progress"}
                       onChange={(event) =>
@@ -321,7 +339,7 @@ export default function IntelligentWorkoutSessionPage() {
                     />
                     {entry.pain_reported ? (
                       <Input
-                        label="Pain area"
+                        label={t("painArea")}
                         required
                         maxLength={80}
                         disabled={session.status !== "in_progress"}
@@ -341,7 +359,7 @@ export default function IntelligentWorkoutSessionPage() {
           </div>
           <Card className="iw-session-notes">
             <Input
-              label="Actual duration (minutes)"
+              label={t("actualDuration")}
               type="number"
               min={1}
               max={300}
@@ -350,7 +368,7 @@ export default function IntelligentWorkoutSessionPage() {
               onChange={(event) => setDuration(event.target.value)}
             />
             <Textarea
-              label="Session notes"
+              label={t("sessionNotes")}
               maxLength={1000}
               disabled={session.status !== "in_progress"}
               value={notes}
@@ -362,24 +380,24 @@ export default function IntelligentWorkoutSessionPage() {
             {session.status === "in_progress" ? (
               <>
                 <Button loading={saving} variant="outline" onClick={() => void save()}>
-                  Save progress
+                  {t("saveProgress")}
                 </Button>
                 <Button loading={saving} onClick={() => void save("completed")}>
-                  Complete session
+                  {t("completeSession")}
                 </Button>
                 <Button loading={saving} variant="danger" onClick={() => void save("abandoned")}>
-                  Abandon
+                  {t("abandon")}
                 </Button>
               </>
             ) : null}
             <Button loading={saving} variant="ghost" onClick={() => void analyze()}>
-              Analyze adaptation
+              {t("analyzeAdaptation")}
             </Button>
             <Link
               className="ds-button ds-button-ghost ds-button-md"
               to="/intelligent-workouts/history/sessions"
             >
-              Session history
+              {t("sessionHistory")}
             </Link>
           </div>
         </>

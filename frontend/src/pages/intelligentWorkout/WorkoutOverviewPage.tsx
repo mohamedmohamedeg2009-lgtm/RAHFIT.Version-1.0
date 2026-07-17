@@ -13,8 +13,11 @@ import { intelligentWorkoutService } from "../../services/intelligentWorkoutServ
 import { mapWorkoutError, type WorkoutClientError } from "../../services/workoutErrorMapper";
 import { Alert, Card, EmptyState, Skeleton } from "../../components/ui";
 import type { WorkoutPlanResponse } from "../../types/intelligentWorkout";
+import { useLocale } from "../../contexts/LocaleContext";
+import { workoutText } from "../../i18n/intelligentWorkout";
 
 export default function WorkoutOverviewPage() {
+  const { locale } = useLocale();
   const [plan, setPlan] = useState<WorkoutPlanResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<WorkoutClientError | null>(null);
@@ -25,11 +28,11 @@ export default function WorkoutOverviewPage() {
       setPlan(await intelligentWorkoutService.getActivePlan());
     } catch (cause) {
       if (cause instanceof ApiError && cause.code === "workout_plan_not_found") setPlan(null);
-      else setError(mapWorkoutError(cause));
+      else setError(mapWorkoutError(cause, locale));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [locale]);
   useEffect(() => {
     // Initial route loading synchronizes the protected screen with its server resource.
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -38,20 +41,21 @@ export default function WorkoutOverviewPage() {
 
   return (
     <IntelligentWorkoutShell
-      title="Your intelligent workout"
-      description="A safe, server-validated training plan shaped by your profile, health declaration, and readiness."
+      title={workoutText(locale, "overviewTitle")}
+      description={workoutText(locale, "overviewDescription")}
     >
       {error ? <WorkoutErrorAlert error={error} onRetry={() => void load()} /> : null}
       {loading ? (
-        <Card>
+        <Card aria-live="polite" aria-busy="true">
+          <span className="sr-only">{workoutText(locale, "loadingActivePlan")}</span>
           <Skeleton height="12rem" />
         </Card>
       ) : plan ? (
         <>
           <PlanSummary plan={plan} />
           {plan.generation_mode === "deterministic_fallback" ? (
-            <Alert variant="info" title="Safe deterministic plan">
-              <p>AI assistance was unavailable, but this plan remains fully validated.</p>
+            <Alert variant="info" title={workoutText(locale, "safeDeterministicPlan")}>
+              <p>{workoutText(locale, "safeDeterministicPlanDescription")}</p>
             </Alert>
           ) : null}
           <SafetyNotices plan={plan} />
@@ -60,17 +64,17 @@ export default function WorkoutOverviewPage() {
               className="ds-button ds-button-outline ds-button-md"
               to={`/intelligent-workouts/plans/${plan.plan_id}`}
             >
-              View complete plan
+              {workoutText(locale, "viewCompletePlan")}
             </Link>
             <Link
               className="ds-button ds-button-ghost ds-button-md"
               to={`/intelligent-workouts/plans/${plan.plan_id}/adaptation`}
             >
-              Review adaptation
+              {workoutText(locale, "reviewAdaptation")}
             </Link>
           </div>
           <section className="iw-section" aria-labelledby="iw-schedule">
-            <h2 id="iw-schedule">Weekly schedule</h2>
+            <h2 id="iw-schedule">{workoutText(locale, "weeklySchedule")}</h2>
             <div className="iw-list">
               {plan.weekly_schedule.map((day) => (
                 <WorkoutDayCard key={day.day_number} planId={plan.plan_id} day={day} />
@@ -88,13 +92,13 @@ export default function WorkoutOverviewPage() {
                   className="ds-button ds-button-primary ds-button-md"
                   to="/intelligent-workouts/setup/profile"
                 >
-                  Start setup
+                  {workoutText(locale, "startSetup")}
                 </Link>
                 <Link
                   className="ds-button ds-button-outline ds-button-md"
                   to="/intelligent-workouts/generate"
                 >
-                  Generate plan
+                  {workoutText(locale, "generatePlan")}
                 </Link>
               </div>
             }

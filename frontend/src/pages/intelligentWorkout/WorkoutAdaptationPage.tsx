@@ -10,8 +10,11 @@ import { Alert, Button, Card } from "../../components/ui";
 import { intelligentWorkoutService } from "../../services/intelligentWorkoutService";
 import { mapWorkoutError, type WorkoutClientError } from "../../services/workoutErrorMapper";
 import type { WorkoutAdaptationResponse } from "../../types/intelligentWorkout";
+import { useLocale } from "../../contexts/LocaleContext";
+import { workoutText } from "../../i18n/intelligentWorkout";
 
 export default function WorkoutAdaptationPage() {
+  const { locale } = useLocale();
   const { planId = "" } = useParams();
   const [result, setResult] = useState<WorkoutAdaptationResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -22,28 +25,25 @@ export default function WorkoutAdaptationPage() {
     try {
       setResult(await intelligentWorkoutService.analyzeAdaptation(planId));
     } catch (cause) {
-      setError(mapWorkoutError(cause));
+      setError(mapWorkoutError(cause, locale));
     } finally {
       setLoading(false);
     }
   };
   return (
     <IntelligentWorkoutShell
-      title="Adaptation review"
-      description="Analyze recorded sessions for deterministic guidance without mutating the plan."
+      title={workoutText(locale, "adaptationTitle")}
+      description={workoutText(locale, "adaptationDescription")}
     >
       {error ? <WorkoutErrorAlert error={error} onRetry={() => void analyze()} /> : null}
       <Card className="iw-form-card">
-        <h2>Review current evidence</h2>
-        <p>
-          The server reviews completed and in-progress session evidence. Recommendations remain
-          advisory and are never applied automatically.
-        </p>
+        <h2>{workoutText(locale, "reviewEvidence")}</h2>
+        <p>{workoutText(locale, "reviewEvidenceDescription")}</p>
         <Alert variant="info">
-          <p>RAHFIT AI does not diagnose injury or replace professional guidance.</p>
+          <p>{workoutText(locale, "noDiagnosis")}</p>
         </Alert>
         <Button loading={loading} onClick={() => void analyze()}>
-          Analyze adaptation
+          {workoutText(locale, "analyzeAdaptation")}
         </Button>
       </Card>
       {result ? <AdaptationResult result={result} /> : null}

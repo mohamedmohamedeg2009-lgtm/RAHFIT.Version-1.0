@@ -13,7 +13,13 @@ import IntelligentWorkoutSessionPage from "../pages/intelligentWorkout/WorkoutSe
 import { ApiError, setAccessToken } from "../services/apiClient";
 import { intelligentWorkoutService } from "../services/intelligentWorkoutService";
 import { mapWorkoutError } from "../services/workoutErrorMapper";
-import type { WorkoutPlanResponse, WorkoutSessionResponse } from "../types/intelligentWorkout";
+import type {
+  HealthProfileRequest,
+  UserProfileRequest,
+  WorkoutPlanResponse,
+  WorkoutSessionResponse,
+} from "../types/intelligentWorkout";
+import { LocaleProvider } from "../contexts/LocaleContext";
 
 const exercise = {
   exercise_id: "goblet_squat",
@@ -104,20 +110,60 @@ const session: WorkoutSessionResponse = {
   completed_at: null,
   updated_at: "2026-07-17T10:00:00Z",
 };
+const savedProfile: UserProfileRequest = {
+  identity: { full_name: "Saved User", age: 29, gender: "male", country: "KW" },
+  body: { height_cm: 178, weight_kg: 82, body_fat_percentage: 18 },
+  goals: {
+    primary_goal: "strength",
+    secondary_goal: null,
+    target_weight_kg: null,
+    target_date: null,
+  },
+  training: {
+    experience: "intermediate",
+    available_days: 4,
+    session_duration_minutes: 60,
+    available_equipment: ["barbell", "dumbbell"],
+    workout_location: "commercial_gym",
+  },
+  lifestyle: {
+    sleep_hours: 7,
+    stress_level: 4,
+    activity_level: "moderate",
+    daily_water_ml: 2500,
+  },
+  nutrition: { dietary_preferences: ["halal"], allergies: [], dietary_restrictions: [] },
+};
+const savedHealth: HealthProfileRequest = {
+  injuries: [],
+  chronic_conditions: [],
+  pain_areas: [],
+  mobility_limitations: [],
+  surgery_history: [],
+};
 
 function renderRoute(element: React.ReactNode, path = "/intelligent-workouts", route = path) {
   return render(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path={route} element={element} />
-        <Route path="*" element={<p>Destination</p>} />
-      </Routes>
-    </MemoryRouter>,
+    <LocaleProvider>
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path={route} element={element} />
+          <Route path="*" element={<p>Destination</p>} />
+        </Routes>
+      </MemoryRouter>
+    </LocaleProvider>,
   );
 }
 
 beforeEach(() => {
+  window.localStorage.setItem("rahfit.locale", "en");
   setAccessToken("access-token");
+  vi.spyOn(intelligentWorkoutService, "getProfile").mockRejectedValue(
+    new ApiError("Not found", 404, "user_profile_not_found"),
+  );
+  vi.spyOn(intelligentWorkoutService, "getHealthProfile").mockRejectedValue(
+    new ApiError("Not found", 404, "health_profile_not_found"),
+  );
 });
 afterEach(() => vi.restoreAllMocks());
 
@@ -211,9 +257,131 @@ describe("intelligent workout API service", () => {
       "Medical clearance required",
     );
   });
+
+  it("uses owner-scoped profile and health read URLs with GET semantics", async () => {
+    vi.mocked(intelligentWorkoutService.getProfile).mockRestore();
+    vi.mocked(intelligentWorkoutService.getHealthProfile).mockRestore();
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify(savedProfile), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify(savedHealth), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      );
+
+    await intelligentWorkoutService.getProfile();
+    await intelligentWorkoutService.getHealthProfile();
+
+    expect(fetchMock.mock.calls[0]?.[0]).toEqual(
+      expect.stringContaining("/user-intelligence/profile"),
+    );
+    expect(fetchMock.mock.calls[1]?.[0]).toEqual(
+      expect.stringContaining("/user-intelligence/health"),
+    );
+    for (const [, options] of fetchMock.mock.calls) {
+      expect(options?.method ?? "GET").toBe("GET");
+      expect(JSON.stringify(options)).not.toContain("user_id");
+      expect(JSON.stringify(options)).not.toContain("owner_id");
+    }
+  });
+
+  it("localizes known workout errors without exposing backend details", () => {
+    const error = mapWorkoutError(
+      new ApiError("private backend details", 409, "workout_profile_incomplete"),
+      "ar",
+    );
+    expect(error.title).toBe("أكمل ملفك");
+    expect(error.message).not.toContain("private backend details");
+  });
 });
 
 describe("intelligent workout screens", () => {
+  it("announces profile loading and then shows the no-data state", async () => {
+    let rejectProfile: ((reason: unknown) => void) | undefined;
+    vi.mocked(intelligentWorkoutService.getProfile).mockReturnValue(
+      new Promise((_resolve, reject) => {
+        rejectProfile = reject;
+      }),
+    );
+    renderRoute(<WorkoutProfileSetupPage />, "/intelligent-workouts/setup/profile");
+    expect(screen.getByText("Loading saved profile")).toBeInTheDocument();
+    rejectProfile?.(new ApiError("Not found", 404, "user_profile_not_found"));
+    expect(await screen.findByText("No saved profile")).toBeInTheDocument();
+  });
+
+  it("prefills the saved profile without rendering ownership or internal fields", async () => {
+    vi.mocked(intelligentWorkoutService.getProfile).mockResolvedValue({
+      ...savedProfile,
+      user_id: "must-not-render",
+      _id: "must-not-render",
+    } as UserProfileRequest);
+    renderRoute(<WorkoutProfileSetupPage />, "/intelligent-workouts/setup/profile");
+    expect(await screen.findByRole("textbox", { name: /Full name/ })).toHaveValue("Saved User");
+    expect(screen.getByRole("textbox", { name: /Country code/ })).toHaveValue("KW");
+    expect(screen.queryByText("must-not-render")).not.toBeInTheDocument();
+  });
+
+  it("prefills the saved health declaration and excludes private notes", async () => {
+    vi.mocked(intelligentWorkoutService.getHealthProfile).mockResolvedValue({
+      injuries: [
+        {
+          area: "knee",
+          description: "Old strain",
+          severity: "mild",
+          active: false,
+          medically_cleared: true,
+        },
+      ],
+      chronic_conditions: [],
+      pain_areas: [],
+      mobility_limitations: [],
+      surgery_history: [],
+      notes: "must-not-render",
+      _id: "must-not-render",
+    } as HealthProfileRequest);
+    renderRoute(<WorkoutHealthSetupPage />, "/intelligent-workouts/setup/health");
+    expect(await screen.findByRole("textbox", { name: /Area/ })).toHaveValue("knee");
+    expect(screen.getByRole("textbox", { name: /Description/ })).toHaveValue("Old strain");
+    expect(screen.queryByText("must-not-render")).not.toBeInTheDocument();
+  });
+
+  it("renders approved Arabic labels in RTL mode", async () => {
+    window.localStorage.setItem("rahfit.locale", "ar");
+    vi.spyOn(intelligentWorkoutService, "getActivePlan").mockRejectedValue(
+      new ApiError("Not found", 404, "workout_plan_not_found"),
+    );
+    renderRoute(<WorkoutOverviewPage />);
+    expect(await screen.findByRole("heading", { name: "تمرينك الذكي" })).toBeInTheDocument();
+    await waitFor(() => expect(document.documentElement).toHaveAttribute("dir", "rtl"));
+    expect(screen.getByRole("link", { name: "بدء الإعداد" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "التنقل في التمرين الذكي" })).toBeInTheDocument();
+  });
+
+  it("shows the existing sign-in recovery path when profile authentication expires", async () => {
+    vi.mocked(intelligentWorkoutService.getProfile).mockRejectedValue(
+      new ApiError("Unauthorized", 401, "request_failed"),
+    );
+    renderRoute(<WorkoutProfileSetupPage />, "/intelligent-workouts/setup/profile");
+    expect(await screen.findByRole("link", { name: "Sign in" })).toHaveAttribute("href", "/login");
+  });
+
+  it("keeps the workout navigation accessible for responsive overflow", async () => {
+    vi.spyOn(intelligentWorkoutService, "getActivePlan").mockResolvedValue(plan);
+    renderRoute(<WorkoutOverviewPage />);
+    const navigation = await screen.findByRole("navigation", {
+      name: "Intelligent workout navigation",
+    });
+    expect(navigation.querySelectorAll("a")).toHaveLength(4);
+    expect(screen.getByRole("button", { name: "Switch language to Arabic" })).toBeInTheDocument();
+  });
+
   it("shows a loading skeleton while the active plan request is pending", () => {
     vi.spyOn(intelligentWorkoutService, "getActivePlan").mockReturnValue(
       new Promise(() => undefined),
@@ -257,16 +425,19 @@ describe("intelligent workout screens", () => {
       .spyOn(intelligentWorkoutService, "updateProfile")
       .mockResolvedValue(undefined);
     renderRoute(<WorkoutProfileSetupPage />, "/intelligent-workouts/setup/profile");
-    await userEvent.click(screen.getByRole("button", { name: "Save and continue" }));
+    await userEvent.click(await screen.findByRole("button", { name: "Save and continue" }));
     expect(update).not.toHaveBeenCalled();
   });
 
   it("submits a complete profile then advances to health setup", async () => {
+    vi.mocked(intelligentWorkoutService.getProfile)
+      .mockRejectedValueOnce(new ApiError("Not found", 404, "user_profile_not_found"))
+      .mockResolvedValueOnce(savedProfile);
     const update = vi
       .spyOn(intelligentWorkoutService, "updateProfile")
       .mockResolvedValue(undefined);
     renderRoute(<WorkoutProfileSetupPage />, "/intelligent-workouts/setup/profile");
-    await userEvent.type(screen.getByLabelText(/Full name/), "Mohamed Ahmed");
+    await userEvent.type(await screen.findByLabelText(/Full name/), "Mohamed Ahmed");
     await userEvent.type(screen.getByLabelText(/Country code/), "eg");
     await userEvent.click(screen.getByRole("button", { name: "Save and continue" }));
     await waitFor(() =>
@@ -276,15 +447,19 @@ describe("intelligent workout screens", () => {
         }),
       ),
     );
+    expect(intelligentWorkoutService.getProfile).toHaveBeenCalledTimes(2);
     expect(await screen.findByText("Destination")).toBeInTheDocument();
   });
 
   it("requires an explicit health declaration and sends empty categories", async () => {
+    vi.mocked(intelligentWorkoutService.getHealthProfile)
+      .mockRejectedValueOnce(new ApiError("Not found", 404, "health_profile_not_found"))
+      .mockResolvedValueOnce(savedHealth);
     const update = vi
       .spyOn(intelligentWorkoutService, "updateHealthProfile")
       .mockResolvedValue(undefined);
     renderRoute(<WorkoutHealthSetupPage />, "/intelligent-workouts/setup/health");
-    expect(screen.getByRole("button", { name: "Save health declaration" })).toBeDisabled();
+    expect(await screen.findByRole("button", { name: "Save health declaration" })).toBeDisabled();
     await userEvent.click(
       screen.getByRole("checkbox", {
         name: /I confirm this declaration is accurate and complete/,
@@ -300,6 +475,7 @@ describe("intelligent workout screens", () => {
         surgery_history: [],
       }),
     );
+    expect(intelligentWorkoutService.getHealthProfile).toHaveBeenCalledTimes(2);
   });
 
   it("shows backend validation errors without exposing private health fields", async () => {
@@ -308,7 +484,9 @@ describe("intelligent workout screens", () => {
     );
     renderRoute(<WorkoutHealthSetupPage />, "/intelligent-workouts/setup/health");
     expect(screen.queryByLabelText(/private notes/i)).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole("checkbox", { name: /I confirm this declaration/ }));
+    await userEvent.click(
+      await screen.findByRole("checkbox", { name: /I confirm this declaration/ }),
+    );
     await userEvent.click(screen.getByRole("button", { name: "Save health declaration" }));
     expect(await screen.findByText("Check your entries")).toBeInTheDocument();
   });

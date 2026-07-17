@@ -11,6 +11,7 @@ from app.profile.models import (
     UserProfileData,
 )
 from app.profile.repository import UserProfileRepository
+from app.profile.schemas import UserProfileReadResponse
 from app.profile.service import UserProfileNotFoundError, UserProfileService
 
 __all__ = [
@@ -26,5 +27,6 @@ __all__ = [
     "UserProfileData",
     "UserProfileNotFoundError",
     "UserProfileRepository",
+    "UserProfileReadResponse",
     "UserProfileService",
 ]

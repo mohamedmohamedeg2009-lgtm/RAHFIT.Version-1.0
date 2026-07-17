@@ -1,14 +1,15 @@
 import { Link, NavLink } from "react-router-dom";
 
-import { Alert, Badge, Button, Card, LinearProgress } from "../ui";
+import { useLocale } from "../../contexts/LocaleContext";
+import { workoutEnumLabel, workoutText } from "../../i18n/intelligentWorkout";
+import type { WorkoutClientError } from "../../services/workoutErrorMapper";
 import type {
   WorkoutAdaptationResponse,
   WorkoutDay,
   WorkoutPlanResponse,
   WorkoutSessionResponse,
 } from "../../types/intelligentWorkout";
-import type { WorkoutClientError } from "../../services/workoutErrorMapper";
-import { label } from "./utils";
+import { Alert, Badge, Button, Card, LinearProgress } from "../ui";
 
 export function IntelligentWorkoutShell({
   children,
@@ -19,24 +20,34 @@ export function IntelligentWorkoutShell({
   title: string;
   description: string;
 }) {
+  const { locale, toggleLocale } = useLocale();
+  const t = (key: Parameters<typeof workoutText>[1]) => workoutText(locale, key);
   return (
     <div className="iw-page">
       <header className="iw-topbar">
         <Link to="/app" className="workout-brand">
           <span>R</span> RAHFIT AI
         </Link>
-        <nav aria-label="Intelligent workout navigation">
+        <nav aria-label={t("navigation")}>
           <NavLink to="/intelligent-workouts" end>
-            Overview
+            {t("overview")}
           </NavLink>
-          <NavLink to="/intelligent-workouts/history/plans">Plans</NavLink>
-          <NavLink to="/intelligent-workouts/history/sessions">Sessions</NavLink>
-          <Link to="/app">Dashboard</Link>
+          <NavLink to="/intelligent-workouts/history/plans">{t("plans")}</NavLink>
+          <NavLink to="/intelligent-workouts/history/sessions">{t("sessions")}</NavLink>
+          <Link to="/app">{t("dashboard")}</Link>
+          <button
+            className="iw-language-toggle"
+            type="button"
+            aria-label={t("languageLabel")}
+            onClick={toggleLocale}
+          >
+            {t("language")}
+          </button>
         </nav>
       </header>
       <main className="iw-shell">
         <header className="iw-hero">
-          <Badge>INTELLIGENT TRAINING</Badge>
+          <Badge>{t("featureBadge")}</Badge>
           <h1>{title}</h1>
           <p>{description}</p>
         </header>
@@ -53,6 +64,7 @@ export function WorkoutErrorAlert({
   error: WorkoutClientError;
   onRetry?: () => void;
 }) {
+  const { locale } = useLocale();
   return (
     <Alert variant="danger" title={error.title}>
       <p>{error.message}</p>
@@ -64,7 +76,7 @@ export function WorkoutErrorAlert({
         ) : null}
         {error.retryable && onRetry ? (
           <Button size="sm" variant="outline" onClick={onRetry}>
-            Try again
+            {workoutText(locale, "retry")}
           </Button>
         ) : null}
       </div>
@@ -73,30 +85,33 @@ export function WorkoutErrorAlert({
 }
 
 export function PlanSummary({ plan }: { plan: WorkoutPlanResponse }) {
+  const { locale } = useLocale();
   return (
     <Card className="iw-plan-summary">
       <div>
-        <span>Plan</span>
-        <strong>{label(plan.plan_type)}</strong>
+        <span>{workoutText(locale, "plan")}</span>
+        <strong>{workoutEnumLabel(plan.plan_type, locale)}</strong>
       </div>
       <div>
-        <span>Schedule</span>
-        <strong>{plan.training_days_per_week} days / week</strong>
+        <span>{workoutText(locale, "schedule")}</span>
+        <strong>
+          {workoutText(locale, "daysPerWeek", { count: plan.training_days_per_week })}
+        </strong>
       </div>
       <div>
-        <span>Cycle</span>
-        <strong>{plan.duration_weeks} weeks</strong>
+        <span>{workoutText(locale, "cycle")}</span>
+        <strong>{workoutText(locale, "weeks", { count: plan.duration_weeks })}</strong>
       </div>
       <div>
-        <span>Status</span>
-        <Badge>{plan.status}</Badge>
+        <span>{workoutText(locale, "status")}</span>
+        <Badge>{workoutEnumLabel(plan.status, locale)}</Badge>
       </div>
       <div>
-        <span>Generation</span>
-        <strong>{label(plan.generation_mode)}</strong>
+        <span>{workoutText(locale, "generation")}</span>
+        <strong>{workoutEnumLabel(plan.generation_mode, locale)}</strong>
       </div>
       <div>
-        <span>Version</span>
+        <span>{workoutText(locale, "version")}</span>
         <strong>v{plan.version}</strong>
       </div>
     </Card>
@@ -104,15 +119,19 @@ export function PlanSummary({ plan }: { plan: WorkoutPlanResponse }) {
 }
 
 export function SafetyNotices({ plan }: { plan: WorkoutPlanResponse }) {
+  const { locale } = useLocale();
   if (!plan.warnings.length && !plan.safety_notes.length) return null;
   return (
     <section className="iw-safety" aria-labelledby="iw-safety-title">
-      <h2 id="iw-safety-title">Safety guidance</h2>
+      <h2 id="iw-safety-title">{workoutText(locale, "safetyGuidance")}</h2>
       {plan.warnings.map((warning) => (
         <Alert
           key={warning.code}
           variant={warning.professional_guidance ? "warning" : "info"}
-          title={warning.professional_guidance ? "Professional guidance" : "Plan notice"}
+          title={workoutText(
+            locale,
+            warning.professional_guidance ? "professionalGuidance" : "planNotice",
+          )}
         >
           <p>{warning.message}</p>
         </Alert>
@@ -131,6 +150,7 @@ export function SafetyNotices({ plan }: { plan: WorkoutPlanResponse }) {
 }
 
 export function WorkoutDayCard({ planId, day }: { planId: string; day: WorkoutDay }) {
+  const { locale } = useLocale();
   const exerciseCount = day.sections.reduce(
     (count, section) => count + section.exercises.length,
     0,
@@ -139,34 +159,40 @@ export function WorkoutDayCard({ planId, day }: { planId: string; day: WorkoutDa
     <Card className="iw-day-card">
       <div>
         <div className="iw-inline">
-          <Badge>DAY {day.day_number}</Badge>
-          {day.high_intensity ? <Badge className="iw-badge-warning">High intensity</Badge> : null}
+          <Badge>{workoutText(locale, "day", { count: day.day_number })}</Badge>
+          {day.high_intensity ? (
+            <Badge className="iw-badge-warning">{workoutText(locale, "highIntensity")}</Badge>
+          ) : null}
         </div>
         <h3>{day.title}</h3>
         <p>
-          {day.focus} · {exerciseCount} exercises · {day.estimated_duration_minutes} minutes
+          {day.focus} · {workoutText(locale, "exerciseCount", { count: exerciseCount })} ·{" "}
+          {workoutText(locale, "minutes", { count: day.estimated_duration_minutes })}
         </p>
       </div>
       <Link
         className="ds-button ds-button-primary ds-button-md"
         to={`/intelligent-workouts/plans/${planId}/session/${day.day_number}`}
       >
-        Start session
+        {workoutText(locale, "startSession")}
       </Link>
     </Card>
   );
 }
 
 export function SessionStatusCard({ session }: { session: WorkoutSessionResponse }) {
+  const { locale } = useLocale();
   return (
     <Card className="iw-session-status" aria-live="polite">
       <div>
-        <strong>{label(session.status)}</strong>
-        <span>{session.planned_duration_minutes} minute plan</span>
+        <strong>{workoutEnumLabel(session.status, locale)}</strong>
+        <span>
+          {workoutText(locale, "minutePlan", { count: session.planned_duration_minutes })}
+        </span>
       </div>
       <LinearProgress
         value={session.completion_percentage}
-        label="Server-calculated session progress"
+        label={workoutText(locale, "sessionProgress")}
       />
       <strong>{session.completion_percentage}%</strong>
     </Card>
@@ -174,19 +200,27 @@ export function SessionStatusCard({ session }: { session: WorkoutSessionResponse
 }
 
 export function AdaptationResult({ result }: { result: WorkoutAdaptationResponse }) {
+  const { locale } = useLocale();
   const variant =
     result.severity === "info" ? "info" : result.severity === "caution" ? "warning" : "danger";
   return (
-    <Alert variant={variant} title={`Recommendation: ${label(result.action)}`}>
-      <p>This is guidance only. It has not changed your plan.</p>
+    <Alert
+      variant={variant}
+      title={workoutText(locale, "recommendation", {
+        action: workoutEnumLabel(result.action, locale),
+      })}
+    >
+      <p>{workoutText(locale, "advisoryOnly")}</p>
       <ul>
         {result.evidence_summary.map((item) => (
           <li key={item}>{item}</li>
         ))}
       </ul>
-      {result.affected_day_number ? <p>Affected day: {result.affected_day_number}</p> : null}
+      {result.affected_day_number ? (
+        <p>{workoutText(locale, "affectedDay", { count: result.affected_day_number })}</p>
+      ) : null}
       {result.affected_exercise_id ? (
-        <p>Affected exercise: {label(result.affected_exercise_id)}</p>
+        <p>{workoutText(locale, "affectedExercise", { id: result.affected_exercise_id })}</p>
       ) : null}
     </Alert>
   );

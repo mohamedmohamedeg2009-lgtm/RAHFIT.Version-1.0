@@ -10,8 +10,11 @@ import { Alert, Button, Card, Select, Switch } from "../../components/ui";
 import { intelligentWorkoutService } from "../../services/intelligentWorkoutService";
 import { mapWorkoutError, type WorkoutClientError } from "../../services/workoutErrorMapper";
 import type { WorkoutPlanResponse } from "../../types/intelligentWorkout";
+import { useLocale } from "../../contexts/LocaleContext";
+import { workoutText } from "../../i18n/intelligentWorkout";
 
 export default function WorkoutGenerationPage() {
+  const { locale } = useLocale();
   const location = useLocation();
   const healthSaved = Boolean((location.state as { healthSaved?: boolean } | null)?.healthSaved);
   const [duration, setDuration] = useState(8);
@@ -31,62 +34,56 @@ export default function WorkoutGenerationPage() {
         }),
       );
     } catch (cause) {
-      setError(mapWorkoutError(cause));
+      setError(mapWorkoutError(cause, locale));
     } finally {
       setSubmitting(false);
     }
   };
   return (
     <IntelligentWorkoutShell
-      title="Generate a training plan"
-      description="Python validates readiness, safety, exercise selection, and the final plan before anything is returned."
+      title={workoutText(locale, "generationTitle")}
+      description={workoutText(locale, "generationDescription")}
     >
       {healthSaved ? (
-        <Alert variant="success" title="Health declaration saved">
-          <p>Your required setup is ready for server validation.</p>
+        <Alert variant="success" title={workoutText(locale, "healthSaved")}>
+          <p>{workoutText(locale, "healthSavedDescription")}</p>
         </Alert>
       ) : null}
       {error ? <WorkoutErrorAlert error={error} onRetry={() => void generate()} /> : null}
       {!plan ? (
         <Card className="iw-form-card">
-          <h2>Plan preferences</h2>
+          <h2>{workoutText(locale, "planPreferences")}</h2>
           <Select
-            label="Training cycle"
+            label={workoutText(locale, "trainingCycle")}
             value={duration}
             onChange={(event) => setDuration(Number(event.target.value))}
             options={[4, 6, 8, 10, 12].map((value) => ({
               value: String(value),
-              label: `${value} weeks`,
+              label: workoutText(locale, "weeks", { count: value }),
             }))}
           />
           <Switch
             checked={aiAssistance}
             onChange={(event) => setAiAssistance(event.target.checked)}
-            label="AI-assisted explanation"
-            description="AI may explain an already validated plan. Exercise selection remains deterministic and server-controlled."
+            label={workoutText(locale, "aiExplanation")}
+            description={workoutText(locale, "aiExplanationDescription")}
           />
-          <Alert variant="info" title="Before generation">
-            <p>
-              Your profile and explicit health declaration must be complete. RAHFIT AI does not
-              replace professional medical advice.
-            </p>
+          <Alert variant="info" title={workoutText(locale, "beforeGeneration")}>
+            <p>{workoutText(locale, "beforeGenerationDescription")}</p>
           </Alert>
           <Button size="lg" loading={submitting} onClick={() => void generate()}>
-            Generate safe plan
+            {workoutText(locale, "generateSafePlan")}
           </Button>
         </Card>
       ) : (
         <div className="iw-list" role="status">
           {plan.generation_mode === "deterministic_fallback" ? (
-            <Alert variant="info" title="Safe deterministic plan created">
-              <p>
-                AI assistance was unavailable, so the validated deterministic plan was returned
-                successfully. No retry is needed.
-              </p>
+            <Alert variant="info" title={workoutText(locale, "safePlanCreated")}>
+              <p>{workoutText(locale, "safePlanCreatedDescription")}</p>
             </Alert>
           ) : (
-            <Alert variant="success" title="Plan ready">
-              <p>Your plan was generated and activated successfully.</p>
+            <Alert variant="success" title={workoutText(locale, "planReady")}>
+              <p>{workoutText(locale, "planReadyDescription")}</p>
             </Alert>
           )}
           <PlanSummary plan={plan} />
@@ -95,10 +92,10 @@ export default function WorkoutGenerationPage() {
               className="ds-button ds-button-primary ds-button-md"
               to={`/intelligent-workouts/plans/${plan.plan_id}`}
             >
-              Open plan
+              {workoutText(locale, "openPlan")}
             </Link>
             <Link className="ds-button ds-button-outline ds-button-md" to="/intelligent-workouts">
-              Workout overview
+              {workoutText(locale, "workoutOverview")}
             </Link>
           </div>
         </div>

@@ -2711,8 +2711,24 @@ button:focus-visible {
   font-weight: 650;
 }
 .iw-topbar nav a:hover,
-.iw-topbar nav a.active {
+.iw-topbar nav a.active,
+.iw-language-toggle:hover {
   color: var(--color-primary);
+}
+.iw-language-toggle {
+  padding: var(--space-8) var(--space-12);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.iw-language-toggle:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
 }
 .iw-shell {
   width: min(100% - 2rem, 78rem);
@@ -2727,6 +2743,9 @@ button:focus-visible {
   margin-block: var(--space-16) var(--space-8);
   font-size: clamp(2.2rem, 5vw, 4rem);
   letter-spacing: -0.045em;
+}
+[dir="rtl"] .iw-hero h1 {
+  letter-spacing: normal;
 }
 .iw-hero p,
 .iw-day-card p,
@@ -2924,7 +2943,9 @@ button:focus-visible {
   }
   .iw-topbar nav {
     width: 100%;
+    flex-wrap: nowrap;
     overflow-x: auto;
+    padding-block-end: var(--space-4);
   }
   .iw-plan-summary,
   .iw-form-grid,

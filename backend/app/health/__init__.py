@@ -9,7 +9,7 @@ from app.health.models import (
     SurgeryRecord,
 )
 from app.health.repository import HealthProfileRepository
-from app.health.schemas import HealthProfileUpdateRequest
+from app.health.schemas import HealthProfileReadResponse, HealthProfileUpdateRequest
 from app.health.service import HealthProfileNotFoundError, HealthProfileService
 
 __all__ = [
@@ -18,6 +18,7 @@ __all__ = [
     "HealthProfileData",
     "HealthProfileNotFoundError",
     "HealthProfileRepository",
+    "HealthProfileReadResponse",
     "HealthProfileService",
     "HealthProfileUpdateRequest",
     "HealthSeverity",
