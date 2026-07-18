@@ -1,6 +1,11 @@
 import { createContext, useCallback, useEffect, useState, type ReactNode } from "react";
 
-import { ApiConnectionError, ApiError, setRefreshHandler } from "../services/apiClient";
+import {
+  ApiConfigurationError,
+  ApiConnectionError,
+  ApiError,
+  setRefreshHandler,
+} from "../services/apiClient";
 import { authService } from "../services/authService";
 import type { AuthContextValue, AuthCredentials, AuthUser } from "../types/auth";
 
@@ -8,6 +13,9 @@ import type { AuthContextValue, AuthCredentials, AuthUser } from "../types/auth"
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
 function userMessage(error: unknown): string {
+  if (error instanceof ApiConfigurationError) {
+    return "The application service is not configured. Please contact the administrator.";
+  }
   if (error instanceof ApiConnectionError) {
     return error.code === "request_timeout"
       ? "The service took too long to respond. Please try again."

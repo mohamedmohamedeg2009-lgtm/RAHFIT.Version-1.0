@@ -1,7 +1,25 @@
 const localApiBaseUrl = "http://127.0.0.1:8000/api/v1";
 
-export function normalizeApiBaseUrl(value: string | undefined): string {
-  const candidate = value?.trim() || localApiBaseUrl;
+export class ApiConfigurationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ApiConfigurationError";
+  }
+}
+
+export function normalizeApiBaseUrl(
+  value: string | undefined,
+  mode = import.meta.env.MODE,
+): string {
+  const candidate = value?.trim();
+  if (!candidate) {
+    if (mode === "production") {
+      throw new ApiConfigurationError(
+        "VITE_API_BASE_URL must be set to the public backend HTTPS URL in production.",
+      );
+    }
+    return localApiBaseUrl;
+  }
   if (candidate.startsWith("/")) {
     const normalizedPath = candidate.replace(/\/+$/, "");
     if (!normalizedPath.endsWith("/api/v1")) {
@@ -18,6 +36,9 @@ export function normalizeApiBaseUrl(value: string | undefined): string {
   if (!(["http:", "https:"] as string[]).includes(parsed.protocol)) {
     throw new Error("VITE_API_BASE_URL must use HTTP or HTTPS.");
   }
+  if (mode === "production" && parsed.protocol !== "https:") {
+    throw new ApiConfigurationError("VITE_API_BASE_URL must use HTTPS in production.");
+  }
   const normalizedPath = parsed.pathname.replace(/\/+$/, "");
   if (!normalizedPath.endsWith("/api/v1")) {
     throw new Error("VITE_API_BASE_URL must include the /api/v1 prefix.");
@@ -26,7 +47,24 @@ export function normalizeApiBaseUrl(value: string | undefined): string {
   return parsed.toString().replace(/\/$/, "");
 }
 
-const baseUrl = normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL);
+function getApiBaseUrl(): string {
+  return normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL);
+}
+
+export function buildApiRequestUrl(baseUrl: string, path: string): string {
+  if (!path.startsWith("/")) {
+    throw new Error("API request paths must start with '/'.");
+  }
+  if (path === "/api/v1" || path.startsWith("/api/v1/")) {
+    throw new Error("API request paths must not repeat the /api/v1 prefix.");
+  }
+  return `${baseUrl}${path}`;
+}
+
+function logDevelopmentApiEvent(event: string, details: Record<string, unknown>): void {
+  if (import.meta.env.DEV) console.debug(`[RAHFIT API] ${event}`, details);
+}
+
 let accessToken: string | null = null;
 let refreshHandler: (() => Promise<boolean>) | null = null;
 let refreshing: Promise<boolean> | null = null;
@@ -78,6 +116,7 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
   } = options;
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 12000);
+  let requestUrl: string | undefined;
 
   if (options.signal) {
     if (options.signal.aborted) {
@@ -88,7 +127,9 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
   }
 
   try {
-    const response = await fetch(`${baseUrl}${path}`, {
+    requestUrl = buildApiRequestUrl(getApiBaseUrl(), path);
+    logDevelopmentApiEvent("request", { method: init.method ?? "GET", url: requestUrl });
+    const response = await fetch(requestUrl, {
       ...init,
       body: body === undefined ? undefined : JSON.stringify(body),
       credentials: "include",
@@ -100,6 +141,7 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
         ...headers,
       },
     });
+    logDevelopmentApiEvent("response", { status: response.status, url: requestUrl });
     if (response.status === 401 && accessToken && !skipRefresh && (await refreshOnce()))
       return apiRequest<T>(path, { ...options, skipRefresh: true });
     if (response.status === 204) return undefined as T;
@@ -137,7 +179,12 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
     }
     return payload as T;
   } catch (cause) {
-    if (cause instanceof ApiError) throw cause;
+    if (cause instanceof ApiError || cause instanceof ApiConfigurationError) throw cause;
+
+    logDevelopmentApiEvent("request failed", {
+      errorType: cause instanceof Error ? cause.name : typeof cause,
+      url: requestUrl,
+    });
 
     let connError: ApiConnectionError;
     if (options.signal?.aborted) {

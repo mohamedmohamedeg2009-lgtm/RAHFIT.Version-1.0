@@ -23,6 +23,7 @@ import { LoginPage } from "../pages/auth/LoginPage";
 import { RegisterPage } from "../pages/auth/RegisterPage";
 import {
   apiRequest,
+  buildApiRequestUrl,
   normalizeApiBaseUrl,
   setAccessToken,
   setRefreshHandler,
@@ -272,6 +273,24 @@ describe("authentication integration boundary", () => {
     );
     expect(() => normalizeApiBaseUrl("http://localhost:8000")).toThrow("/api/v1");
     expect(() => normalizeApiBaseUrl("not-a-url")).toThrow("valid absolute URL");
+  });
+
+  it("requires an explicit HTTPS backend URL in production", () => {
+    expect(() => normalizeApiBaseUrl(undefined, "production")).toThrow("must be set");
+    expect(() => normalizeApiBaseUrl("http://api.example.com/api/v1", "production")).toThrow(
+      "must use HTTPS",
+    );
+    expect(normalizeApiBaseUrl("https://api.example.com/api/v1/", "production")).toBe(
+      "https://api.example.com/api/v1",
+    );
+  });
+
+  it("builds an endpoint once without repeating the API version prefix", () => {
+    expect(buildApiRequestUrl("https://api.example.com/api/v1", "/auth/register")).toBe(
+      "https://api.example.com/api/v1/auth/register",
+    );
+    expect(() => buildApiRequestUrl("https://api.example.com/api/v1", "/api/v1/auth/register"))
+      .toThrow("must not repeat");
   });
 
   it("completes registration and loads the created current user", async () => {

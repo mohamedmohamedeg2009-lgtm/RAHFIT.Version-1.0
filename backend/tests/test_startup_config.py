@@ -49,6 +49,20 @@ def test_local_cors_defaults_are_explicit_and_credential_safe(
     assert "*" not in settings.allowed_origins
 
 
+def test_cors_origins_are_parsed_from_the_production_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    required_environment(monkeypatch)
+    monkeypatch.setenv(
+        "ALLOWED_ORIGINS",
+        "https://app.example.com, https://preview.example.com ",
+    )
+
+    settings = Settings(_env_file=None)
+
+    assert settings.allowed_origins == ["https://app.example.com", "https://preview.example.com"]
+
+
 def test_auth_routes_remain_registered_in_the_application_router() -> None:
     paths = {route.path for route in router.routes if isinstance(route, APIRoute)}
 
