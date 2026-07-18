@@ -63,6 +63,17 @@ def test_cors_origins_are_parsed_from_the_production_environment(
     assert settings.allowed_origins == ["https://app.example.com", "https://preview.example.com"]
 
 
+@pytest.mark.parametrize("origins", ("", " , ", "https://app.example.com,*"))
+def test_cors_configuration_rejects_empty_or_wildcard_origins(
+    origins: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    required_environment(monkeypatch)
+    monkeypatch.setenv("ALLOWED_ORIGINS", origins)
+
+    with pytest.raises(ValidationError, match="ALLOWED_ORIGINS"):
+        Settings(_env_file=None)
+
+
 def test_auth_routes_remain_registered_in_the_application_router() -> None:
     paths = {route.path for route in router.routes if isinstance(route, APIRoute)}
 

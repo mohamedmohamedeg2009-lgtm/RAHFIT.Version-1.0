@@ -39,7 +39,7 @@ export const authService = {
       return false;
     }
   },
-  getCurrentUser: () => apiRequest<AuthUser>("/auth/me"),
+  getCurrentUser: (skipRefresh = false) => apiRequest<AuthUser>("/auth/me", { skipRefresh }),
   async logout() {
     try {
       await apiRequest("/auth/logout", { method: "POST", skipRefresh: true });

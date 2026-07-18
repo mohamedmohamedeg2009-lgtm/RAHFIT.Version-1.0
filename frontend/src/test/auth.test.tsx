@@ -1,6 +1,6 @@
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 import * as React from "react";
@@ -29,6 +29,7 @@ import {
   setRefreshHandler,
 } from "../services/apiClient";
 import { authService } from "../services/authService";
+import { tokenStore } from "../services/tokenStore";
 import type { AuthContextValue, AuthUser } from "../types/auth";
 
 const user: AuthUser = {
@@ -90,6 +91,35 @@ describe("authentication pages", () => {
     await userActions.click(screen.getByRole("button", { name: "Sign in" }));
     expect(screen.getByRole("alert")).toHaveTextContent("valid email address");
     expect(login).not.toHaveBeenCalled();
+  });
+
+  it("prevents duplicate login submissions while a request is pending", async () => {
+    let resolveLogin: (() => void) | undefined;
+    const login = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveLogin = resolve;
+        }),
+    );
+    const userActions = userEvent.setup();
+    render(
+      <AuthContext.Provider value={context({ login })}>
+        <MemoryRouter>
+          <LoginPage />
+        </MemoryRouter>
+      </AuthContext.Provider>,
+    );
+
+    await userActions.type(screen.getByLabelText("Email address"), "user@example.com");
+    await userActions.type(screen.getByLabelText("Password"), "secure-password-123");
+    const form = screen.getByRole("button", { name: "Sign in" }).closest("form");
+    expect(form).not.toBeNull();
+
+    fireEvent.submit(form!);
+    fireEvent.submit(form!);
+
+    await waitFor(() => expect(login).toHaveBeenCalledTimes(1));
+    resolveLogin?.();
   });
 
   it("validates password confirmation during registration", async () => {
@@ -200,6 +230,19 @@ describe("api refresh boundary", () => {
     await expect(apiRequest("/auth/me")).rejects.toMatchObject({ status: 401 });
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
+
+  it("does not start a nested refresh for a session-restoration request", async () => {
+    setAccessToken("fresh-access");
+    const refresh = vi.fn(async () => true);
+    setRefreshHandler(refresh);
+    const fetchMock = vi
+      .spyOn(window, "fetch")
+      .mockResolvedValue(new Response(JSON.stringify({ message: "expired" }), { status: 401 }));
+
+    await expect(apiRequest("/auth/me", { skipRefresh: true })).rejects.toMatchObject({ status: 401 });
+    expect(refresh).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("authentication integration boundary", () => {
@@ -251,6 +294,72 @@ describe("authentication integration boundary", () => {
     expect(String(fetchMock.mock.calls[0][0])).toBe("http://127.0.0.1:8000/api/v1/auth/login");
   });
 
+  it("persists a successful login session and clears it when logout fails", async () => {
+    const fetchMock = vi
+      .spyOn(window, "fetch")
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            access_token: "access",
+            refresh_token: "refresh",
+            access_token_expires_in: 1800,
+          }),
+          { status: 200 },
+        ),
+      )
+      .mockResolvedValueOnce(new Response(JSON.stringify({ message: "unavailable" }), { status: 503 }));
+
+    await authService.login({ email: "user@example.com", password: "secure-password-123" });
+    expect(tokenStore.get()).toBe("refresh");
+
+    await expect(authService.logout()).rejects.toMatchObject({ status: 503 });
+    expect(tokenStore.get()).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("restores a session from its persisted refresh token after reload", async () => {
+    tokenStore.set("persisted-refresh");
+    const fetchMock = vi
+      .spyOn(window, "fetch")
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            access_token: "restored-access",
+            refresh_token: "rotated-refresh",
+            access_token_expires_in: 1800,
+          }),
+          { status: 200 },
+        ),
+      )
+      .mockResolvedValueOnce(new Response(JSON.stringify(user), { status: 200 }));
+
+    function SessionHarness() {
+      const auth = React.useContext(AuthContext);
+      return <p>{auth?.user?.email ?? "No session"}</p>;
+    }
+
+    render(
+      <AuthProvider>
+        <SessionHarness />
+      </AuthProvider>,
+    );
+
+    expect(await screen.findByText("user@example.com")).toBeInTheDocument();
+    expect(tokenStore.get()).toBe("rotated-refresh");
+    expect(String(fetchMock.mock.calls[0][0])).toContain("/auth/refresh");
+    expect(String(fetchMock.mock.calls[1][0])).toContain("/auth/me");
+  });
+
+  it("clears persisted tokens when refresh fails", async () => {
+    tokenStore.set("expired-refresh");
+    vi.spyOn(window, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ message: "expired" }), { status: 401 }),
+    );
+
+    await expect(authService.refreshSession()).resolves.toBe(false);
+    expect(tokenStore.get()).toBeNull();
+  });
+
   it("keeps an HTTP conflict as an API error instead of a network error", async () => {
     vi.spyOn(window, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ code: "http_error", message: "Account already exists." }), {
@@ -277,6 +386,7 @@ describe("authentication integration boundary", () => {
 
   it("requires an explicit HTTPS backend URL in production", () => {
     expect(() => normalizeApiBaseUrl(undefined, "production")).toThrow("must be set");
+    expect(() => normalizeApiBaseUrl("/api/v1", "production")).toThrow("public HTTPS");
     expect(() => normalizeApiBaseUrl("http://api.example.com/api/v1", "production")).toThrow(
       "must use HTTPS",
     );

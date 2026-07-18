@@ -41,7 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const restore = useCallback(async () => {
     if (!(await authService.refreshSession())) return false;
     try {
-      setUser(await authService.getCurrentUser());
+      // A second refresh from this restoration path would recurse through this callback.
+      setUser(await authService.getCurrentUser(true));
       return true;
     } catch {
       authService.clearSession();

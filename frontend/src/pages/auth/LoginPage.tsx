@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { FormAlert } from "../../components/auth/FormAlert";
@@ -16,9 +16,11 @@ export function LoginPage() {
   const [password, setPassword] = useState("");
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const submittingRef = useRef(false);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (pending || isLoading || submittingRef.current) return;
     clearError();
     const normalizedEmail = email.trim().toLowerCase();
     if (!normalizedEmail || !normalizedEmail.includes("@")) {
@@ -30,6 +32,7 @@ export function LoginPage() {
       return;
     }
     setFieldError(null);
+    submittingRef.current = true;
     setPending(true);
     try {
       await login({ email: normalizedEmail, password });
@@ -41,6 +44,7 @@ export function LoginPage() {
     } catch {
       // AuthContext provides a safe user-facing error without exposing tokens or server details.
     } finally {
+      submittingRef.current = false;
       setPending(false);
     }
   };

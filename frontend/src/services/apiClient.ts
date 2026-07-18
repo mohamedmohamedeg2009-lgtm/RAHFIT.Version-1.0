@@ -21,6 +21,11 @@ export function normalizeApiBaseUrl(
     return localApiBaseUrl;
   }
   if (candidate.startsWith("/")) {
+    if (mode === "production") {
+      throw new ApiConfigurationError(
+        "VITE_API_BASE_URL must be a public HTTPS backend URL in production.",
+      );
+    }
     const normalizedPath = candidate.replace(/\/+$/, "");
     if (!normalizedPath.endsWith("/api/v1")) {
       throw new Error("VITE_API_BASE_URL must include the /api/v1 prefix.");

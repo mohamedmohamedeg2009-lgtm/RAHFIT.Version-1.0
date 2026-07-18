@@ -197,6 +197,13 @@ def test_authentication_endpoints_support_the_core_session_flow(settings: Settin
     assert invalid_login.status_code == 401
     assert "password" not in invalid_login.text.lower()
 
+    unknown_login = client.post(
+        "/api/v1/auth/login",
+        json={"email": "unknown@example.com", "password": "secure-password-123"},
+    )
+    assert unknown_login.status_code == 401
+    assert unknown_login.json()["detail"] == invalid_login.json()["detail"]
+
     refreshed = client.post("/api/v1/auth/refresh", json={"refresh_token": tokens["refresh_token"]})
     assert refreshed.status_code == 200
 

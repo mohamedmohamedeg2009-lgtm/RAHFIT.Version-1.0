@@ -91,9 +91,13 @@ class Settings(BaseSettings):
     @field_validator("allowed_origins", mode="before")
     @classmethod
     def parse_origins(cls, value: str | list[str]) -> list[str]:
-        if isinstance(value, str):
-            return [origin.strip().rstrip("/") for origin in value.split(",") if origin.strip()]
-        return value
+        values = value.split(",") if isinstance(value, str) else value
+        origins = [origin.strip().rstrip("/") for origin in values if origin.strip()]
+        if not origins:
+            raise ValueError("ALLOWED_ORIGINS must include at least one origin.")
+        if "*" in origins:
+            raise ValueError("ALLOWED_ORIGINS cannot contain '*' when credentials are enabled.")
+        return origins
 
     @field_validator("mongodb_database", "mongodb_app_name", mode="before")
     @classmethod
