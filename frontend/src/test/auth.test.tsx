@@ -390,6 +390,12 @@ describe("authentication integration boundary", () => {
     expect(() => normalizeApiBaseUrl("http://api.example.com/api/v1", "production")).toThrow(
       "must use HTTPS",
     );
+    expect(() => normalizeApiBaseUrl("https://localhost:8000/api/v1", "production")).toThrow(
+      "must not point to localhost",
+    );
+    expect(() => normalizeApiBaseUrl("https://127.0.0.1:8000/api/v1", "production")).toThrow(
+      "must not point to localhost",
+    );
     expect(normalizeApiBaseUrl("https://api.example.com/api/v1/", "production")).toBe(
       "https://api.example.com/api/v1",
     );
