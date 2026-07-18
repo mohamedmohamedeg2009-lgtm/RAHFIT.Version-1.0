@@ -29,6 +29,7 @@ def _create_token(
 ) -> str:
     payload: dict[str, Any] = {
         "sub": subject,
+        "iat": datetime.now(UTC),
         "exp": expires_at,
         "typ": token_type,
         "ver": token_version,
@@ -80,7 +81,7 @@ def decode_token(token: str, settings: Settings) -> TokenPayload:
             token,
             settings.jwt_secret_key.get_secret_value(),
             algorithms=[settings.jwt_algorithm],
-            options={"require": ["sub", "exp", "typ", "ver"]},
+            options={"require": ["sub", "iat", "exp", "typ", "ver"]},
         )
         subject = payload["sub"]
         token_type = payload["typ"]

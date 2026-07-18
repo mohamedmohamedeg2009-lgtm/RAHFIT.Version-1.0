@@ -23,3 +23,15 @@ services:
         sync: false
       - key: ALLOWED_ORIGINS
         sync: false
+      - key: EMAIL_PROVIDER
+        value: smtp
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM_EMAIL
+        sync: false
+      - key: PASSWORD_RESET_URL
+        sync: false

@@ -1,6 +1,7 @@
 import httpx
 import pytest
 from fastapi import FastAPI
+from pydantic import ValidationError
 
 from app.ai.providers import (
     AIProviderError,
@@ -68,8 +69,8 @@ def test_ai_configuration_normalizes_values_and_whitespace_key() -> None:
     assert settings.gemini_model == "test-model"
     assert settings.gemini_api_key is None
 
-    invalid_flag = configured_settings(AI_FEATURE_ENABLED="not-a-boolean")
-    assert invalid_flag.ai_feature_enabled is False
+    with pytest.raises(ValidationError, match="AI_FEATURE_ENABLED"):
+        configured_settings(AI_FEATURE_ENABLED="not-a-boolean")
 
 
 def test_gemini_configuration_uses_dedicated_environment_variables() -> None:
@@ -153,6 +154,10 @@ def test_fake_provider_cannot_be_selected_from_production_configuration() -> Non
     resolution = AIProviderResolver(
         configured_settings(
             app_env="production",
+            jwt_secret_key="prod-test-secret-A7!x9#q2$Lm4%Rv6^Tw8&Yz0*Bc3+De5=Fg7_Hj9-Kn1",
+            allowed_origins=["https://app.example.com"],
+            EMAIL_PROVIDER="smtp",
+            PASSWORD_RESET_URL="https://app.example.com/reset-password",
             AI_FEATURE_ENABLED=True,
             AI_PROVIDER="fake",
             AI_API_KEY="not-used",

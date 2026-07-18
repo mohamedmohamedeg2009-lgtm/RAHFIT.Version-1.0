@@ -7,6 +7,7 @@ from app.database.indexes import (
     INTELLIGENT_WORKOUT_GENERATION_KEYS,
     USER_INTELLIGENCE_INDEXES,
     WORKOUT_SESSION_INDEX,
+    IndexMigrationError,
     ensure_ai_conversation_indexes,
     ensure_intelligent_workout_indexes,
     ensure_named_index,
@@ -32,14 +33,14 @@ class FakeCollection:
 
 
 @pytest.mark.asyncio
-async def test_legacy_workout_index_is_upgraded_before_creation() -> None:
+async def test_legacy_workout_index_requires_manual_safe_migration() -> None:
     collection = FakeCollection({"key": []})
 
-    await ensure_workout_session_index(collection)
+    with pytest.raises(IndexMigrationError, match="manual migration"):
+        await ensure_workout_session_index(collection)
 
-    assert collection.dropped == [WORKOUT_SESSION_INDEX]
-    assert collection.created[0]["unique"] is True
-    assert collection.created[0]["partialFilterExpression"] == {"status": "in_progress"}
+    assert collection.dropped == []
+    assert collection.created == []
 
 
 @pytest.mark.asyncio
@@ -115,6 +116,20 @@ async def test_same_name_ai_index_drift_is_replaced_without_dropping_other_index
     assert collection.dropped == ["ai_conversations_owner_activity"]
     assert "unrelated_index" in collection.indexes
     assert collection.indexes["ai_conversations_owner_activity"]["key"] == expected
+
+
+@pytest.mark.asyncio
+async def test_unique_index_drift_preserves_old_index_and_reports_actionable_error() -> None:
+    collection = FakeNamedIndexCollection()
+    collection.indexes = {"owned_unique": {"key": [("user_id", 1)]}}
+
+    with pytest.raises(IndexMigrationError, match="existing index was preserved"):
+        await ensure_named_index(
+            collection, [("user_id", 1), ("date", 1)], "owned_unique", unique=True
+        )
+
+    assert collection.dropped == []
+    assert "owned_unique" in collection.indexes
 
 
 @pytest.mark.asyncio

@@ -1,4 +1,5 @@
 import pytest
+from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
@@ -133,6 +134,74 @@ def test_backend_configuration_starts_without_ai_key_when_ai_is_disabled_or_enab
     assert disabled.ai_api_key is None
     assert setup_required.ai_feature_enabled is True
     assert setup_required.ai_api_key is None
+
+
+def test_invalid_ai_feature_flag_is_rejected_clearly(monkeypatch: pytest.MonkeyPatch) -> None:
+    required_environment(monkeypatch)
+    monkeypatch.setenv("AI_FEATURE_ENABLED", "enabled-maybe")
+
+    with pytest.raises(ValidationError, match="AI_FEATURE_ENABLED"):
+        Settings(_env_file=None)
+
+
+def test_production_rejects_development_secrets_and_email_settings(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    required_environment(monkeypatch)
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("JWT_SECRET_KEY", "replace-with-a-long-random-secret-at-least-32-characters")
+    monkeypatch.setenv("ALLOWED_ORIGINS", "https://app.example.com")
+    monkeypatch.setenv("EMAIL_PROVIDER", "smtp")
+    monkeypatch.setenv("PASSWORD_RESET_URL", "https://app.example.com/reset-password")
+
+    with pytest.raises(ValidationError, match="JWT_SECRET_KEY"):
+        Settings(_env_file=None)
+
+
+def test_production_requires_smtp_and_secure_reset_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    required_environment(monkeypatch)
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv(
+        "JWT_SECRET_KEY", "prod-test-secret-A7!x9#q2$Lm4%Rv6^Tw8&Yz0*Bc3+De5=Fg7_Hj9-Kn1"
+    )
+    monkeypatch.setenv("ALLOWED_ORIGINS", "https://app.example.com")
+
+    with pytest.raises(ValidationError, match="EMAIL_PROVIDER"):
+        Settings(_env_file=None)
+
+
+@pytest.mark.asyncio
+async def test_lifespan_closes_mongodb_when_index_initialization_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    required_environment(monkeypatch)
+    get_settings.cache_clear()
+    from app import main
+
+    class Database:
+        database = object()
+        disconnected = False
+
+        async def connect(self) -> None:
+            return None
+
+        async def disconnect(self) -> None:
+            self.disconnected = True
+
+    database = Database()
+
+    async def fail_index_initialization(_: object) -> None:
+        raise RuntimeError("index creation failed")
+
+    monkeypatch.setattr(main, "MongoDatabase", lambda _: database)
+    monkeypatch.setattr(main, "initialize_indexes", fail_index_initialization)
+
+    with pytest.raises(RuntimeError, match="index creation failed"):
+        async with main.lifespan(FastAPI()):
+            pass
+
+    assert database.disconnected is True
+    get_settings.cache_clear()
 
 
 def test_ai_provider_and_conversation_routes_exclude_public_messages() -> None:

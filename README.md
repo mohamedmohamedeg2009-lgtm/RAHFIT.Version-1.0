@@ -113,6 +113,39 @@ npm run dev
 
 The Vite development app uses <http://localhost:5173>; its default API base is <http://127.0.0.1:8000/api/v1>.
 
+## Production Deployment: Vercel + Render + MongoDB Atlas
+
+The production browser flow is **Vercel frontend → Render FastAPI API → MongoDB Atlas**.
+The frontend must never use a local or same-origin API URL on Vercel.
+
+1. Deploy the root [`render.yaml`](render.yaml) as a Render Blueprint. In Render, set
+   `MONGODB_URI`, `MONGODB_DATABASE`, `JWT_SECRET_KEY`, and `ALLOWED_ORIGINS` as secrets.
+   Set `ALLOWED_ORIGINS` to the exact stable Vercel production origin, for example
+   `https://<your-stable-vercel-production-domain>`; do not include a trailing slash.
+2. Confirm `https://<render-service-host>/health` returns
+   `{"status":"ok","database":"ok"}`. Atlas network access and database-user setup are
+   documented in [MongoDB Atlas Deployment](docs/MongoDB-Atlas-Deployment.md).
+3. In Vercel, set the project Root Directory to `frontend`. The committed
+   [`frontend/vercel.json`](frontend/vercel.json) supplies the Vite build, `dist` output, and
+   SPA fallback.
+4. In Vercel **Settings → Environment Variables**, set this value for **Production** (and Preview
+   if previews must call the API):
+
+   ```text
+   VITE_API_BASE_URL=https://<render-service-host>/api/v1
+   ```
+
+   It must be the public HTTPS Render URL, include `/api/v1`, and must not be `localhost`,
+   `127.0.0.1`, or `/api/v1`.
+5. Redeploy Render after changing `ALLOWED_ORIGINS`, then redeploy Vercel after changing
+   `VITE_API_BASE_URL`. Vite embeds `VITE_*` values during the frontend build; changing the
+   Vercel variable alone does not update an existing deployment.
+6. Verify registration reaches
+   `https://<render-service-host>/api/v1/auth/register` and login reaches
+   `https://<render-service-host>/api/v1/auth/login`.
+
+Do not add Atlas, JWT, or backend secret values to Vercel, browser code, or Git.
+
 ## Release Checks
 
 From the repository root, with backend development dependencies installed:

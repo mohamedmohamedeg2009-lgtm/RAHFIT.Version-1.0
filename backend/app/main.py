@@ -28,12 +28,14 @@ from app.middleware.security import SecurityHeadersMiddleware
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     database = MongoDatabase(settings)
-    await database.connect()
-    await initialize_indexes(database.database)
-    await initialize_assessment_catalog(database.database)
-    app.state.database = database
-    yield
-    await database.disconnect()
+    try:
+        await database.connect()
+        await initialize_indexes(database.database)
+        await initialize_assessment_catalog(database.database)
+        app.state.database = database
+        yield
+    finally:
+        await database.disconnect()
 
 
 def create_app() -> FastAPI:

@@ -5,6 +5,12 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 
 WORKOUT_SESSION_INDEX = "workout_sessions_active_lookup"
 WORKOUT_SESSION_FILTER = {"status": "in_progress"}
+
+
+class IndexMigrationError(RuntimeError):
+    """Raised when an automatic index replacement could make data unavailable."""
+
+
 AI_CONVERSATION_INDEXES: tuple[tuple[str, tuple[tuple[str, int], ...]], ...] = (
     (
         "ai_conversations_owner_activity",
@@ -149,6 +155,11 @@ async def ensure_named_index(
         and all(existing.get(key) == value for key, value in expected_options.items())
     ):
         return
+    if existing and (existing.get("unique") is True or unique):
+        raise IndexMigrationError(
+            f"Index '{name}' has an incompatible definition and requires a manual migration. "
+            "The existing index was preserved; review duplicate data before replacing it."
+        )
     if existing:
         await collection.drop_index(name)
     await collection.create_index(expected_keys, name=name, **expected_options)
@@ -178,7 +189,11 @@ async def ensure_workout_session_index(collection: Any) -> None:
         existing.get("unique") is not True
         or existing.get("partialFilterExpression") != WORKOUT_SESSION_FILTER
     ):
-        await collection.drop_index(WORKOUT_SESSION_INDEX)
+        raise IndexMigrationError(
+            f"Index '{WORKOUT_SESSION_INDEX}' has an incompatible definition and requires a "
+            "manual migration. The existing index was preserved; review duplicate in-progress "
+            "sessions before replacing it."
+        )
     await collection.create_index(
         [("user_id", 1), ("plan_id", 1), ("workout_day_id", 1), ("status", 1)],
         unique=True,

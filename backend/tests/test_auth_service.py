@@ -157,6 +157,36 @@ def test_token_type_cannot_be_used_for_another_flow(settings: Settings) -> None:
     assert decode_token(refresh, settings).token_type == "refresh"
 
 
+def test_tokens_include_required_issued_at_claim(settings: Settings) -> None:
+    import jwt
+
+    token = create_access_token("user-id", settings)
+    claims = jwt.decode(
+        token,
+        settings.jwt_secret_key.get_secret_value(),
+        algorithms=[settings.jwt_algorithm],
+    )
+
+    assert isinstance(claims["iat"], int)
+
+
+@pytest.mark.asyncio
+async def test_google_only_user_password_login_returns_authentication_error(
+    settings: Settings,
+) -> None:
+    store = FakeUserStore()
+    store.users["1"] = User(
+        id="1",
+        email="google-only@example.com",
+        password_hash="",
+        provider="google",
+        provider_subject="google-subject",
+    )
+
+    with pytest.raises(AuthenticationError):
+        await AuthService(store, settings).login("google-only@example.com", "not-the-password")
+
+
 def test_authentication_endpoints_support_the_core_session_flow(settings: Settings) -> None:
     service = AuthService(FakeUserStore(), settings)
     app = FastAPI()

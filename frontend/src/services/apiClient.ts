@@ -10,6 +10,7 @@ export class ApiConfigurationError extends Error {
 export function normalizeApiBaseUrl(
   value: string | undefined,
   mode = import.meta.env.MODE,
+  hostname = window.location.hostname,
 ): string {
   const candidate = value?.trim();
   if (!candidate) {
@@ -21,7 +22,8 @@ export function normalizeApiBaseUrl(
     return localApiBaseUrl;
   }
   if (candidate.startsWith("/")) {
-    if (mode === "production") {
+    const localSameOrigin = ["localhost", "127.0.0.1"].includes(hostname);
+    if (mode === "production" && !localSameOrigin) {
       throw new ApiConfigurationError(
         "VITE_API_BASE_URL must be a public HTTPS backend URL in production.",
       );

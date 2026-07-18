@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Annotated, Any, Literal, cast
 
-from pydantic import Field, MongoDsn, SecretStr, field_validator
+from pydantic import Field, MongoDsn, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
@@ -46,7 +46,7 @@ class Settings(BaseSettings):
         validation_alias="MONGODB_APP_NAME",
     )
     jwt_secret_key: SecretStr = Field(min_length=32)
-    jwt_algorithm: str = "HS256"
+    jwt_algorithm: Literal["HS256"] = "HS256"
     jwt_access_token_expire_minutes: int = Field(default=30, gt=0)
     jwt_refresh_token_expire_days: int = Field(default=7, gt=0)
     rate_limit_requests: int = Field(default=100, gt=0)
@@ -88,6 +88,36 @@ class Settings(BaseSettings):
     def debug(self) -> bool:
         return self.app_debug
 
+    @model_validator(mode="after")
+    def validate_production_security(self) -> "Settings":
+        if self.app_env != "production":
+            return self
+        secret = self.jwt_secret_key.get_secret_value()
+        if (
+            len(secret) < 48
+            or "replace-with" in secret.lower()
+            or "dev-secret" in secret.lower()
+            or len(set(secret)) < 8
+        ):
+            raise ValueError(
+                "JWT_SECRET_KEY must be a high-entropy production secret of at least 48 characters."
+            )
+        if any(
+            origin.startswith(("http://localhost", "http://127.0.0.1"))
+            for origin in self.allowed_origins
+        ):
+            raise ValueError("ALLOWED_ORIGINS must not contain localhost origins in production.")
+        if self.email_provider == "development":
+            raise ValueError(
+                "EMAIL_PROVIDER must be smtp in production when password reset is enabled."
+            )
+        if (
+            not self.password_reset_url.startswith("https://")
+            or "localhost" in self.password_reset_url
+        ):
+            raise ValueError("PASSWORD_RESET_URL must be an HTTPS non-localhost URL in production.")
+        return self
+
     @field_validator("allowed_origins", mode="before")
     @classmethod
     def parse_origins(cls, value: str | list[str]) -> list[str]:
@@ -117,7 +147,11 @@ class Settings(BaseSettings):
         if isinstance(value, bool):
             return value
         normalized = str(value).strip().lower()
-        return normalized in {"1", "true", "yes", "on"}
+        if normalized in {"1", "true", "yes", "on"}:
+            return True
+        if normalized in {"0", "false", "no", "off"}:
+            return False
+        raise ValueError("AI_FEATURE_ENABLED must be a Boolean value.")
 
     @field_validator("ai_model", mode="before")
     @classmethod

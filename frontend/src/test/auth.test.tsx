@@ -386,7 +386,10 @@ describe("authentication integration boundary", () => {
 
   it("requires an explicit HTTPS backend URL in production", () => {
     expect(() => normalizeApiBaseUrl(undefined, "production")).toThrow("must be set");
-    expect(() => normalizeApiBaseUrl("/api/v1", "production")).toThrow("public HTTPS");
+    expect(() => normalizeApiBaseUrl("/api/v1", "production", "app.example.com")).toThrow(
+      "public HTTPS",
+    );
+    expect(normalizeApiBaseUrl("/api/v1", "production", "localhost")).toBe("/api/v1");
     expect(() => normalizeApiBaseUrl("http://api.example.com/api/v1", "production")).toThrow(
       "must use HTTPS",
     );
