@@ -10,6 +10,9 @@ import {
   ArrowRight,
   Layers,
   HelpCircle,
+  CheckCircle2,
+  CircleAlert,
+  LockKeyhole,
 } from "lucide-react";
 
 import { Badge, Button, Card, LinearProgress, MetricCard } from "../ui";
@@ -41,7 +44,15 @@ export function NutritionSnapshotCard({ nutrition }: { nutrition: DashboardData[
       transition={{ duration: 0.5 }}
     >
       <Card className="dashboard-progress-card" style={{ padding: "32px", borderRadius: "28px" }}>
-        <div className="dashboard-section-heading" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+        <div
+          className="dashboard-section-heading"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "24px",
+          }}
+        >
           <h2 style={{ fontSize: "20px", fontWeight: 700, margin: 0 }}>Today's Nutrition & Fuel</h2>
           <Link
             to={nutrition.destinationRoute}
@@ -66,15 +77,42 @@ export function NutritionSnapshotCard({ nutrition }: { nutrition: DashboardData[
               label="Calories Target"
             />
           </div>
-          <div className="dashboard-metric-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-            <MetricCard style={{ background: "var(--color-background)", border: "1px solid var(--color-border)" }}>
-              <span style={{ fontSize: "12px", color: "var(--color-text-secondary)", fontWeight: 700 }}>Calories Remaining</span>
-              <strong style={{ fontSize: "24px", color: "var(--color-text-primary)", fontWeight: 800 }}>{nutrition.caloriesRemaining}</strong>
+          <div
+            className="dashboard-metric-grid"
+            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}
+          >
+            <MetricCard
+              style={{
+                background: "var(--color-background)",
+                border: "1px solid var(--color-border)",
+              }}
+            >
+              <span
+                style={{ fontSize: "12px", color: "var(--color-text-secondary)", fontWeight: 700 }}
+              >
+                Calories Remaining
+              </span>
+              <strong
+                style={{ fontSize: "24px", color: "var(--color-text-primary)", fontWeight: 800 }}
+              >
+                {nutrition.caloriesRemaining}
+              </strong>
               <small style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>kcal</small>
             </MetricCard>
-            <MetricCard style={{ background: "var(--color-background)", border: "1px solid var(--color-border)" }}>
-              <span style={{ fontSize: "12px", color: "var(--color-text-secondary)", fontWeight: 700 }}>Meals Completed</span>
-              <strong style={{ fontSize: "24px", color: "var(--color-text-primary)", fontWeight: 800 }}>
+            <MetricCard
+              style={{
+                background: "var(--color-background)",
+                border: "1px solid var(--color-border)",
+              }}
+            >
+              <span
+                style={{ fontSize: "12px", color: "var(--color-text-secondary)", fontWeight: 700 }}
+              >
+                Meals Completed
+              </span>
+              <strong
+                style={{ fontSize: "24px", color: "var(--color-text-primary)", fontWeight: 800 }}
+              >
                 {nutrition.mealsCompleted} / {nutrition.totalMeals}
               </strong>
             </MetricCard>
@@ -121,7 +159,15 @@ export function DailyPriorityCard({
           overflow: "hidden",
         }}
       >
-        <div style={{ display: "flex", gap: "24px", alignItems: "flex-start", position: "relative", zIndex: 1 }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "24px",
+            alignItems: "flex-start",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
           <div
             className="dashboard-priority-icon"
             style={{
@@ -138,30 +184,69 @@ export function DailyPriorityCard({
             {priority.severity === "danger" ? <ShieldAlert size={28} /> : <Compass size={28} />}
           </div>
           <div className="dashboard-priority-copy" style={{ flexGrow: 1 }}>
-            <span className="dashboard-eyebrow" style={{ fontSize: "12px", color: "var(--color-primary)", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em" }}>
+            <span
+              className="dashboard-eyebrow"
+              style={{
+                fontSize: "12px",
+                color: "var(--color-primary)",
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+              }}
+            >
               {copy.todayPriority}
             </span>
             <h2 style={{ fontSize: "24px", fontWeight: 800, margin: "8px 0" }}>{priority.title}</h2>
-            <p style={{ fontSize: "16px", color: "var(--color-text-secondary)", margin: "0 0 16px" }}>{priority.description}</p>
-            <details style={{ background: "rgba(0,0,0,0.02)", padding: "12px 16px", borderRadius: "12px" }}>
-              <summary style={{ cursor: "pointer", fontWeight: 700, fontSize: "14px", color: "var(--color-primary)" }}>
+            <p
+              style={{ fontSize: "16px", color: "var(--color-text-secondary)", margin: "0 0 16px" }}
+            >
+              {priority.description}
+            </p>
+            <details
+              style={{ background: "rgba(0,0,0,0.02)", padding: "12px 16px", borderRadius: "12px" }}
+            >
+              <summary
+                style={{
+                  cursor: "pointer",
+                  fontWeight: 700,
+                  fontSize: "14px",
+                  color: "var(--color-primary)",
+                }}
+              >
                 {copy.whyThis}
               </summary>
-              <p style={{ marginTop: "8px", fontSize: "14px", color: "var(--color-text-secondary)", lineHeight: 1.5 }}>
+              <p
+                style={{
+                  marginTop: "8px",
+                  fontSize: "14px",
+                  color: "var(--color-text-secondary)",
+                  lineHeight: 1.5,
+                }}
+              >
                 {priority.priorityReason}
               </p>
             </details>
           </div>
           <div className="dashboard-priority-action" style={{ alignSelf: "center", flexShrink: 0 }}>
             {isRefresh ? (
-              <Button size="lg" onClick={onRefresh} style={{ height: "52px", borderRadius: "18px" }}>
+              <Button
+                size="lg"
+                onClick={onRefresh}
+                style={{ height: "52px", borderRadius: "18px" }}
+              >
                 {actionLabel(priority.actionType, locale)}
               </Button>
             ) : priority.destinationRoute ? (
               <Link
                 className="ds-button ds-button-primary ds-button-lg"
                 to={priority.destinationRoute}
-                style={{ height: "52px", borderRadius: "18px", display: "inline-flex", alignItems: "center", gap: "8px" }}
+                style={{
+                  height: "52px",
+                  borderRadius: "18px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
               >
                 {actionLabel(priority.actionType, locale)}
                 <ArrowRight size={18} />
@@ -218,15 +303,37 @@ export function SafetyNoticeCard({
           <ShieldAlert size={24} />
         </div>
         <div>
-          <div className="dashboard-safety-heading" style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
-            <h2 style={{ fontSize: "20px", fontWeight: 700, margin: 0, color: "var(--color-danger)" }}>{notice.title}</h2>
+          <div
+            className="dashboard-safety-heading"
+            style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}
+          >
+            <h2
+              style={{ fontSize: "20px", fontWeight: 700, margin: 0, color: "var(--color-danger)" }}
+            >
+              {notice.title}
+            </h2>
             {notice.planGenerationBlocked ? (
-              <Badge style={{ background: "rgba(239, 68, 68, 0.1)", color: "var(--color-danger)", border: "none" }}>
+              <Badge
+                style={{
+                  background: "rgba(239, 68, 68, 0.1)",
+                  color: "var(--color-danger)",
+                  border: "none",
+                }}
+              >
                 {copy.safetyBlocked}
               </Badge>
             ) : null}
           </div>
-          <p style={{ fontSize: "16px", color: "var(--color-text-secondary)", margin: 0, lineHeight: 1.6 }}>{notice.message}</p>
+          <p
+            style={{
+              fontSize: "16px",
+              color: "var(--color-text-secondary)",
+              margin: 0,
+              lineHeight: 1.6,
+            }}
+          >
+            {notice.message}
+          </p>
         </div>
       </Card>
     </motion.div>
@@ -249,66 +356,158 @@ export function AssessmentSummaryCard({
       transition={{ duration: 0.5 }}
       style={{ height: "100%" }}
     >
-      <Card className="dashboard-assessment-card" style={{ padding: "32px", borderRadius: "28px", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+      <Card
+        className="dashboard-assessment-card"
+        style={{
+          padding: "32px",
+          borderRadius: "28px",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
         <div>
-          <div className="dashboard-section-heading" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
+          <div
+            className="dashboard-section-heading"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              marginBottom: "20px",
+            }}
+          >
             <div>
-              <span className="dashboard-eyebrow" style={{ fontSize: "12px", color: "var(--color-primary)", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              <span
+                className="dashboard-eyebrow"
+                style={{
+                  fontSize: "12px",
+                  color: "var(--color-primary)",
+                  fontWeight: 800,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                }}
+              >
                 {copy.assessment}
               </span>
               <h2 style={{ fontSize: "24px", fontWeight: 800, margin: "4px 0" }}>
                 {dashboardStatusLabel(assessment.status, locale)}
               </h2>
             </div>
-            <Badge className={`dashboard-status status-${assessment.status}`} style={{
-              background: `rgba(${assessment.status === "completed" ? "34, 197, 94" : "245, 158, 11"}, 0.1)`,
-              color: `var(--color-${assessment.status === "completed" ? "success" : "warning"})`,
-              border: "none",
-              padding: "6px 12px",
-              fontWeight: 700
-            }}>
+            <Badge
+              className={`dashboard-status status-${assessment.status}`}
+              style={{
+                background: `rgba(${assessment.status === "completed" ? "34, 197, 94" : "245, 158, 11"}, 0.1)`,
+                color: `var(--color-${assessment.status === "completed" ? "success" : "warning"})`,
+                border: "none",
+                padding: "6px 12px",
+                fontWeight: 700,
+              }}
+            >
               {dashboardStatusLabel(assessment.status, locale)}
             </Badge>
           </div>
-          
+
           <div style={{ marginBottom: "24px" }}>
             <LinearProgress value={assessment.completionPercentage} label={copy.completion} />
           </div>
 
-          <div className="dashboard-metric-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "24px" }}>
-            <MetricCard style={{ background: "var(--color-background)", border: "1px solid var(--color-border)", padding: "20px" }}>
-              <span style={{ fontSize: "12px", color: "var(--color-text-secondary)", fontWeight: 700 }}>{copy.readiness}</span>
-              <strong style={{ fontSize: "28px", color: "var(--color-text-primary)", fontWeight: 800 }}>
+          <div
+            className="dashboard-metric-grid"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "16px",
+              marginBottom: "24px",
+            }}
+          >
+            <MetricCard
+              style={{
+                background: "var(--color-background)",
+                border: "1px solid var(--color-border)",
+                padding: "20px",
+              }}
+            >
+              <span
+                style={{ fontSize: "12px", color: "var(--color-text-secondary)", fontWeight: 700 }}
+              >
+                {copy.readiness}
+              </span>
+              <strong
+                style={{ fontSize: "28px", color: "var(--color-text-primary)", fontWeight: 800 }}
+              >
                 {assessment.readinessScore ?? copy.notCalculated}
               </strong>
-              {assessment.readinessScore !== null ? <small style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>/ 100</small> : null}
+              {assessment.readinessScore !== null ? (
+                <small style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>/ 100</small>
+              ) : null}
             </MetricCard>
-            <MetricCard style={{ background: "var(--color-background)", border: "1px solid var(--color-border)", padding: "20px" }}>
-              <span style={{ fontSize: "12px", color: "var(--color-text-secondary)", fontWeight: 700 }}>{copy.risk}</span>
-              <strong style={{ fontSize: "20px", color: "var(--color-text-primary)", fontWeight: 800 }}>
-                {assessment.riskLevel ? riskLabel(assessment.riskLevel, locale) : copy.notCalculated}
+            <MetricCard
+              style={{
+                background: "var(--color-background)",
+                border: "1px solid var(--color-border)",
+                padding: "20px",
+              }}
+            >
+              <span
+                style={{ fontSize: "12px", color: "var(--color-text-secondary)", fontWeight: 700 }}
+              >
+                {copy.risk}
+              </span>
+              <strong
+                style={{ fontSize: "20px", color: "var(--color-text-primary)", fontWeight: 800 }}
+              >
+                {assessment.riskLevel
+                  ? riskLabel(assessment.riskLevel, locale)
+                  : copy.notCalculated}
               </strong>
             </MetricCard>
           </div>
 
-          <div className="dashboard-missing-categories" style={{ borderTop: "1px solid var(--color-border)", paddingTop: "20px", marginBottom: "20px" }}>
-            <h3 style={{ fontSize: "14px", fontWeight: 700, margin: "0 0 12px" }}>{copy.missing}</h3>
+          <div
+            className="dashboard-missing-categories"
+            style={{
+              borderTop: "1px solid var(--color-border)",
+              paddingTop: "20px",
+              marginBottom: "20px",
+            }}
+          >
+            <h3 style={{ fontSize: "14px", fontWeight: 700, margin: "0 0 12px" }}>
+              {copy.missing}
+            </h3>
             {assessment.missingCategories.length ? (
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {assessment.missingCategories.map((category) => (
-                  <Badge key={category} style={{ background: "rgba(0,0,0,0.04)", color: "var(--color-text-secondary)" }}>
+                  <Badge
+                    key={category}
+                    style={{ background: "rgba(0,0,0,0.04)", color: "var(--color-text-secondary)" }}
+                  >
                     {categoryLabel(category, locale)}
                   </Badge>
                 ))}
               </div>
             ) : (
-              <p style={{ fontSize: "14px", color: "var(--color-text-secondary)", margin: 0 }}>{copy.noMissing}</p>
+              <p style={{ fontSize: "14px", color: "var(--color-text-secondary)", margin: 0 }}>
+                {copy.noMissing}
+              </p>
             )}
           </div>
         </div>
 
         {assessment.reassessmentRecommended ? (
-          <div className="dashboard-reassessment" role="status" style={{ background: "rgba(245, 158, 11, 0.05)", border: "1px solid rgba(245, 158, 11, 0.2)", color: "var(--color-warning)", padding: "12px 16px", borderRadius: "16px", fontSize: "14px", lineHeight: 1.5 }}>
+          <div
+            className="dashboard-reassessment"
+            role="status"
+            style={{
+              background: "rgba(245, 158, 11, 0.05)",
+              border: "1px solid rgba(245, 158, 11, 0.2)",
+              color: "var(--color-warning)",
+              padding: "12px 16px",
+              borderRadius: "16px",
+              fontSize: "14px",
+              lineHeight: 1.5,
+            }}
+          >
             {copy.reassessment}
           </div>
         ) : null}
@@ -320,9 +519,11 @@ export function AssessmentSummaryCard({
 export function FeatureStatusGrid({
   features,
   locale,
+  dashboard,
 }: {
   features: DashboardFeature[];
   locale: Locale;
+  dashboard: DashboardData;
 }) {
   const copy = dashboardCopy[locale];
 
@@ -343,20 +544,66 @@ export function FeatureStatusGrid({
     }
   };
 
+  const getFeatureMetrics = (feature: DashboardFeature): string[] => {
+    switch (feature.key) {
+      case "assessment":
+        return [
+          dashboardStatusLabel(dashboard.assessment.status, locale),
+          `${dashboard.assessment.completionPercentage}% ${copy.completion.toLowerCase()}`,
+        ];
+      case "workout":
+        return dashboard.workout
+          ? [
+              dashboard.workout.title,
+              dashboard.workout.focus,
+              `${dashboard.workout.completionPercentage}% complete`,
+            ]
+          : [];
+      case "nutrition":
+        return dashboard.nutrition
+          ? [
+              `${dashboard.nutrition.caloriesRemaining} kcal remaining`,
+              `${dashboard.nutrition.mealsCompleted}/${dashboard.nutrition.totalMeals} meals completed`,
+              `${dashboard.nutrition.waterConsumedMl}/${dashboard.nutrition.waterTargetMl} ml water`,
+            ]
+          : [];
+      case "progress":
+        return [
+          `${dashboard.progress.assessmentCompletion}% ${copy.completion.toLowerCase()}`,
+          `${dashboard.progress.profileCompleteness}% ${copy.profile.toLowerCase()}`,
+        ];
+      default:
+        return [];
+    }
+  };
+
+  const getStatusIcon = (status: DashboardFeature["status"]) => {
+    if (status === "available") return <CheckCircle2 size={15} aria-hidden="true" />;
+    if (status === "locked") return <LockKeyhole size={15} aria-hidden="true" />;
+    return <CircleAlert size={15} aria-hidden="true" />;
+  };
+
   return (
-    <section className="dashboard-modules" aria-labelledby="dashboard-modules-title" style={{ marginTop: "32px" }}>
+    <section
+      className="dashboard-modules"
+      aria-labelledby="dashboard-modules-title"
+      style={{ marginTop: "32px" }}
+    >
       <div className="dashboard-section-heading" style={{ marginBottom: "24px" }}>
         <div>
           <h2 id="dashboard-modules-title" style={{ fontSize: "24px", fontWeight: 800, margin: 0 }}>
             {copy.modules}
           </h2>
-          <p style={{ fontSize: "16px", color: "var(--color-text-secondary)", marginTop: "8px" }}>{copy.modulesBody}</p>
+          <p style={{ fontSize: "16px", color: "var(--color-text-secondary)", marginTop: "8px" }}>
+            {copy.modulesBody}
+          </p>
         </div>
       </div>
-      <div className="dashboard-feature-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px" }}>
+      <div className="dashboard-feature-grid">
         {features.map((feature, idx) => (
           <motion.div
             key={feature.key}
+            className={feature.key === "assessment" ? "dashboard-feature-primary" : undefined}
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -364,68 +611,39 @@ export function FeatureStatusGrid({
             whileHover={{ y: -4 }}
           >
             <Card
-              className={`dashboard-feature-card feature-${feature.status}`}
-              style={{
-                borderRadius: "28px",
-                padding: "32px",
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                background: "var(--color-surface)",
-                border: "1px solid var(--color-border)",
-                boxShadow: "var(--shadow-soft)",
-              }}
+              className={`dashboard-feature-card feature-${feature.status} ${feature.key === "assessment" ? "is-primary" : ""}`}
             >
               <div>
-                <div className="dashboard-feature-heading" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-                  <div
-                    className="dashboard-feature-icon"
-                    style={{
-                      width: "48px",
-                      height: "48px",
-                      borderRadius: "14px",
-                      display: "grid",
-                      placeItems: "center",
-                      background: feature.status === "available" ? "rgba(15, 118, 110, 0.08)" : "rgba(0,0,0,0.03)",
-                      color: feature.status === "available" ? "var(--color-primary)" : "var(--color-text-secondary)",
-                    }}
+                <div className="dashboard-feature-heading">
+                  <div className="dashboard-feature-icon">{getFeatureIcon(feature.key)}</div>
+                  <Badge
+                    className={`dashboard-feature-status status-${feature.status}`}
+                    aria-label={`Status: ${featureStatusLabel(feature.status, locale)}`}
                   >
-                    {getFeatureIcon(feature.key)}
-                  </div>
-                  <Badge style={{
-                    background: feature.status === "available" ? "rgba(34, 197, 94, 0.1)" : "rgba(0,0,0,0.05)",
-                    color: feature.status === "available" ? "var(--color-success)" : "var(--color-text-secondary)",
-                    border: "none",
-                    fontWeight: 700
-                  }}>
+                    {getStatusIcon(feature.status)}
                     {featureStatusLabel(feature.status, locale)}
                   </Badge>
                 </div>
-                <h3 style={{ fontSize: "20px", fontWeight: 800, margin: "0 0 8px" }}>{feature.title}</h3>
-                <p style={{ fontSize: "14px", color: "var(--color-text-secondary)", margin: "0 0 20px", lineHeight: 1.5 }}>
-                  {feature.reason}
-                </p>
+                <h3>{feature.title}</h3>
+                <p>{feature.reason}</p>
+                {getFeatureMetrics(feature).length ? (
+                  <ul className="dashboard-feature-metrics" aria-label={`${feature.title} details`}>
+                    {getFeatureMetrics(feature).map((metric) => (
+                      <li key={metric}>{metric}</li>
+                    ))}
+                  </ul>
+                ) : null}
               </div>
               {feature.destinationRoute ? (
                 <Link
                   to={feature.destinationRoute}
                   aria-label={`${copy.open}: ${feature.title}`}
-                  style={{
-                    color: "var(--color-primary)",
-                    fontWeight: 700,
-                    fontSize: "14px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "4px",
-                    textDecoration: "none",
-                    marginTop: "auto"
-                  }}
+                  className="dashboard-feature-action"
                 >
                   {copy.open} <ArrowRight size={16} />
                 </Link>
               ) : (
-                <span className="dashboard-unavailable" style={{ fontSize: "14px", color: "var(--color-text-muted)", marginTop: "auto" }}>
+                <span className="dashboard-unavailable" role="status">
                   {copy.notAvailable}
                 </span>
               )}
@@ -467,10 +685,19 @@ export function ProgressSnapshotCard({
         id="profile-summary"
         style={{ padding: "32px", borderRadius: "28px" }}
       >
-        <div className="dashboard-section-heading" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+        <div
+          className="dashboard-section-heading"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "20px",
+          }}
+        >
           <h2 style={{ fontSize: "20px", fontWeight: 700, margin: 0 }}>{copy.progress}</h2>
           <span style={{ fontSize: "12px", color: "var(--color-text-secondary)" }}>
-            {copy.defaultUnits}: <strong style={{ textTransform: "uppercase" }}>{user.preferredUnits}</strong>
+            {copy.defaultUnits}:{" "}
+            <strong style={{ textTransform: "uppercase" }}>{user.preferredUnits}</strong>
           </span>
         </div>
         <div className="dashboard-progress-list" style={{ display: "grid", gap: "20px" }}>
@@ -511,7 +738,9 @@ export function ProgressSnapshotCard({
             }}
           >
             <strong style={{ display: "block", marginBottom: "4px" }}>{copy.profileMissing}</strong>
-            <span style={{ color: "var(--color-text-secondary)" }}>{user.missingProfileFields.join(", ")}</span>
+            <span style={{ color: "var(--color-text-secondary)" }}>
+              {user.missingProfileFields.join(", ")}
+            </span>
           </div>
         ) : null}
       </Card>
@@ -530,8 +759,20 @@ export function QuickActions({
 }) {
   const copy = dashboardCopy[locale];
   return (
-    <section className="dashboard-quick-actions" aria-labelledby="dashboard-quick-title" style={{ marginTop: "32px", borderTop: "1px solid var(--color-border)", paddingTop: "24px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "20px" }}>
+    <section
+      className="dashboard-quick-actions"
+      aria-labelledby="dashboard-quick-title"
+      style={{ marginTop: "32px", borderTop: "1px solid var(--color-border)", paddingTop: "24px" }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "20px",
+        }}
+      >
         <h2 id="dashboard-quick-title" style={{ fontSize: "20px", fontWeight: 800, margin: 0 }}>
           {copy.quickActions}
         </h2>
@@ -542,7 +783,13 @@ export function QuickActions({
                 variant="ghost"
                 key={action.actionType}
                 onClick={onLogout}
-                style={{ borderRadius: "18px", minHeight: "48px", display: "flex", alignItems: "center", gap: "6px" }}
+                style={{
+                  borderRadius: "18px",
+                  minHeight: "48px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
               >
                 <HelpCircle size={18} />
                 <span>{actionLabel(action.actionType, locale)}</span>
@@ -563,4 +810,3 @@ export function QuickActions({
     </section>
   );
 }
-

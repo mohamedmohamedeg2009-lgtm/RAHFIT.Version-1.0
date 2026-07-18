@@ -40,17 +40,17 @@ export function DashboardHeader({ displayName, email }: DashboardHeaderProps) {
         </span>
       </Link>
       <nav className="dashboard-controls" aria-label={copy.dashboard}>
-        <Link 
-          className="ds-button ds-button-ghost ds-button-sm" 
+        <Link
+          className="ds-button ds-button-ghost ds-button-sm"
           to="/intelligent-workouts"
           style={{ fontWeight: 700 }}
         >
           {locale === "ar" ? "التدريب الذكي" : "Training"}
         </Link>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={toggleLocale} 
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={toggleLocale}
           aria-label={copy.language}
           style={{ display: "flex", alignItems: "center", gap: "6px" }}
         >
@@ -66,15 +66,21 @@ export function DashboardHeader({ displayName, email }: DashboardHeaderProps) {
         >
           {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
         </Button>
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => void logout().catch(() => undefined)}
           aria-label={copy.signOut}
         >
           <LogOut size={18} />
         </Button>
-        <div className="header-user-info" style={{ marginLeft: locale === "en" ? "12px" : "0", marginRight: locale === "ar" ? "12px" : "0" }}>
+        <div
+          className="header-user-info"
+          style={{
+            marginLeft: locale === "en" ? "12px" : "0",
+            marginRight: locale === "ar" ? "12px" : "0",
+          }}
+        >
           <div className="header-avatar" title={email}>
             {getInitials(displayName)}
           </div>
@@ -83,4 +89,3 @@ export function DashboardHeader({ displayName, email }: DashboardHeaderProps) {
     </header>
   );
 }
-

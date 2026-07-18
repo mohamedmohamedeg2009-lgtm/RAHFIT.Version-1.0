@@ -80,16 +80,28 @@ async def ensure_intelligent_workout_indexes(database: Any) -> None:
     )
 
 
-async def ensure_named_index(collection: Any, keys: Sequence[tuple[str, int]], name: str) -> None:
+async def ensure_named_index(
+    collection: Any,
+    keys: Sequence[tuple[str, int]],
+    name: str,
+    *,
+    unique: bool = False,
+    partial_filter: dict[str, object] | None = None,
+) -> None:
     """Create one owned index after safely resolving same-name definition drift."""
     indexes = await collection.index_information()
     existing = indexes.get(name)
     expected_keys = list(keys)
-    if existing and existing.get("key") == expected_keys:
+    expected_options: dict[str, object] = {"unique": True} if unique else {}
+    if partial_filter is not None:
+        expected_options["partialFilterExpression"] = partial_filter
+    if existing and existing.get("key") == expected_keys and all(
+        existing.get(key) == value for key, value in expected_options.items()
+    ):
         return
     if existing:
         await collection.drop_index(name)
-    await collection.create_index(expected_keys, name=name)
+    await collection.create_index(expected_keys, name=name, **expected_options)
 
 
 async def ensure_ai_conversation_indexes(database: Any) -> None:
@@ -209,15 +221,12 @@ async def initialize_indexes(database: AsyncIOMotorDatabase[dict[str, Any]]) -> 
 
 async def ensure_ai_decision_indexes(database: Any) -> None:
     decisions = database["ai_decisions"]
-    await decisions.create_index(
-        [("user_id", 1), ("effective_date", 1)],
+    await ensure_named_index(
+        decisions,
+        (("user_id", 1), ("effective_date", 1)),
+        "ai_decisions_one_active_per_user_date",
         unique=True,
-        partialFilterExpression={
-            "is_active": True,
-            "provider": {"$type": "string"},
-            "provider_subject": {"$type": "string"},
-        },
-        name="ai_decisions_one_active_per_user_date",
+        partial_filter={"is_active": True},
     )
     await decisions.create_index(
         [("user_id", 1), ("metadata.created_at", -1)],

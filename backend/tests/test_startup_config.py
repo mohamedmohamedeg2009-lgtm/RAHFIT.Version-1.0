@@ -54,6 +54,44 @@ def test_auth_routes_remain_registered_in_the_application_router() -> None:
     assert {"/auth/register", "/auth/login", "/auth/refresh", "/auth/me", "/auth/logout"} <= paths
 
 
+def test_health_route_reports_database_readiness_without_exposing_details(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    required_environment(monkeypatch)
+    get_settings.cache_clear()
+    from app.main import create_app
+
+    class Admin:
+        async def command(self, name: str) -> dict[str, int]:
+            assert name == "ping"
+            return {"ok": 1}
+
+    class Client:
+        admin = Admin()
+
+    class Database:
+        client = Client()
+
+    app = create_app()
+    app.state.database = Database()
+    response = TestClient(app).get("/health")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok", "database": "ok"}
+
+
+def test_health_route_returns_safe_database_failure(monkeypatch: pytest.MonkeyPatch) -> None:
+    required_environment(monkeypatch)
+    get_settings.cache_clear()
+    from app.main import create_app
+
+    response = TestClient(create_app()).get("/health")
+
+    assert response.status_code == 503
+    assert response.json()["code"] == "database_unavailable"
+    get_settings.cache_clear()
+
+
 def test_backend_configuration_starts_without_ai_key_when_ai_is_disabled_or_enabled(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -78,6 +116,7 @@ def test_ai_provider_and_conversation_routes_are_registered() -> None:
         "/ai-coach/conversations",
         "/ai-coach/conversations/{conversation_id}",
         "/ai-coach/conversations/{conversation_id}/close",
+        "/ai-coach/conversations/{conversation_id}/messages",
     }
 
 

@@ -22,5 +22,7 @@ export {
 } from "./Surfaces";
 export { Alert, EmptyState, ErrorState } from "./Feedback";
 export { Dialog, Drawer, Modal } from "./Overlay";
-export { CircularProgress, LinearProgress, StepProgress } from "./Progress";
+export { LinearProgress, StepProgress } from "./Progress";
+export { CircularProgress } from "./CircularProgress";
+export { TrendIndicator } from "./TrendIndicator";
 export { FullPageLoader, Skeleton, Spinner } from "./Loading";

@@ -1,6 +1,6 @@
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 
@@ -8,7 +8,12 @@ import { ProtectedRoute } from "../components/ProtectedRoute";
 import { AuthContext } from "../contexts/AuthContext";
 import { LocaleProvider } from "../contexts/LocaleContext";
 import DashboardPage from "../pages/dashboard/DashboardPage";
-import { setAccessToken, setRefreshHandler } from "../services/apiClient";
+import {
+  setAccessToken,
+  setRefreshHandler,
+  apiRequest,
+  ApiConnectionError,
+} from "../services/apiClient";
 import { ThemeProvider } from "../theme";
 import type { AuthContextValue, AuthUser } from "../types/auth";
 
@@ -207,6 +212,14 @@ describe("intelligent dashboard", () => {
     expect(screen.getByText("Assessment destination")).toBeInTheDocument();
   });
 
+  it("sends the authenticated token with the dashboard request", async () => {
+    renderDashboard();
+
+    await screen.findByRole("heading", { name: "Start your smart assessment" });
+    const [, options] = vi.mocked(window.fetch).mock.calls[0];
+    expect(new Headers(options?.headers).get("Authorization")).toBe("Bearer test-access-token");
+  });
+
   it("renders the resume priority and saved progress", async () => {
     renderDashboard({
       ...baseDashboard,
@@ -235,6 +248,95 @@ describe("intelligent dashboard", () => {
       "/assessment/resume/session-1",
     );
     expect(screen.getByText("Health and safety")).toBeInTheDocument();
+  });
+
+  it("renders Smart Assessment as the primary feature with its real status", async () => {
+    renderDashboard();
+
+    const assessmentCard = (
+      await screen.findByRole("heading", { name: "Smart assessment" })
+    ).closest(".dashboard-feature-card");
+    expect(assessmentCard).toHaveClass("is-primary");
+    expect(within(assessmentCard as HTMLElement).getByText("Action required")).toBeVisible();
+    expect(
+      within(assessmentCard as HTMLElement).getByText("0% assessment completion"),
+    ).toBeVisible();
+  });
+
+  it("shows the available workout plan using real dashboard values", async () => {
+    renderDashboard({
+      ...baseDashboard,
+      workout: {
+        plan_id: "plan-1",
+        day_id: "day-2",
+        title: "Strength foundation",
+        focus: "Full body",
+        status: "ready",
+        completion_percentage: 25,
+        destination_route: "/workouts/plan-1",
+        last_activity_at: null,
+      },
+      features: baseDashboard.features.map((feature) =>
+        feature.key === "workout"
+          ? { ...feature, status: "available", destination_route: "/workouts/plan-1" }
+          : feature,
+      ),
+    });
+
+    const workoutCard = (await screen.findByRole("heading", { name: "Workout planning" })).closest(
+      ".dashboard-feature-card",
+    );
+    expect(within(workoutCard as HTMLElement).getByText("Strength foundation")).toBeVisible();
+    expect(within(workoutCard as HTMLElement).getByText("25% complete")).toBeVisible();
+    expect(
+      within(workoutCard as HTMLElement).getByRole("link", { name: "Open: Workout planning" }),
+    ).toHaveAttribute("href", "/workouts/plan-1");
+  });
+
+  it("keeps nutrition, AI Coach, and reports honest when data or availability is missing", async () => {
+    renderDashboard({
+      ...baseDashboard,
+      features: baseDashboard.features.map((feature) => {
+        if (feature.key === "nutrition") {
+          return {
+            ...feature,
+            status: "available",
+            reason: "A nutrition plan has not been generated yet.",
+          };
+        }
+        return feature;
+      }),
+    });
+
+    const nutritionCard = (
+      await screen.findByRole("heading", { name: "Nutrition planning" })
+    ).closest(".dashboard-feature-card");
+    expect(
+      within(nutritionCard as HTMLElement).getByText(
+        "A nutrition plan has not been generated yet.",
+      ),
+    ).toBeVisible();
+    expect(
+      within(nutritionCard as HTMLElement).queryByLabelText("Nutrition planning details"),
+    ).not.toBeInTheDocument();
+
+    const coachCard = screen
+      .getByRole("heading", { name: "AI Coach" })
+      .closest(".dashboard-feature-card");
+    const reportsCard = screen
+      .getByRole("heading", { name: "Reports" })
+      .closest(".dashboard-feature-card");
+    expect(within(coachCard as HTMLElement).getByText("Locked")).toBeVisible();
+    expect(within(reportsCard as HTMLElement).getByText("Locked")).toBeVisible();
+  });
+
+  it("renders the feature grid in RTL when Arabic is selected", async () => {
+    window.localStorage.setItem("rahfit.locale", "ar");
+    renderDashboard();
+
+    await screen.findByRole("heading", { name: "Smart assessment" });
+    expect(document.documentElement).toHaveAttribute("dir", "rtl");
+    expect(document.querySelector(".dashboard-feature-grid")).toBeInTheDocument();
   });
 
   it("renders completed assessment scores and coming-soon modules", async () => {
@@ -349,6 +451,64 @@ describe("intelligent dashboard", () => {
     expect(window.fetch).toHaveBeenCalledTimes(2);
   });
 
+  it("keeps loaded dashboard content visible when a refresh fails", async () => {
+    const user = userEvent.setup();
+    const partial = {
+      ...baseDashboard,
+      daily_priority: {
+        ...baseDashboard.daily_priority,
+        action_type: "continue_available_feature",
+        title: "Dashboard data needs a refresh",
+        severity: "warning",
+      },
+      metadata: { ...baseDashboard.metadata, data_freshness: "partial", partial_data: true },
+    };
+    vi.spyOn(window, "fetch")
+      .mockResolvedValueOnce(new Response(JSON.stringify(partial), { status: 200 }))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ detail: "unavailable" }), { status: 503 }),
+      );
+    render(
+      <ThemeProvider>
+        <LocaleProvider>
+          <AuthContext.Provider value={authContext()}>
+            <MemoryRouter>
+              <DashboardPage />
+            </MemoryRouter>
+          </AuthContext.Provider>
+        </LocaleProvider>
+      </ThemeProvider>,
+    );
+
+    await screen.findByRole("heading", { name: "Dashboard data needs a refresh" });
+    await user.click(screen.getByRole("button", { name: "Refresh dashboard" }));
+    await screen.findByText("Your dashboard could not load");
+    expect(screen.getByRole("heading", { name: "Dashboard data needs a refresh" })).toBeVisible();
+  });
+
+  it("cancels an in-flight dashboard request when the page unmounts", async () => {
+    let capturedSignal: AbortSignal | undefined;
+    vi.spyOn(window, "fetch").mockImplementation((_input, options) => {
+      capturedSignal = options?.signal as AbortSignal;
+      return new Promise(() => undefined);
+    });
+    const view = render(
+      <ThemeProvider>
+        <LocaleProvider>
+          <AuthContext.Provider value={authContext()}>
+            <MemoryRouter>
+              <DashboardPage />
+            </MemoryRouter>
+          </AuthContext.Provider>
+        </LocaleProvider>
+      </ThemeProvider>,
+    );
+
+    await waitFor(() => expect(capturedSignal).toBeDefined());
+    view.unmount();
+    expect(capturedSignal?.aborted).toBe(true);
+  });
+
   it("renders a safe backend error state", async () => {
     vi.spyOn(window, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ detail: "internal detail" }), { status: 503 }),
@@ -387,5 +547,45 @@ describe("intelligent dashboard", () => {
 
     expect(screen.getByText("Login required")).toBeInTheDocument();
     expect(screen.queryByText("Dashboard private content")).not.toBeInTheDocument();
+  });
+
+  it("does not retry 4xx client responses", async () => {
+    let callCount = 0;
+    vi.spyOn(window, "fetch").mockImplementation(async () => {
+      callCount++;
+      return new Response(JSON.stringify({ detail: "bad request" }), { status: 400 });
+    });
+
+    await expect(apiRequest("/dashboard", { retries: 2, retryDelay: 1 })).rejects.toThrow();
+    expect(callCount).toBe(1);
+  });
+
+  it("retries 5xx server responses with exponential backoff", async () => {
+    let callCount = 0;
+    vi.spyOn(window, "fetch").mockImplementation(async () => {
+      callCount++;
+      return new Response(JSON.stringify({ detail: "server error" }), { status: 500 });
+    });
+
+    await expect(apiRequest("/dashboard", { retries: 2, retryDelay: 1 })).rejects.toThrow();
+    expect(callCount).toBe(3); // Initial call + 2 retries
+  });
+
+  it("respects and forwards AbortSignal user cancellation instantly without retry", async () => {
+    let callCount = 0;
+    vi.spyOn(window, "fetch").mockImplementation(async () => {
+      callCount++;
+      throw new DOMException("The user aborted a request.", "AbortError");
+    });
+
+    const controller = new AbortController();
+    controller.abort();
+
+    await expect(
+      apiRequest("/dashboard", { signal: controller.signal, retries: 2, retryDelay: 1 }),
+    ).rejects.toThrow(
+      new ApiConnectionError("The request was cancelled.", "network_or_cors_error"),
+    );
+    expect(callCount).toBe(0); // Should not even make the call since already aborted
   });
 });

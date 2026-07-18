@@ -1,9 +1,38 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useLocale } from "../../contexts/LocaleContext";
+
+interface GoogleCredentialResponse {
+  credential: string;
+}
+
+interface GoogleSignInOptions {
+  client_id: string;
+  callback: (response: GoogleCredentialResponse) => void;
+}
+
+interface GoogleButtonOptions {
+  type: "standard";
+  theme: "filled_dark";
+  size: "large";
+  text: "continue_with";
+  shape: "rectangular";
+  width: number;
+  locale: "ar" | "en";
+}
+
+interface GoogleIdentityServices {
+  accounts: {
+    id: {
+      initialize: (options: GoogleSignInOptions) => void;
+      renderButton: (parent: HTMLElement, options: GoogleButtonOptions) => void;
+    };
+  };
+}
+
 declare global {
   interface Window {
-    google: any;
+    google?: GoogleIdentityServices;
   }
 }
 
@@ -25,7 +54,7 @@ export function GoogleSignInButton() {
       try {
         window.google.accounts.id.initialize({
           client_id: clientId,
-          callback: async (response: { credential: string }) => {
+          callback: async (response) => {
             setLoading(true);
             setError(null);
             try {

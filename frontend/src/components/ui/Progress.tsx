@@ -29,23 +29,6 @@ export function LinearProgress({ value, max = 100, label }: ProgressProps) {
     </div>
   );
 }
-export function CircularProgress({ value, max = 100, label }: ProgressProps) {
-  const bounded = Math.min(Math.max(value, 0), max);
-  const percent = Math.round((bounded / max) * 100);
-  return (
-    <div
-      className="ds-circular-progress"
-      role="progressbar"
-      aria-valuenow={bounded}
-      aria-valuemin={0}
-      aria-valuemax={max}
-      aria-label={label ?? "Progress"}
-      style={{ "--progress": `${percent}%` } as React.CSSProperties}
-    >
-      <strong>{percent}%</strong>
-    </div>
-  );
-}
 export function StepProgress({
   current,
   total,

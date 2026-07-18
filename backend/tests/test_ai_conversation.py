@@ -436,3 +436,118 @@ async def test_conversation_operations_never_call_provider_or_log_content(
     await service.get_conversation("owner-user", conversation.id)
 
     assert secret_content not in caplog.text
+
+
+@pytest.mark.asyncio
+async def test_message_endpoints_require_authentication() -> None:
+    app = FastAPI()
+    app.include_router(router, prefix="/api/v1")
+    app.dependency_overrides[get_settings] = configured_settings
+    app.dependency_overrides[get_auth_service] = lambda: object()
+    conversation_id = "0" * 32
+
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://test"
+    ) as client:
+        responses = [
+            await client.get(f"/api/v1/ai-coach/conversations/{conversation_id}/messages"),
+            await client.post(
+                f"/api/v1/ai-coach/conversations/{conversation_id}/messages",
+                json={"content": "hello"},
+            ),
+        ]
+
+    assert all(response.status_code == 401 for response in responses)
+
+
+@pytest.mark.asyncio
+async def test_message_api_lifecycle_and_safety_checks() -> None:
+    from app.ai.exceptions import AISafetyError
+    from app.ai.provider import AITokenUsage
+    from app.ai.schemas import AIServiceResponse, AITextOutput
+    from app.controllers.ai_coach import get_ai_service
+    from app.models.ai_safety import AISafetyDecision, AISafetyReasonCode
+
+    service, _ = conversation_service()
+    current_user = {"value": authenticated_user("owner-user")}
+    app = FastAPI()
+    app.include_router(router, prefix="/api/v1")
+    app.dependency_overrides[get_current_user] = lambda: current_user["value"]
+    app.dependency_overrides[get_ai_conversation_service] = lambda: service
+
+    # Safe mock service
+    class MockAIService:
+        prepare_calls = 0
+        generation_calls = 0
+
+        async def prepare_text(self, user, request):
+            self.prepare_calls += 1
+            if "safety-trigger" in request.prompt:
+                raise AISafetyError(AISafetyReasonCode.URGENT_SYMPTOM.value)
+            return object(), object()
+
+        async def generate_prepared_text(self, request, provider_request, safety):
+            self.generation_calls += 1
+            return AIServiceResponse[AITextOutput](
+                output=AITextOutput(text="This is a safe and helpful coaching reply."),
+                provider="mock",
+                model="mock-model",
+                usage=AITokenUsage(input_tokens=5, output_tokens=5, total_tokens=10),
+                latency_ms=5,
+                provider_request_id="req-1",
+                safety_decision=AISafetyDecision.ALLOW,
+                safety_reason_code=AISafetyReasonCode.REQUEST_ALLOWED,
+            )
+
+    mock_ai_service = MockAIService()
+    app.dependency_overrides[get_ai_service] = lambda: mock_ai_service
+
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://test"
+    ) as client:
+        # 1. Create conversation
+        created = await client.post("/api/v1/ai-coach/conversations", json={"title": "Chat"})
+        conversation_id = created.json()["id"]
+
+        # 2. Get initial messages (should be empty list)
+        msgs_before = await client.get(f"/api/v1/ai-coach/conversations/{conversation_id}/messages")
+        assert msgs_before.status_code == 200
+        assert msgs_before.json() == []
+
+        # 3. Send valid message
+        sent = await client.post(
+            f"/api/v1/ai-coach/conversations/{conversation_id}/messages",
+            json={"content": "Please explain my workout plan."},
+        )
+        assert sent.status_code == 200
+        assert sent.json()["role"] == "assistant"
+        assert sent.json()["content"] == "This is a safe and helpful coaching reply."
+        assert mock_ai_service.generation_calls == 1
+
+        # 4. Get messages again (should have 2: user and assistant)
+        msgs_after = await client.get(f"/api/v1/ai-coach/conversations/{conversation_id}/messages")
+        assert msgs_after.status_code == 200
+        assert len(msgs_after.json()) == 2
+        assert msgs_after.json()[0]["role"] == "user"
+        assert msgs_after.json()[0]["content"] == "Please explain my workout plan."
+        assert msgs_after.json()[1]["role"] == "assistant"
+
+        # 5. Send message triggering safety warning
+        safety_refused = await client.post(
+            f"/api/v1/ai-coach/conversations/{conversation_id}/messages",
+            json={"content": "Please explain my workout safety-trigger."},
+        )
+        assert safety_refused.status_code == 400
+        assert safety_refused.json()["detail"]["code"] == "ai_safety_refusal"
+        assert mock_ai_service.generation_calls == 1
+
+        # 6. Close conversation
+        await client.post(f"/api/v1/ai-coach/conversations/{conversation_id}/close")
+
+        # 7. Try to send message on closed conversation (should fail)
+        closed_refused = await client.post(
+            f"/api/v1/ai-coach/conversations/{conversation_id}/messages",
+            json={"content": "hello?"},
+        )
+        assert closed_refused.status_code == 400
+        assert closed_refused.json()["detail"]["code"] == "ai_conversation_closed"

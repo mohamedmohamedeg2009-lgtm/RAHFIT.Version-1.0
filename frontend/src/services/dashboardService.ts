@@ -192,7 +192,7 @@ function mapDashboard(raw: RawDashboard): DashboardData {
 }
 
 export const dashboardService = {
-  async getDashboard(): Promise<DashboardData> {
-    return mapDashboard(await apiRequest<RawDashboard>("/dashboard"));
+  async getDashboard(options?: Parameters<typeof apiRequest>[1]): Promise<DashboardData> {
+    return mapDashboard(await apiRequest<RawDashboard>("/dashboard", options));
   },
 };

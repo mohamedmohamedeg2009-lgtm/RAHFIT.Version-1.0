@@ -809,8 +809,8 @@ def test_logs_include_only_safe_metadata(
     assert "ai_safety_evaluated" in caplog.text
 
 
-def test_no_public_safety_or_message_generation_endpoint_exists() -> None:
+def test_no_public_safety_endpoint_exists_and_messages_are_scoped_to_conversations() -> None:
     paths = {route.path for route in router.routes}
 
     assert all("safety" not in path for path in paths)
-    assert all(not path.endswith("/messages") for path in paths)
+    assert "/ai-coach/conversations/{conversation_id}/messages" in paths

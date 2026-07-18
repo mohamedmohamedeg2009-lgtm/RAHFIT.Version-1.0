@@ -2,6 +2,13 @@ const localApiBaseUrl = "http://127.0.0.1:8000/api/v1";
 
 export function normalizeApiBaseUrl(value: string | undefined): string {
   const candidate = value?.trim() || localApiBaseUrl;
+  if (candidate.startsWith("/")) {
+    const normalizedPath = candidate.replace(/\/+$/, "");
+    if (!normalizedPath.endsWith("/api/v1")) {
+      throw new Error("VITE_API_BASE_URL must include the /api/v1 prefix.");
+    }
+    return normalizedPath;
+  }
   let parsed: URL;
   try {
     parsed = new URL(candidate);
@@ -53,12 +60,33 @@ async function refreshOnce() {
   });
   return refreshing;
 }
-type ApiRequestOptions = Omit<RequestInit, "body"> & { body?: unknown; skipRefresh?: boolean };
+type ApiRequestOptions = Omit<RequestInit, "body"> & {
+  body?: unknown;
+  skipRefresh?: boolean;
+  retries?: number;
+  retryDelay?: number;
+};
 
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
-  const { body, headers, skipRefresh = false, ...init } = options;
+  const {
+    body,
+    headers,
+    skipRefresh = false,
+    retries = import.meta.env.MODE === "test" ? 0 : 2,
+    retryDelay = 500,
+    ...init
+  } = options;
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 12000);
+
+  if (options.signal) {
+    if (options.signal.aborted) {
+      window.clearTimeout(timeout);
+      throw new ApiConnectionError("The request was cancelled.", "network_or_cors_error");
+    }
+    options.signal.addEventListener("abort", () => controller.abort());
+  }
+
   try {
     const response = await fetch(`${baseUrl}${path}`, {
       ...init,
@@ -85,7 +113,7 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
           string | { code?: string; message?: string; details?: Array<Record<string, unknown>> };
       } | null;
       const nested = typeof data?.detail === "object" ? data.detail : null;
-      throw new ApiError(
+      const errorObj = new ApiError(
         data?.message ??
           nested?.message ??
           (typeof data?.detail === "string" ? data.detail : null) ??
@@ -94,14 +122,40 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
         data?.code ?? nested?.code,
         data?.details ?? nested?.details,
       );
+
+      // Retry on transient server-side errors (>= 500)
+      if (response.status >= 500 && retries > 0 && !options.signal?.aborted) {
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
+        return apiRequest<T>(path, {
+          ...options,
+          retries: retries - 1,
+          retryDelay: retryDelay * 2,
+        });
+      }
+
+      throw errorObj;
     }
     return payload as T;
   } catch (cause) {
-    if (cause instanceof ApiError || cause instanceof ApiConnectionError) throw cause;
-    if (cause instanceof DOMException && cause.name === "AbortError") {
-      throw new ApiConnectionError("The request timed out.", "request_timeout");
+    if (cause instanceof ApiError) throw cause;
+
+    let connError: ApiConnectionError;
+    if (options.signal?.aborted) {
+      connError = new ApiConnectionError("The request was cancelled.", "network_or_cors_error");
+    } else if (cause instanceof DOMException && cause.name === "AbortError") {
+      connError = new ApiConnectionError("The request timed out.", "request_timeout");
+    } else if (cause instanceof ApiConnectionError) {
+      connError = cause;
+    } else {
+      connError = new ApiConnectionError("The API could not be reached.", "network_or_cors_error");
     }
-    throw new ApiConnectionError("The API could not be reached.", "network_or_cors_error");
+
+    if (retries > 0 && !options.signal?.aborted) {
+      await new Promise((resolve) => setTimeout(resolve, retryDelay));
+      return apiRequest<T>(path, { ...options, retries: retries - 1, retryDelay: retryDelay * 2 });
+    }
+
+    throw connError;
   } finally {
     window.clearTimeout(timeout);
   }

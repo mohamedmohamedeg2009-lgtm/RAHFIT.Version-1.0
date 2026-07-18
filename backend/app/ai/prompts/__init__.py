@@ -1,1 +1,1 @@
-"""Reserved package for future reviewed prompt templates and versioning."""
+"""Reserved package for reviewed, versioned prompt templates."""

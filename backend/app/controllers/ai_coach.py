@@ -1,13 +1,33 @@
 from typing import Annotated, Any, NoReturn, cast
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, Response, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.ai.conversation_limits import AI_CONVERSATION_LIMITS
+from app.ai.resolver import AIProviderResolver
+from app.ai.schemas import AIServiceRequest
+from app.ai.service import AIService
 from app.config import Settings, get_settings
+from app.context import UserIntelligenceContextBuilder
 from app.controllers.auth import get_current_user
-from app.models.ai_conversation import CONVERSATION_ID_PATTERN, AIConversation, AIMessage
+from app.health import HealthProfileRepository
+from app.models.ai_context import AIContextPurpose, AIContextRequest
+from app.models.ai_conversation import (
+    CONVERSATION_ID_PATTERN,
+    AIConversation,
+    AIConversationStatus,
+    AIMessage,
+)
+from app.models.ai_policy import (
+    AIAction,
+    AICapability,
+    AIForbiddenAction,
+    AIPolicyDecision,
+)
 from app.models.user import User
+from app.profile import UserProfileRepository
+from app.readiness import ReadinessChecker
 from app.repositories.ai_conversations import AIConversationRepository, AIMessageRepository
 from app.schemas.ai_conversation import (
     AIConversationDetailResponse,
@@ -18,6 +38,7 @@ from app.schemas.ai_conversation import (
 )
 from app.schemas.ai_provider import AIAvailabilityResponse
 from app.services.ai_availability import AIAvailabilityService
+from app.services.ai_classifier import CapabilityClassifier
 from app.services.ai_conversation import (
     AIConversationLimitError,
     AIConversationNotFoundError,
@@ -25,6 +46,9 @@ from app.services.ai_conversation import (
     AIConversationStateError,
     AIConversationValidationError,
 )
+from app.services.ai_policy import AIPolicyService
+from app.services.ai_safety import AISafetyEngine
+from app.users.service import UserIntelligenceService
 
 router = APIRouter(prefix="/ai-coach", tags=["AI Provider Infrastructure"])
 
@@ -40,6 +64,25 @@ def get_ai_conversation_service(request: Request) -> AIConversationService:
     return AIConversationService(
         AIConversationRepository(database),
         AIMessageRepository(database),
+    )
+
+
+def get_ai_service(
+    request: Request,
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> AIService | None:
+    database = cast(AsyncIOMotorDatabase[dict[str, Any]], request.app.state.database.database)
+    resolution = AIProviderResolver(settings).resolve()
+    if resolution.provider is None:
+        return None
+    intelligence = UserIntelligenceService(
+        UserProfileRepository(database),
+        HealthProfileRepository(database),
+    )
+    return AIService(
+        provider=resolution.provider,
+        context_builder=UserIntelligenceContextBuilder(intelligence, ReadinessChecker()),
+        safety_engine=AISafetyEngine(),
     )
 
 
@@ -218,3 +261,134 @@ async def delete_ai_conversation(
 ) -> Response:
     await service.delete_conversation(user.id, conversation_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+# Intentionally not decorated: Phase A keeps free-form generation internal only.
+async def send_ai_conversation_message(
+    conversation_id: Annotated[str, Path(pattern=CONVERSATION_ID_PATTERN)],
+    body: Any,
+    user: Annotated[User, Depends(get_current_user)],
+    service: Annotated[AIConversationService, Depends(get_ai_conversation_service)],
+    ai_service: Annotated[Any, Depends(get_ai_service)],
+) -> AIMessageResponse:
+    try:
+        detail = await service.get_conversation(user.id, conversation_id)
+    except Exception as exc:
+        _translate_conversation_error(exc)
+
+    if detail.conversation.status != AIConversationStatus.ACTIVE:
+        _error(
+            status.HTTP_400_BAD_REQUEST,
+            "ai_conversation_closed",
+            "Cannot send messages to a closed or deleted conversation.",
+        )
+
+    try:
+        classification = CapabilityClassifier().classify(body.content)
+    except Exception as exc:
+        _error(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "ai_classification_failed",
+            str(exc),
+        )
+
+    capability = classification.capability
+    if isinstance(capability, AICapability):
+        policy_actions = {
+            AICapability.EXPLAIN_ASSESSMENT: AIAction.EXPLAIN,
+            AICapability.EXPLAIN_WORKOUT: AIAction.EXPLAIN,
+            AICapability.EXPLAIN_NUTRITION: AIAction.EXPLAIN,
+            AICapability.EXPLAIN_PROGRESS: AIAction.EXPLAIN,
+            AICapability.MOTIVATE: AIAction.ENCOURAGE,
+            AICapability.SUMMARIZE: AIAction.SUMMARIZE,
+            AICapability.SUGGEST_WORKOUT_ALTERNATIVE: AIAction.RECOMMEND,
+            AICapability.SUGGEST_NUTRITION_ALTERNATIVE: AIAction.RECOMMEND,
+        }
+        action = policy_actions.get(capability, AIAction.EXPLAIN)
+        policy = AIPolicyService().evaluate(capability, action)
+
+        if capability in {
+            AICapability.EXPLAIN_NUTRITION,
+            AICapability.SUGGEST_NUTRITION_ALTERNATIVE,
+        }:
+            purpose = AIContextPurpose.GENERAL_NUTRITION_QUESTION
+        elif capability == AICapability.MOTIVATE:
+            purpose = AIContextPurpose.SAFE_MOTIVATION
+        else:
+            purpose = AIContextPurpose.GENERAL_FITNESS_QUESTION
+    else:
+        policy = AIPolicyService().evaluate(
+            AICapability.EXPLAIN_ASSESSMENT,
+            AIForbiddenAction.DIAGNOSE_MEDICAL_CONDITION,
+        )
+        purpose = AIContextPurpose.GENERAL_FITNESS_QUESTION
+
+    if policy.decision in {AIPolicyDecision.DENY, AIPolicyDecision.PROFESSIONAL_GUIDANCE_REQUIRED}:
+        _error(
+            status.HTTP_400_BAD_REQUEST,
+            "ai_policy_refusal",
+            "This request cannot be handled by AI coaching. Please seek appropriate professional guidance.",
+        )
+
+    if ai_service is None:
+        _error(
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+            "ai_provider_unavailable",
+            "AI coaching features are not configured on this server.",
+        )
+
+    from app.ai.prompts.ai_coach import build_ai_coach_system_instructions
+
+    system_instructions = build_ai_coach_system_instructions()
+
+    request = AIServiceRequest(
+        prompt=body.content,
+        system_instructions=system_instructions,
+        context_request=AIContextRequest(
+            purpose=purpose,
+            current_user_question=body.content,
+            conversation_id=conversation_id,
+            include_conversation_context=True,
+        ),
+        classification=classification,
+        policy=policy,
+        request_id=uuid4().hex,
+        locale="en",
+    )
+
+    try:
+        provider_request, safety = await ai_service.prepare_text(user, request)
+    except Exception as exc:
+        _translate_conversation_error(exc)
+
+    try:
+        await service.append_user_message(user.id, conversation_id, body.content)
+    except Exception as exc:
+        _translate_conversation_error(exc)
+
+    try:
+        ai_response = await ai_service.generate_prepared_text(request, provider_request, safety)
+    except Exception as exc:
+        _translate_conversation_error(exc)
+
+    try:
+        stored_assistant = await service.append_assistant_message(
+            user.id, conversation_id, ai_response.output.text
+        )
+    except Exception as exc:
+        _translate_conversation_error(exc)
+
+    return _message(stored_assistant)
+
+
+# Kept as an internal helper only until Phase B defines the public message contract.
+async def get_ai_conversation_messages(
+    conversation_id: Annotated[str, Path(pattern=CONVERSATION_ID_PATTERN)],
+    user: Annotated[User, Depends(get_current_user)],
+    service: Annotated[AIConversationService, Depends(get_ai_conversation_service)],
+) -> list[AIMessageResponse]:
+    try:
+        detail = await service.get_conversation(user.id, conversation_id)
+    except Exception as exc:
+        _translate_conversation_error(exc)
+    return [_message(item) for item in detail.messages]

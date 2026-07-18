@@ -64,7 +64,24 @@ class AIService:
         authenticated_user: User,
         request: AIServiceRequest,
     ) -> AIServiceResponse[AITextOutput]:
-        provider_request, safety = await self._prepare(authenticated_user, request)
+        provider_request, safety = await self.prepare_text(authenticated_user, request)
+        return await self.generate_prepared_text(request, provider_request, safety)
+
+    async def prepare_text(
+        self,
+        authenticated_user: User,
+        request: AIServiceRequest,
+    ) -> tuple[AIProviderRequest, AISafetyResult]:
+        """Build approved provider input and enforce safety without provider I/O."""
+        return await self._prepare(authenticated_user, request)
+
+    async def generate_prepared_text(
+        self,
+        request: AIServiceRequest,
+        provider_request: AIProviderRequest,
+        safety: AISafetyResult,
+    ) -> AIServiceResponse[AITextOutput]:
+        """Generate from already-approved provider input exactly once."""
         try:
             response = await self.provider.generate_text(provider_request)
             output = AITextOutput(text=response.text)

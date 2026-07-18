@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from typing import Any, cast
 
 import structlog
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -54,6 +54,26 @@ def create_app() -> FastAPI:
     app.add_exception_handler(StarletteHTTPException, cast(Any, http_exception_handler))
     app.add_exception_handler(RequestValidationError, cast(Any, validation_exception_handler))
     app.add_exception_handler(Exception, unhandled_exception_handler)
+
+    @app.get("/health", tags=["Health"], summary="Check application and database availability")
+    async def health() -> dict[str, str]:
+        """Expose a secret-free readiness probe without requiring authentication."""
+        database = getattr(app.state, "database", None)
+        client = getattr(database, "client", None)
+        if client is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={"code": "database_unavailable", "message": "Database is unavailable."},
+            )
+        try:
+            await client.admin.command("ping")
+        except Exception as exc:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={"code": "database_unavailable", "message": "Database is unavailable."},
+            ) from exc
+        return {"status": "ok", "database": "ok"}
+
     app.include_router(router, prefix=settings.api_v1_prefix)
     return app
 

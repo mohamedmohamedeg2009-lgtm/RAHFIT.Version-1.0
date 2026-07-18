@@ -64,7 +64,7 @@ export function DashboardHero({ data, locale }: DashboardHeroProps) {
   const { user, assessment, nutrition, progress } = data;
 
   const currentHour = new Date().getHours();
-  let greeting = "";
+  let greeting: string;
   if (locale === "ar") {
     greeting = currentHour < 12 ? "صباح الخير" : "طاب مساؤك";
   } else {

@@ -54,6 +54,7 @@ const WorkoutSessionHistoryPage = lazy(
 );
 const ForgotPasswordPage = lazy(() => import("../pages/auth/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("../pages/auth/ResetPasswordPage"));
+const AICoachPage = lazy(() => import("../pages/aiCoach/AICoachPage"));
 
 /** Sets document.title while a route is active. */
 function RouteTitle({ en, ar }: { en: string; ar: string }) {
@@ -161,6 +162,15 @@ export function App() {
               <Route path="/workouts/:planId/session/:dayId" element={<WorkoutSessionPage />} />
               <Route path="/nutrition" element={<NutritionPage />} />
               <Route path="/nutrition/history" element={<NutritionHistoryPage />} />
+              <Route
+                path="/ai-coach"
+                element={
+                  <>
+                    <RouteTitle en="AI Coach" ar="المدرب الذكي" />
+                    <AICoachPage />
+                  </>
+                }
+              />
               <Route
                 path="/intelligent-workouts"
                 element={
