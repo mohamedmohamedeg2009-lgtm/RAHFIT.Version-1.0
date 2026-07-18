@@ -52,8 +52,6 @@ const WorkoutPlanHistoryPage = lazy(
 const WorkoutSessionHistoryPage = lazy(
   () => import("../pages/intelligentWorkout/WorkoutSessionHistoryPage"),
 );
-const ForgotPasswordPage = lazy(() => import("../pages/auth/ForgotPasswordPage"));
-const ResetPasswordPage = lazy(() => import("../pages/auth/ResetPasswordPage"));
 const AICoachPage = lazy(() => import("../pages/aiCoach/AICoachPage"));
 
 /** Sets document.title while a route is active. */
@@ -124,24 +122,6 @@ export function App() {
                   <>
                     <RouteTitle en="Create account" ar="إنشاء حساب" />
                     <RegisterPage />
-                  </>
-                }
-              />
-              <Route
-                path="/forgot-password"
-                element={
-                  <>
-                    <RouteTitle en="Forgot password" ar="نسيت كلمة المرور" />
-                    <ForgotPasswordPage />
-                  </>
-                }
-              />
-              <Route
-                path="/reset-password"
-                element={
-                  <>
-                    <RouteTitle en="Reset password" ar="إعادة تعيين كلمة المرور" />
-                    <ResetPasswordPage />
                   </>
                 }
               />

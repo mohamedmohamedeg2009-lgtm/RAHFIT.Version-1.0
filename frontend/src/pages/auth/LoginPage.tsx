@@ -81,25 +81,6 @@ export function LoginPage() {
           onChange={setPassword}
           autoComplete="current-password"
         />
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            marginBottom: "1.5rem",
-            marginTop: "-0.5rem",
-          }}
-        >
-          <Link
-            to="/forgot-password"
-            style={{
-              fontSize: "0.875rem",
-              color: "var(--color-primary)",
-              textDecoration: "none",
-            }}
-          >
-            {locale === "ar" ? "هل نسيت كلمة المرور؟" : "Forgot password?"}
-          </Link>
-        </div>
         <button
           className="button button-primary button-full"
           type="submit"

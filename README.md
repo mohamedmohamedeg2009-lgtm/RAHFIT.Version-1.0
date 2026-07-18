@@ -61,7 +61,7 @@ Generic fitness advice can ignore readiness, injury declarations, dietary prefer
 
 ## Implemented Features
 
-- Password authentication, JWT access/refresh flow, Google ID-token integration, password reset, and session revocation.
+- Password authentication, JWT access/refresh flow, Google ID-token integration, and session revocation.
 - Owner-isolated MongoDB persistence for users, assessments, workout plans/sessions, nutrition plans/logs, dashboards, and AI conversation records.
 - Adaptive assessment, health/profile readiness checks, safety states, and dashboard aggregation.
 - Deterministic workout generation, session recording, recovery-aware adaptation recommendations, and nutrition targets/logging.

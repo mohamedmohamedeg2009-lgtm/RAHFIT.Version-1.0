@@ -22,13 +22,6 @@ export const authService = {
     save(await apiRequest<ApiTokens>("/auth/login", { method: "POST", body: credentials })),
   loginWithGoogle: async (credential: string) =>
     save(await apiRequest<ApiTokens>("/auth/google", { method: "POST", body: { credential } })),
-  forgotPassword: (email: string) =>
-    apiRequest<{ message: string }>("/auth/forgot-password", { method: "POST", body: { email } }),
-  resetPassword: (token: string, password: string, passwordConfirmation: string) =>
-    apiRequest<{ message: string }>("/auth/reset-password", {
-      method: "POST",
-      body: { token, password, password_confirmation: passwordConfirmation },
-    }),
   async refreshSession() {
     const refreshToken = tokenStore.get();
     if (!refreshToken) return false;

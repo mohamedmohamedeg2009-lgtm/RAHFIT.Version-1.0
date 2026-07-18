@@ -23,6 +23,7 @@ export default function AICoachPage() {
   const { locale } = useLocale();
   const { user } = useAuth();
   const copy = dashboardCopy[locale];
+  const messageSendingEnabled = false;
 
   const [available, setAvailable] = useState<boolean>(true);
   const [conversations, setConversations] = useState<AIConversation[]>([]);
@@ -135,6 +136,10 @@ export default function AICoachPage() {
 
   // 7. Send user message
   const handleSendMessage = async (textToSend?: string) => {
+    if (!messageSendingEnabled) {
+      setError("AI Coach messaging is not available in this deployment.");
+      return;
+    }
     const text = (textToSend || input).trim();
     if (!text || !selectedId || submitting) return;
 
@@ -331,18 +336,21 @@ export default function AICoachPage() {
                     <button
                       className="coach-suggested-card"
                       onClick={() => void handleSendMessage(copy.suggestedPromptWorkout)}
+                      disabled={!messageSendingEnabled}
                     >
                       {copy.suggestedPromptWorkout}
                     </button>
                     <button
                       className="coach-suggested-card"
                       onClick={() => void handleSendMessage(copy.suggestedPromptHydration)}
+                      disabled={!messageSendingEnabled}
                     >
                       {copy.suggestedPromptHydration}
                     </button>
                     <button
                       className="coach-suggested-card"
                       onClick={() => void handleSendMessage(copy.suggestedPromptRest)}
+                      disabled={!messageSendingEnabled}
                     >
                       {copy.suggestedPromptRest}
                     </button>
@@ -399,6 +407,11 @@ export default function AICoachPage() {
           {/* Composer Form */}
           {selectedId && available && (
             <div className="coach-composer-container">
+              {!messageSendingEnabled && (
+                <p className="text-sm text-slate-500" role="status">
+                  AI Coach messaging is not available in this deployment.
+                </p>
+              )}
               {isClosed ? (
                 <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-500 flex items-center gap-2">
                   <Lock size={16} />
@@ -419,7 +432,7 @@ export default function AICoachPage() {
                       placeholder={copy.inputPlaceholder}
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
-                      disabled={submitting}
+                      disabled={submitting || !messageSendingEnabled}
                       required
                     />
                   </div>
@@ -427,7 +440,7 @@ export default function AICoachPage() {
                     type="submit"
                     className="ds-button ds-button-primary"
                     aria-label={copy.sendButton}
-                    disabled={submitting || !input.trim()}
+                    disabled={submitting || !input.trim() || !messageSendingEnabled}
                     style={{ height: "48px", width: "48px", borderRadius: "12px", padding: 0 }}
                   >
                     <Send
