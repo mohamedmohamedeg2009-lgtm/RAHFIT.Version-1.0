@@ -7,6 +7,7 @@ export interface AuthUser {
   id: string;
   email: string;
   is_active: boolean;
+  role?: "user" | "admin";
   created_at: string;
 }
 export interface AuthCredentials {

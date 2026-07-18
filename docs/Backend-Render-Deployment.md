@@ -35,3 +35,18 @@ browser code.
 
 For Atlas setup and index verification, see
 [MongoDB Atlas Deployment](MongoDB-Atlas-Deployment.md).
+
+## Create an administrator
+
+There is no Admin dashboard in the competition scope. Create or promote an
+administrator only from a Render Shell (or a trusted local shell using the same
+Atlas database):
+
+```powershell
+$env:ADMIN_EMAIL="admin@your-domain.example"
+$env:ADMIN_PASSWORD="Choose-a-unique-strong-password-123"
+python scripts/create_admin.py
+```
+
+The script never creates a default account, never prints the password, and
+requires a password of at least 12 characters containing letters and numbers.

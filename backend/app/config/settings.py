@@ -92,7 +92,7 @@ class Settings(BaseSettings):
     @classmethod
     def parse_origins(cls, value: str | list[str]) -> list[str]:
         if isinstance(value, str):
-            return [origin.strip() for origin in value.split(",") if origin.strip()]
+            return [origin.strip().rstrip("/") for origin in value.split(",") if origin.strip()]
         return value
 
     @field_validator("mongodb_database", "mongodb_app_name", mode="before")

@@ -26,6 +26,7 @@ class UserRepository:
                 str(document["preferred_units"]) if document.get("preferred_units") else None
             ),
             is_active=bool(document["is_active"]),
+            role=str(document.get("role", "user")),
             token_version=int(document.get("token_version", 0)),
             created_at=document["created_at"],
             updated_at=document["updated_at"],
@@ -40,6 +41,7 @@ class UserRepository:
             "email": email,
             "password_hash": password_hash,
             "is_active": True,
+            "role": "user",
             "token_version": 0,
             "created_at": now,
             "updated_at": now,
@@ -60,6 +62,7 @@ class UserRepository:
             "password_hash": "",  # Locked password hash for oauth only user
             "display_name": display_name,
             "is_active": True,
+            "role": "user",
             "token_version": 0,
             "created_at": now,
             "updated_at": now,
@@ -125,6 +128,16 @@ class UserRepository:
             },
         )
         return result.modified_count == 1
+
+    async def set_role(self, user_id: str, role: str) -> User | None:
+        if not ObjectId.is_valid(user_id):
+            return None
+        document = await self.collection.find_one_and_update(
+            {"_id": ObjectId(user_id)},
+            {"$set": {"role": role, "updated_at": datetime.now(UTC)}},
+            return_document=ReturnDocument.AFTER,
+        )
+        return self._to_user(document) if document else None
 
     async def increment_token_version(self, user_id: str, expected_version: int) -> User | None:
         if not ObjectId.is_valid(user_id):

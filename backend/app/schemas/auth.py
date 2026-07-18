@@ -4,6 +4,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 
 class RegisterRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     email: str = Field(min_length=3, max_length=254, examples=["user@example.com"])
     password: str = Field(min_length=12, max_length=128, examples=["strong-password-123"])
 
@@ -37,6 +39,7 @@ class UserResponse(BaseModel):
     id: str
     email: str
     is_active: bool
+    role: str
     created_at: datetime
 
 

@@ -55,7 +55,7 @@ def test_cors_origins_are_parsed_from_the_production_environment(
     required_environment(monkeypatch)
     monkeypatch.setenv(
         "ALLOWED_ORIGINS",
-        "https://app.example.com, https://preview.example.com ",
+        "https://app.example.com/, https://preview.example.com/ ",
     )
 
     settings = Settings(_env_file=None)
