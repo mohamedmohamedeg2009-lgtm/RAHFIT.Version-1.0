@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 from fastapi import FastAPI, HTTPException, status
+from fastapi.routing import APIRoute
 from fastapi.testclient import TestClient
 
 from app.controllers.auth import get_current_user
@@ -342,6 +343,6 @@ def test_adaptation_endpoint_returns_recommendation_without_plan_mutation() -> N
 def test_legacy_and_intelligent_workout_routes_are_both_registered() -> None:
     from app.api.router import router as application_router
 
-    paths = {route.path for route in application_router.routes}
+    paths = {route.path for route in application_router.routes if isinstance(route, APIRoute)}
     assert "/workouts/current" in paths
     assert "/intelligent-workouts/plans/generate" in paths

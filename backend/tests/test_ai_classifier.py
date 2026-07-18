@@ -2,6 +2,7 @@ from copy import deepcopy
 from inspect import signature
 
 import pytest
+from fastapi.routing import APIRoute
 
 from app.ai.providers import OpenAICompatibleProvider
 from app.api.router import router
@@ -262,6 +263,6 @@ def test_classifier_accepts_only_message_and_cannot_mutate_context() -> None:
 
 
 def test_classifier_adds_no_public_api_route() -> None:
-    paths = {route.path for route in router.routes}
+    paths = {route.path for route in router.routes if isinstance(route, APIRoute)}
 
     assert all("classif" not in path for path in paths)

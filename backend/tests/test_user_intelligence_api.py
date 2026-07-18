@@ -208,7 +208,7 @@ def test_existing_put_contracts_remain_unchanged() -> None:
 def test_openapi_exposes_stable_read_operation_ids_and_safe_schemas() -> None:
     app = FastAPI()
     app.include_router(router, prefix="/api/v1")
-    schema = cast(dict[str, Any], app.openapi())
+    schema = app.openapi()
     paths = cast(dict[str, Any], schema["paths"])
 
     assert paths["/api/v1/user-intelligence/profile"]["get"]["operationId"] == (

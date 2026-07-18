@@ -1,5 +1,3 @@
-from typing import Any, cast
-
 import httpx
 import pytest
 from fastapi import FastAPI
@@ -24,13 +22,12 @@ from app.services.ai_availability import AIAvailabilityService
 
 def configured_settings(**overrides: object) -> Settings:
     values: dict[str, object] = {
-        "_env_file": None,
         "mongodb_uri": "mongodb://localhost:27017",
         "mongodb_database": "rahfit_test",
         "jwt_secret_key": "a" * 32,
     }
     values.update(overrides)
-    return cast(Any, Settings)(**values)
+    return Settings.model_validate(values)
 
 
 def authenticated_user() -> User:

@@ -5,11 +5,13 @@ import pytest
 from app.models.assessment import AssessmentResult, QuestionCategory, SafetyStatus
 from app.models.workout import (
     Equipment,
+    ExerciseProgress,
     ExperienceLevel,
     TrainingGoal,
     TrainingLocation,
     WorkoutGenerationInput,
     WorkoutPlan,
+    WorkoutProgress,
     WorkoutSession,
     WorkoutSessionStatus,
 )
@@ -161,7 +163,10 @@ class FakeWorkoutStore:
         return session
 
     async def update_exercise_progress(
-        self, session: WorkoutSession, exercise_progress: tuple, progress: object
+        self,
+        session: WorkoutSession,
+        exercise_progress: tuple[ExerciseProgress, ...],
+        progress: WorkoutProgress,
     ) -> WorkoutSession | None:
         saved = session.model_copy(
             update={
@@ -174,7 +179,7 @@ class FakeWorkoutStore:
         return saved
 
     async def complete_session(
-        self, session: WorkoutSession, progress: object
+        self, session: WorkoutSession, progress: WorkoutProgress
     ) -> WorkoutSession | None:
         saved = session.model_copy(
             update={

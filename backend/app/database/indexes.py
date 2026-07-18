@@ -1,4 +1,4 @@
-﻿from collections.abc import Sequence
+from collections.abc import Sequence
 from typing import Any
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
@@ -36,6 +36,54 @@ INTELLIGENT_WORKOUT_GENERATION_KEYS: tuple[tuple[str, int], ...] = (
     ("generation_metadata.generation_key", 1),
     ("version", -1),
 )
+REQUIRED_INDEXES: dict[str, frozenset[str]] = {
+    "users": frozenset({"users_email_unique", "users_provider_subject_unique"}),
+    "user_profiles": frozenset({"user_profiles_user_unique"}),
+    "health_profiles": frozenset({"health_profiles_user_unique"}),
+    "intelligent_workout_plans": frozenset(
+        {
+            "intelligent_workout_plans_plan_id_unique",
+            "intelligent_workout_plans_one_active_per_user",
+            "intelligent_workout_plans_owner_history",
+            "intelligent_workout_plans_owner_status",
+            INTELLIGENT_WORKOUT_GENERATION_INDEX,
+        }
+    ),
+    "intelligent_workout_sessions": frozenset(
+        {
+            "intelligent_workout_sessions_session_id_unique",
+            "intelligent_workout_sessions_owner_plan_history",
+            "intelligent_workout_sessions_owner_status",
+        }
+    ),
+    "ai_conversations": frozenset(name for name, _ in AI_CONVERSATION_INDEXES),
+    "ai_messages": frozenset(name for name, _ in AI_MESSAGE_INDEXES),
+    "assessment_questions": frozenset(
+        {"assessment_questions_version_question_unique", "assessment_questions_active_order"}
+    ),
+    "assessment_sessions": frozenset(
+        {"assessment_sessions_one_active_per_user", "assessment_sessions_user_updated"}
+    ),
+    "assessment_results": frozenset(
+        {"assessment_results_session_unique", "assessment_results_user_latest"}
+    ),
+    "nutrition_plans": frozenset(
+        {"nutrition_plans_one_active_per_user", "nutrition_plans_user_history"}
+    ),
+    "nutrition_daily_logs": frozenset({"nutrition_logs_user_date_unique"}),
+    "workout_plans": frozenset({"workout_plans_one_active_per_user", "workout_plans_user_history"}),
+    "workout_sessions": frozenset({WORKOUT_SESSION_INDEX, "workout_sessions_user_history"}),
+    "password_reset_tokens": frozenset(
+        {"password_reset_tokens_hash_unique", "password_reset_tokens_ttl"}
+    ),
+    "ai_decisions": frozenset(
+        {
+            "ai_decisions_one_active_per_user_date",
+            "ai_decisions_owner_history",
+            "ai_decisions_version_status",
+        }
+    ),
+}
 
 
 async def ensure_intelligent_workout_indexes(database: Any) -> None:
@@ -95,8 +143,10 @@ async def ensure_named_index(
     expected_options: dict[str, object] = {"unique": True} if unique else {}
     if partial_filter is not None:
         expected_options["partialFilterExpression"] = partial_filter
-    if existing and existing.get("key") == expected_keys and all(
-        existing.get(key) == value for key, value in expected_options.items()
+    if (
+        existing
+        and existing.get("key") == expected_keys
+        and all(existing.get(key) == value for key, value in expected_options.items())
     ):
         return
     if existing:
@@ -236,3 +286,14 @@ async def ensure_ai_decision_indexes(database: Any) -> None:
         [("metadata.engine_version", 1), ("status", 1)],
         name="ai_decisions_version_status",
     )
+
+
+async def verify_required_indexes(database: Any) -> None:
+    """Raise a safe error when a required application index is absent."""
+    missing: list[str] = []
+    for collection_name, required_names in REQUIRED_INDEXES.items():
+        existing_names = set(await database[collection_name].index_information())
+        for index_name in sorted(required_names - existing_names):
+            missing.append(f"{collection_name}.{index_name}")
+    if missing:
+        raise RuntimeError(f"Required MongoDB indexes are missing: {', '.join(missing)}")

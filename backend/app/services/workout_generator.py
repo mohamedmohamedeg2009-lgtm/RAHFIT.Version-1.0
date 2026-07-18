@@ -29,7 +29,9 @@ class WorkoutGenerator:
         exercise_count = (
             4
             if inputs.session_duration_minutes <= 40
-            else 5 if inputs.session_duration_minutes <= 60 else 6
+            else 5
+            if inputs.session_duration_minutes <= 60
+            else 6
         )
         days = tuple(
             self._day(number, focus, exercise_count, inputs)

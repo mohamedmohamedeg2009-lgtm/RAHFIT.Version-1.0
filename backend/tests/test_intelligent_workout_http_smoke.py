@@ -43,6 +43,55 @@ class InMemoryUserStore:
     async def find_by_id(self, user_id: str) -> User | None:
         return self.users.get(user_id)
 
+    async def find_by_provider(self, provider: str, provider_subject: str) -> User | None:
+        return next(
+            (
+                user
+                for user in self.users.values()
+                if user.provider == provider and user.provider_subject == provider_subject
+            ),
+            None,
+        )
+
+    async def link_google_account(
+        self, user_id: str, provider_subject: str, verified_email: str
+    ) -> bool:
+        user = self.users.get(user_id)
+        if user is None:
+            return False
+        self.users[user_id] = user.model_copy(
+            update={
+                "provider": "google",
+                "provider_subject": provider_subject,
+                "verified_email": verified_email,
+            }
+        )
+        return True
+
+    async def create_google_user(
+        self, email: str, display_name: str | None, provider_subject: str
+    ) -> User:
+        user = User(
+            id=f"user-{len(self.users) + 1}",
+            email=email,
+            password_hash="",
+            display_name=display_name,
+            provider="google",
+            provider_subject=provider_subject,
+            verified_email=email,
+        )
+        self.users[user.id] = user
+        return user
+
+    async def update_password_and_revoke_tokens(self, user_id: str, password_hash: str) -> bool:
+        user = self.users.get(user_id)
+        if user is None:
+            return False
+        self.users[user_id] = user.model_copy(
+            update={"password_hash": password_hash, "token_version": user.token_version + 1}
+        )
+        return True
+
     async def increment_token_version(self, user_id: str, expected_version: int) -> User | None:
         user = self.users.get(user_id)
         if user is None or user.token_version != expected_version:
@@ -388,16 +437,15 @@ def test_full_authenticated_intelligent_workout_http_journey(smoke: SmokeEnviron
         == 404
     )
 
-    progress = {
+    completed_exercise = {
+        "exercise_id": exercise["exercise_id"],
+        "completed_sets": [{"set_number": 1, "actual_reps": 8, "completed": True}],
+        "skipped": False,
+        "pain_reported": False,
+    }
+    progress: dict[str, object] = {
         "status": "in_progress",
-        "completed_exercises": [
-            {
-                "exercise_id": exercise["exercise_id"],
-                "completed_sets": [{"set_number": 1, "actual_reps": 8, "completed": True}],
-                "skipped": False,
-                "pain_reported": False,
-            }
-        ],
+        "completed_exercises": [completed_exercise],
         "actual_duration_minutes": 20,
     }
     updated = client.patch(
@@ -406,8 +454,8 @@ def test_full_authenticated_intelligent_workout_http_journey(smoke: SmokeEnviron
     assert updated.status_code == 200, updated.text
     assert 0 < updated.json()["completion_percentage"] < 100
 
-    progress["completed_exercises"][0]["pain_reported"] = True
-    progress["completed_exercises"][0]["pain_area"] = "shoulder discomfort"
+    completed_exercise["pain_reported"] = True
+    completed_exercise["pain_area"] = "shoulder discomfort"
     pain_update = client.patch(
         f"/api/v1/intelligent-workouts/sessions/{session_id}", headers=owner, json=progress
     )

@@ -36,6 +36,62 @@ class FakeUserStore:
     async def find_by_id(self, user_id: str) -> User | None:
         return self.users.get(user_id)
 
+    async def find_by_provider(self, provider: str, provider_subject: str) -> User | None:
+        return next(
+            (
+                user
+                for user in self.users.values()
+                if user.provider == provider and user.provider_subject == provider_subject
+            ),
+            None,
+        )
+
+    async def link_google_account(
+        self, user_id: str, provider_subject: str, verified_email: str
+    ) -> bool:
+        user = self.users.get(user_id)
+        if user is None:
+            return False
+        self.users[user_id] = user.model_copy(
+            update={
+                "provider": "google",
+                "provider_subject": provider_subject,
+                "verified_email": verified_email,
+                "updated_at": datetime.now(UTC),
+            }
+        )
+        return True
+
+    async def create_google_user(
+        self, email: str, display_name: str | None, provider_subject: str
+    ) -> User:
+        user = User(
+            id=str(len(self.users) + 1),
+            email=email,
+            password_hash="",
+            display_name=display_name,
+            provider="google",
+            provider_subject=provider_subject,
+            verified_email=email,
+            created_at=datetime.now(UTC),
+            updated_at=datetime.now(UTC),
+        )
+        self.users[user.id] = user
+        return user
+
+    async def update_password_and_revoke_tokens(self, user_id: str, password_hash: str) -> bool:
+        user = self.users.get(user_id)
+        if user is None:
+            return False
+        self.users[user_id] = user.model_copy(
+            update={
+                "password_hash": password_hash,
+                "token_version": user.token_version + 1,
+                "updated_at": datetime.now(UTC),
+            }
+        )
+        return True
+
     async def increment_token_version(self, user_id: str, expected_version: int) -> User | None:
         user = self.users.get(user_id)
         if not user or user.token_version != expected_version:

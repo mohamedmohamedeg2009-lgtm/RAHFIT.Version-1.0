@@ -507,12 +507,16 @@ class DashboardService:
         status = (
             active.progress.safety.status
             if active
-            else result.safety_status if result else SafetyStatus.SAFE
+            else result.safety_status
+            if result
+            else SafetyStatus.SAFE
         )
         explanations = (
             active.progress.safety.explanations
             if active
-            else result.safety_explanations if result else ()
+            else result.safety_explanations
+            if result
+            else ()
         )
         if status == SafetyStatus.SAFE:
             return None

@@ -1,4 +1,5 @@
 import pytest
+from fastapi.routing import APIRoute
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
@@ -49,7 +50,7 @@ def test_local_cors_defaults_are_explicit_and_credential_safe(
 
 
 def test_auth_routes_remain_registered_in_the_application_router() -> None:
-    paths = {route.path for route in router.routes}
+    paths = {route.path for route in router.routes if isinstance(route, APIRoute)}
 
     assert {"/auth/register", "/auth/login", "/auth/refresh", "/auth/me", "/auth/logout"} <= paths
 
@@ -109,14 +110,17 @@ def test_backend_configuration_starts_without_ai_key_when_ai_is_disabled_or_enab
     assert setup_required.ai_api_key is None
 
 
-def test_ai_provider_and_conversation_routes_are_registered() -> None:
-    ai_paths = {route.path for route in router.routes if route.path.startswith("/ai-coach")}
+def test_ai_provider_and_conversation_routes_exclude_public_messages() -> None:
+    ai_paths = {
+        route.path
+        for route in router.routes
+        if isinstance(route, APIRoute) and route.path.startswith("/ai-coach")
+    }
     assert ai_paths == {
         "/ai-coach/availability",
         "/ai-coach/conversations",
         "/ai-coach/conversations/{conversation_id}",
         "/ai-coach/conversations/{conversation_id}/close",
-        "/ai-coach/conversations/{conversation_id}/messages",
     }
 
 

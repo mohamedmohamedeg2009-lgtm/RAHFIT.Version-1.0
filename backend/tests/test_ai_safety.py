@@ -4,6 +4,7 @@ from typing import Any
 
 import httpx
 import pytest
+from fastapi.routing import APIRoute
 from pydantic import ValidationError
 
 from app.ai.providers import OpenAICompatibleProvider
@@ -809,8 +810,9 @@ def test_logs_include_only_safe_metadata(
     assert "ai_safety_evaluated" in caplog.text
 
 
-def test_no_public_safety_endpoint_exists_and_messages_are_scoped_to_conversations() -> None:
-    paths = {route.path for route in router.routes}
+def test_no_public_safety_or_ai_coach_message_endpoint_exists() -> None:
+    paths = {route.path for route in router.routes if isinstance(route, APIRoute)}
 
     assert all("safety" not in path for path in paths)
-    assert "/ai-coach/conversations/{conversation_id}/messages" in paths
+    assert "/ai-coach/messages" not in paths
+    assert "/ai-coach/conversations/{conversation_id}/messages" not in paths

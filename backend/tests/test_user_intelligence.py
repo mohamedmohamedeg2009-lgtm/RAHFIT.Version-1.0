@@ -213,7 +213,7 @@ def test_profile_computed_fields_and_normalization_are_deterministic() -> None:
 
 def test_profile_rejects_coercion_impossible_values_and_conflicts() -> None:
     with pytest.raises(ValidationError):
-        BodyProfile(height_cm="180", weight_kg=80.0)  # type: ignore[arg-type]
+        BodyProfile(height_cm="180", weight_kg=80.0)
     with pytest.raises(ValidationError):
         BodyProfile(height_cm=90.0, weight_kg=80.0)
     with pytest.raises(ValidationError):
@@ -238,9 +238,9 @@ def test_profile_rejects_coercion_impossible_values_and_conflicts() -> None:
 
 def test_health_profile_requires_explicit_declarations_and_strict_values() -> None:
     with pytest.raises(ValidationError):
-        HealthProfileData()  # type: ignore[call-arg]
+        HealthProfileData.model_validate({})
     with pytest.raises(ValidationError):
-        PainAreaRecord(area="knee", intensity="8", movement_related=True)  # type: ignore[arg-type]
+        PainAreaRecord(area="knee", intensity="8", movement_related=True)
     with pytest.raises(ValidationError):
         SurgeryRecord(
             procedure="Future procedure",

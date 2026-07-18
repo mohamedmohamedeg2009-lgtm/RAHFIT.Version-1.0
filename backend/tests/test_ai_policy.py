@@ -1,6 +1,7 @@
 from typing import Any
 
 import pytest
+from fastapi.routing import APIRoute
 from pydantic import ValidationError
 
 from app.ai.providers import OpenAICompatibleProvider
@@ -232,7 +233,7 @@ def test_policy_evaluation_has_no_provider_or_prompt_behavior(
 
 
 def test_policy_layer_adds_no_public_api_route() -> None:
-    paths = {route.path for route in router.routes}
+    paths = {route.path for route in router.routes if isinstance(route, APIRoute)}
 
     assert all("policy" not in path for path in paths)
 

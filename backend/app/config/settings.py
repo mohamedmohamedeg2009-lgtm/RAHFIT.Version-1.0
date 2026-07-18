@@ -27,6 +27,24 @@ class Settings(BaseSettings):
     )
     mongodb_uri: MongoDsn
     mongodb_database: str = Field(min_length=1)
+    mongodb_server_selection_timeout_ms: int = Field(
+        default=5000,
+        ge=1000,
+        le=30000,
+        validation_alias="MONGODB_SERVER_SELECTION_TIMEOUT_MS",
+    )
+    mongodb_connect_timeout_ms: int = Field(
+        default=10000,
+        ge=1000,
+        le=30000,
+        validation_alias="MONGODB_CONNECT_TIMEOUT_MS",
+    )
+    mongodb_app_name: str = Field(
+        default="rahfit-ai-api",
+        min_length=1,
+        max_length=128,
+        validation_alias="MONGODB_APP_NAME",
+    )
     jwt_secret_key: SecretStr = Field(min_length=32)
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = Field(default=30, gt=0)
@@ -76,6 +94,12 @@ class Settings(BaseSettings):
         if isinstance(value, str):
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
+
+    @field_validator("mongodb_database", "mongodb_app_name", mode="before")
+    @classmethod
+    def normalize_mongodb_text(cls, value: object) -> str:
+        normalized = str(value).strip() if value is not None else ""
+        return normalized
 
     @field_validator("ai_provider", mode="before")
     @classmethod
