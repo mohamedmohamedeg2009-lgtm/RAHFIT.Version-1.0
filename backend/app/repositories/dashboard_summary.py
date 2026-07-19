@@ -11,6 +11,7 @@ class DashboardSummaryRepository:
         self.nutrition_logs = database["nutrition_daily_logs"]
         self.nutrition_plans = database["nutrition_plans"]
         self.workout_sessions = database["workout_sessions"]
+        self.intelligent_workout_sessions = database["intelligent_workout_sessions"]
         self.daily_check_ins = database["daily_check_ins"]
 
     async def latest_check_in(self, user_id: str) -> dict[str, Any] | None:
@@ -25,17 +26,32 @@ class DashboardSummaryRepository:
         )
 
     async def latest_workout(self, user_id: str) -> dict[str, Any] | None:
-        return await self.workout_sessions.find_one({"user_id": user_id}, sort=[("updated_at", -1)])
+        legacy, intelligent = await __import__("asyncio").gather(
+            self.workout_sessions.find_one({"user_id": user_id}, sort=[("updated_at", -1)]),
+            self.intelligent_workout_sessions.find_one(
+                {"user_id": user_id}, sort=[("updated_at", -1)]
+            ),
+        )
+        records = [record for record in (legacy, intelligent) if record]
+        return max(records, key=lambda record: record["updated_at"]) if records else None
 
     async def recent_records(
         self, user_id: str, now: datetime
     ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
         since = now - timedelta(days=7)
-        workouts = (
-            await self.workout_sessions.find({"user_id": user_id, "started_at": {"$gte": since}})
+        legacy, intelligent = await __import__("asyncio").gather(
+            self.workout_sessions.find({"user_id": user_id, "started_at": {"$gte": since}})
             .sort("started_at", -1)
-            .to_list(length=20)
+            .to_list(length=20),
+            self.intelligent_workout_sessions.find(
+                {"user_id": user_id, "started_at": {"$gte": since}}
+            )
+            .sort("started_at", -1)
+            .to_list(length=20),
         )
+        workouts = sorted(
+            [*legacy, *intelligent], key=lambda record: record["started_at"], reverse=True
+        )[:20]
         nutrition = (
             await self.nutrition_logs.find(
                 {"user_id": user_id, "date": {"$gte": since.date().isoformat()}}

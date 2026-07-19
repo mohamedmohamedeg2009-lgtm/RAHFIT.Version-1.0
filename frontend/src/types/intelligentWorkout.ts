@@ -122,6 +122,7 @@ export interface WorkoutSessionResponse {
   adaptation_flags: string[];
   planned_duration_minutes: number;
   actual_duration_minutes: number | null;
+  notes?: string | null;
   started_at: ISODateTime;
   completed_at: ISODateTime | null;
   updated_at: ISODateTime;

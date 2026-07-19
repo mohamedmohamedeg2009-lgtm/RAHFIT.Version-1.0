@@ -183,9 +183,11 @@ class DashboardService:
         if not doc:
             return None
         return DashboardWorkoutSummary(
-            session_id=str(doc.get("_id", doc.get("id"))),
+            session_id=str(doc.get("session_id", doc.get("_id", doc.get("id")))),
             status=str(doc.get("status")),
-            completion_percentage=doc.get("progress", {}).get("completion_percentage"),
+            completion_percentage=doc.get(
+                "completion_percentage", doc.get("progress", {}).get("completion_percentage")
+            ),
             started_at=doc["started_at"],
             completed_at=doc.get("completed_at"),
         )

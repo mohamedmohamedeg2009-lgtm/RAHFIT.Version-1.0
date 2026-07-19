@@ -42,6 +42,7 @@ export default function IntelligentWorkoutSessionPage() {
   const [duration, setDuration] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
   const [error, setError] = useState<WorkoutClientError | null>(null);
   const [adaptation, setAdaptation] = useState<WorkoutAdaptationResponse | null>(null);
   const selectedDayNumber = session?.day_number ?? Number(dayNumber);
@@ -65,6 +66,7 @@ export default function IntelligentWorkoutSessionPage() {
       setSession(loadedSession);
       setPlan(loadedPlan);
       setDuration(loadedSession?.actual_duration_minutes?.toString() ?? "");
+      setNotes(loadedSession?.notes ?? "");
       const planned =
         loadedPlan.weekly_schedule
           .find((item) => item.day_number === (loadedSession?.day_number ?? Number(dayNumber)))
@@ -103,6 +105,7 @@ export default function IntelligentWorkoutSessionPage() {
         completed_exercises: [],
       });
       setSession(created);
+      setDirty(false);
       setEntries(
         day.sections
           .flatMap((section) => section.exercises)
@@ -127,6 +130,7 @@ export default function IntelligentWorkoutSessionPage() {
         notes: notes.trim() || null,
       });
       setSession(updated);
+      setDirty(false);
     } catch (cause) {
       setError(mapWorkoutError(cause, locale));
     } finally {
@@ -145,13 +149,23 @@ export default function IntelligentWorkoutSessionPage() {
       setSaving(false);
     }
   };
+  useEffect(() => {
+    if (!session || session.status !== "in_progress" || !dirty || saving) return;
+    const timer = window.setTimeout(() => void save(), 900);
+    return () => window.clearTimeout(timer);
+    // `save` intentionally reads the current form snapshot and is recreated with it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dirty, entries, duration, notes, saving, session]);
+
   const updateEntry = (
     exerciseId: string,
     transform: (entry: CompletedExerciseInput) => CompletedExerciseInput,
-  ) =>
+  ) => {
+    setDirty(true);
     setEntries((current) =>
       current.map((entry) => (entry.exercise_id === exerciseId ? transform(entry) : entry)),
     );
+  };
 
   return (
     <IntelligentWorkoutShell
@@ -403,14 +417,20 @@ export default function IntelligentWorkoutSessionPage() {
               max={300}
               disabled={session.status !== "in_progress"}
               value={duration}
-              onChange={(event) => setDuration(event.target.value)}
+              onChange={(event) => {
+                setDirty(true);
+                setDuration(event.target.value);
+              }}
             />
             <Textarea
               label={t("sessionNotes")}
               maxLength={1000}
               disabled={session.status !== "in_progress"}
               value={notes}
-              onChange={(event) => setNotes(event.target.value)}
+              onChange={(event) => {
+                setDirty(true);
+                setNotes(event.target.value);
+              }}
             />
           </Card>
           {adaptation ? <AdaptationResult result={adaptation} /> : null}
@@ -423,7 +443,18 @@ export default function IntelligentWorkoutSessionPage() {
                 <Button loading={saving} onClick={() => void save("completed")}>
                   {t("completeSession")}
                 </Button>
-                <Button loading={saving} variant="danger" onClick={() => void save("abandoned")}>
+                <Button
+                  loading={saving}
+                  variant="danger"
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        "Abandon this workout? Your saved progress will remain in history.",
+                      )
+                    )
+                      void save("abandoned");
+                  }}
+                >
                   {t("abandon")}
                 </Button>
               </>

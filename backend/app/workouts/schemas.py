@@ -155,6 +155,7 @@ class WorkoutSessionResponse(BaseModel):
     adaptation_flags: tuple[str, ...]
     planned_duration_minutes: int
     actual_duration_minutes: int | None
+    notes: str | None = None
     started_at: datetime
     completed_at: datetime | None
     updated_at: datetime
@@ -177,6 +178,7 @@ class WorkoutSessionResponse(BaseModel):
             adaptation_flags=session.adaptation_flags,
             planned_duration_minutes=session.planned_duration_minutes,
             actual_duration_minutes=session.actual_duration_minutes,
+            notes=session.notes,
             started_at=session.started_at,
             completed_at=session.completed_at,
             updated_at=session.updated_at,
