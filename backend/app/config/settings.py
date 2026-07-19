@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Annotated, Any, Literal, cast
 
-from pydantic import Field, MongoDsn, SecretStr, field_validator, model_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
@@ -31,7 +31,7 @@ class Settings(BaseSettings):
             "http://127.0.0.1:5174",
         ]
     )
-    mongodb_uri: MongoDsn = Field(validation_alias="MONGODB_URI")
+    mongodb_uri: str = Field(min_length=1, validation_alias="MONGODB_URI")
     mongodb_database: str = Field(min_length=1, validation_alias="MONGODB_DATABASE")
     mongodb_server_selection_timeout_ms: int = Field(
         default=5000,
@@ -114,6 +114,17 @@ class Settings(BaseSettings):
     def normalize_mongodb_text(cls, value: object) -> str:
         normalized = str(value).strip() if value is not None else ""
         return normalized
+
+    @field_validator("mongodb_uri", mode="before")
+    @classmethod
+    def validate_mongodb_uri(cls, value: object) -> str:
+        if not isinstance(value, str) or not value:
+            raise ValueError("MONGODB_URI must be a non-empty MongoDB URI.")
+        if value != value.strip():
+            raise ValueError("MONGODB_URI must not contain leading or trailing whitespace.")
+        if not value.startswith(("mongodb://", "mongodb+srv://")):
+            raise ValueError("MONGODB_URI must use mongodb:// or mongodb+srv://.")
+        return value
 
     @field_validator("ai_provider", mode="before")
     @classmethod

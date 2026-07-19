@@ -22,6 +22,7 @@ from app.database.indexes import initialize_indexes, verify_required_indexes  # 
 from app.database.mongodb import (  # noqa: E402
     DatabaseConnectionError,
     MongoDatabase,
+    mongodb_connection_configuration,
     mongodb_uri_scheme,
 )
 
@@ -49,11 +50,19 @@ async def verify() -> int:
 
     database = MongoDatabase(settings)
     try:
-        uri = settings.mongodb_uri.unicode_string()
+        uri = settings.mongodb_uri
         scheme = mongodb_uri_scheme(uri)
         if scheme == "invalid":
             print("MongoDB diagnostic: invalid URI scheme.", file=sys.stderr)
             return 1
+        configuration = mongodb_connection_configuration(uri, settings.mongodb_database)
+        print(
+            "MongoDB diagnostic: "
+            f"uri_scheme={configuration.uri_scheme} "
+            f"hostname={configuration.hostname} "
+            f"database_name={configuration.database_name} "
+            f"query_keys={','.join(configuration.query_keys) or '<none>'}"
+        )
         try:
             srv_lookup(uri)
         except (ValueError, dns.exception.DNSException, OSError, ssl.SSLError) as exc:

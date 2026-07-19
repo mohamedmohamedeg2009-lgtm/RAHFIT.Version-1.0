@@ -1,12 +1,13 @@
 import ssl
 from dataclasses import dataclass
-from urllib.parse import urlsplit
+from urllib.parse import parse_qsl, urlsplit
 
 import structlog
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from pymongo.errors import (
     ConfigurationError,
     ConnectionFailure,
+    InvalidURI,
     OperationFailure,
     PyMongoError,
     ServerSelectionTimeoutError,
@@ -31,10 +32,39 @@ class MongoConnectionDiagnostic:
     message: str
 
 
+@dataclass(frozen=True)
+class MongoConnectionConfiguration:
+    """Safe, parsed connection details that never include credentials or query values."""
+
+    uri_scheme: str
+    hostname: str | None
+    database_name: str
+    query_keys: tuple[str, ...]
+
+
 def mongodb_uri_scheme(uri: str) -> str:
     """Return the permitted URI scheme without retaining any credential-bearing URI data."""
-    scheme = urlsplit(uri).scheme.lower()
+    scheme = uri.partition("://")[0].lower()
     return scheme if scheme in {"mongodb", "mongodb+srv"} else "invalid"
+
+
+def mongodb_connection_configuration(uri: str, database_name: str) -> MongoConnectionConfiguration:
+    """Inspect a URI for diagnostics without transforming the value sent to Motor."""
+    try:
+        parsed = urlsplit(uri)
+        hostname = parsed.hostname
+        query_keys = tuple(
+            sorted({key for key, _ in parse_qsl(parsed.query, keep_blank_values=True)})
+        )
+    except ValueError:
+        hostname = None
+        query_keys = ()
+    return MongoConnectionConfiguration(
+        uri_scheme=mongodb_uri_scheme(uri),
+        hostname=hostname,
+        database_name=database_name,
+        query_keys=query_keys,
+    )
 
 
 def _is_dns_srv_failure(exc: BaseException, error_text: str) -> bool:
@@ -60,6 +90,7 @@ def _is_invalid_uri(error_text: str) -> bool:
         marker in error_text
         for marker in (
             "invalid uri",
+            "invaliduri",
             "must begin with",
             "mongodb uri",
             "invalid connection string",
@@ -78,7 +109,7 @@ def classify_mongodb_connection_error(exc: BaseException) -> MongoConnectionDiag
             "authentication_failed",
             "MongoDB authentication failed. Check the database user credentials and permissions.",
         )
-    if _is_invalid_uri(error_text):
+    if isinstance(exc, InvalidURI) or _is_invalid_uri(error_text):
         return MongoConnectionDiagnostic(
             exception_class,
             "invalid_uri",
@@ -121,29 +152,25 @@ def classify_mongodb_connection_error(exc: BaseException) -> MongoConnectionDiag
     )
 
 
-def redact_mongodb_uri(uri: str) -> str:
-    """Remove URI credentials before an address is ever included in diagnostics."""
-    scheme, separator, remainder = uri.partition("://")
-    if not separator:
-        return "<invalid MongoDB URI>"
-    credentials, at_sign, location = remainder.partition("@")
-    if not at_sign:
-        return f"{scheme}://{remainder}"
-    del credentials
-    return f"{scheme}://<credentials-redacted>@{location}"
-
-
 class MongoDatabase:
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
         self.client: AsyncIOMotorClient[dict[str, object]] | None = None
 
     async def connect(self) -> None:
-        uri = self._settings.mongodb_uri.unicode_string()
-        uri_scheme = mongodb_uri_scheme(uri)
+        configuration = mongodb_connection_configuration(
+            self._settings.mongodb_uri, self._settings.mongodb_database
+        )
+        logger.info(
+            "mongodb_connection_configured",
+            uri_scheme=configuration.uri_scheme,
+            hostname=configuration.hostname,
+            database_name=configuration.database_name,
+            query_keys=configuration.query_keys,
+        )
         try:
             self.client = AsyncIOMotorClient(
-                uri,
+                self._settings.mongodb_uri,
                 serverSelectionTimeoutMS=self._settings.mongodb_server_selection_timeout_ms,
                 connectTimeoutMS=self._settings.mongodb_connect_timeout_ms,
                 retryWrites=True,
@@ -165,7 +192,7 @@ class MongoDatabase:
                 "mongodb_startup_failed",
                 exception_class=diagnostic.exception_class,
                 safe_reason=diagnostic.safe_reason,
-                uri_scheme=uri_scheme,
+                uri_scheme=configuration.uri_scheme,
             )
             raise DatabaseConnectionError(diagnostic.message) from None
 
