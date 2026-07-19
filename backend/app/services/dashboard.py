@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
-from typing import Protocol
+from typing import Any, Protocol
 
 from app.models.ai_provider import AIAvailability, AIAvailabilityStatus
 from app.models.assessment import AssessmentResult, SafetyStatus
