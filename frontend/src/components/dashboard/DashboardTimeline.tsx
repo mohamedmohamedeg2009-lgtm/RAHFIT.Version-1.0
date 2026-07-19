@@ -51,16 +51,16 @@ export function DashboardTimeline({
       <span className="dashboard-eyebrow">{copy.activityTimeline}</span>
       <div className="flex flex-col gap-4 mt-4">
         {events.map((event) => (
-          <div key={event.id} className="flex items-start gap-4">
-            <span className="w-16 text-xs">{rtl ? event.timeAr : event.time}</span>
-            {event.type === "workout" ? <Dumbbell size={18} /> : <Activity size={18} />}
-            <div className="flex-1">
-              <strong>{rtl ? event.titleAr : event.title}</strong>
+          <div key={event.id} className="flex min-w-0 items-start gap-4">
+            <span className="w-16 shrink-0 text-xs">{rtl ? event.timeAr : event.time}</span>
+            {event.type === "workout" ? <Dumbbell size={18} className="shrink-0" /> : <Activity size={18} className="shrink-0" />}
+            <div className="min-w-0 flex-1">
+              <strong className="break-words">{rtl ? event.titleAr : event.title}</strong>
               {(rtl ? event.descriptionAr : event.description) && (
                 <p>{rtl ? event.descriptionAr : event.description}</p>
               )}
             </div>
-            <Badge>
+            <Badge className="shrink-0">
               {event.status === "completed"
                 ? copy.completed
                 : event.status === "missed"

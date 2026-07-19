@@ -189,13 +189,13 @@ export function DashboardGoals({ state = "ready", goals = defaultGoals }: Dashbo
               aria-label={`${title}: ${goal.current} / ${goal.target} ${unit}, ${Math.round(percentage)}% complete`}
             >
               <div className="flex justify-between items-center gap-3">
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 flex-1 items-center gap-3">
                   <div className="p-2 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border-subtle)] flex items-center justify-center shadow-xs">
                     {getGoalIcon(goal.iconType)}
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h3
-                      className={`text-sm font-bold text-[var(--color-text-primary)] ${isCompleted ? "line-through opacity-70" : ""}`}
+                      className={`break-words text-sm font-bold text-[var(--color-text-primary)] ${isCompleted ? "line-through opacity-70" : ""}`}
                     >
                       {title}
                     </h3>

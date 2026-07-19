@@ -147,13 +147,13 @@ export function DashboardAIInsights({ dashboardData }: DashboardAIInsightsProps)
                 key={insight.id}
                 className="flex items-center justify-between gap-4 p-3 bg-[var(--color-background)] border border-[var(--color-border-subtle)] rounded-xl"
               >
-                <div className="flex items-center gap-2.5">
+                <div className="flex min-w-0 flex-1 items-center gap-2.5">
                   <div className="shrink-0">{getCategoryIcon(insight.category)}</div>
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold text-[var(--color-text-primary)]">
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <span className="text-xs font-bold text-[var(--color-text-primary)] break-words">
                       {insight.title}
                     </span>
-                    <span className="text-[10px] text-[var(--color-text-secondary)] line-clamp-1">
+                    <span className="text-[10px] text-[var(--color-text-secondary)] break-words">
                       {insight.description}
                     </span>
                   </div>
