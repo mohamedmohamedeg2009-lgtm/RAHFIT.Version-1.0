@@ -4,7 +4,6 @@ import { Badge, Card, LinearProgress } from "../ui";
 import type { Locale } from "../../contexts/LocaleContext";
 import { workoutCopy } from "../../i18n/workout";
 import type { WorkoutDay, WorkoutPlan, WorkoutSession } from "../../types/workout";
-import { RahafitLogo } from "../common/RahafitLogo";
 
 export function WorkoutShell({
   children,
@@ -19,9 +18,6 @@ export function WorkoutShell({
   return (
     <div className="workout-page">
       <header className="workout-topbar">
-        <Link to="/app" className="workout-brand" aria-label={copy.dashboard}>
-          <RahafitLogo size="sm" />
-        </Link>
         <nav aria-label="Workout navigation">
           <Link to="/workouts">{copy.today}</Link>
           <Link to="/workouts/history">{copy.history}</Link>

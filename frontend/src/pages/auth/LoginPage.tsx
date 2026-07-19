@@ -6,7 +6,6 @@ import { PasswordField } from "../../components/auth/PasswordField";
 import { useAuth } from "../../hooks/useAuth";
 import { GoogleSignInButton } from "../../components/auth/GoogleSignInButton";
 import { useLocale } from "../../contexts/LocaleContext";
-import { RahafitLogo } from "../../components/common/RahafitLogo";
 
 export function LoginPage() {
   const { login, error, clearError, isLoading } = useAuth();
@@ -15,7 +14,7 @@ export function LoginPage() {
   const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fieldError, setFieldError] = useState<string | null>(null);
+  const [fieldError, setFieldError] = useState<{ email?: string; password?: string } | null>(null);
   const [pending, setPending] = useState(false);
   const submittingRef = useRef(false);
 
@@ -25,11 +24,11 @@ export function LoginPage() {
     clearError();
     const normalizedEmail = email.trim().toLowerCase();
     if (!normalizedEmail || !normalizedEmail.includes("@")) {
-      setFieldError("Enter a valid email address.");
+      setFieldError({ email: "Enter a valid email address." });
       return;
     }
     if (!password) {
-      setFieldError("Enter your password.");
+      setFieldError({ password: "Enter your password." });
       return;
     }
     setFieldError(null);
@@ -54,9 +53,6 @@ export function LoginPage() {
 
   return (
     <section className="auth-card" aria-labelledby="login-title">
-      <div className="mobile-brand">
-        <RahafitLogo size="md" />
-      </div>
       <p className="eyebrow">WELCOME BACK</p>
       <h2 id="login-title">Let’s keep your momentum.</h2>
       <p className="muted-text">Sign in to continue your coaching journey.</p>
@@ -67,7 +63,7 @@ export function LoginPage() {
         </div>
       ) : null}
       <FormAlert message={error} />
-      {fieldError ? <FormAlert message={fieldError} /> : null}
+      {fieldError ? <FormAlert message={fieldError.email ?? fieldError.password ?? null} /> : null}
       <form onSubmit={(event) => void submit(event)} noValidate>
         <div className="field-group">
           <label htmlFor="login-email">Email address</label>
@@ -76,15 +72,25 @@ export function LoginPage() {
             type="email"
             value={email}
             autoComplete="email"
-            onChange={(event) => setEmail(event.target.value)}
-            aria-invalid={Boolean(fieldError && (!email || !email.includes("@")))}
+            onChange={(event) => {
+              setEmail(event.target.value);
+              setFieldError((current) => (current?.email ? null : current));
+            }}
+            aria-invalid={Boolean(fieldError?.email)}
+            aria-describedby={fieldError?.email ? "login-email-error" : undefined}
           />
+          {fieldError?.email ? (
+            <p id="login-email-error" className="field-error">
+              {fieldError.email}
+            </p>
+          ) : null}
         </div>
         <PasswordField
           label="Password"
           value={password}
           onChange={setPassword}
           autoComplete="current-password"
+          error={fieldError?.password}
         />
         <button
           className="button button-primary button-full"

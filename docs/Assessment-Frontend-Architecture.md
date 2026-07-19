@@ -50,7 +50,7 @@ Assessment pages are lazy-loaded into separate production chunks. Direct navigat
 
 | Component                  | Responsibility                                                                            |
 | -------------------------- | ----------------------------------------------------------------------------------------- |
-| `AssessmentLayout`         | Shared brand, theme, locale, logout, responsive shell, and route outlet.                  |
+| `AssessmentLayout`         | Shared theme, locale, logout, responsive shell, and route outlet.                         |
 | `AssessmentProgressHeader` | Server-provided completeness, readiness, category, and question position.                 |
 | `AssessmentQuestionField`  | Generic accessible rendering for every backend question type.                             |
 | `SafetyStatusCard`         | `SAFE`, `CAUTION`, and `STOP` presentation with risk and explanations.                    |

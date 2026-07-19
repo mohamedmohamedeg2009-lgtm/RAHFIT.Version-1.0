@@ -7,7 +7,6 @@ import { useAuth } from "../../hooks/useAuth";
 import { GoogleSignInButton } from "../../components/auth/GoogleSignInButton";
 import { useLocale } from "../../contexts/LocaleContext";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
-import { RahafitLogo } from "../../components/common/RahafitLogo";
 
 const passwordHint = "Use 12–128 characters. A longer, memorable phrase is best.";
 
@@ -54,9 +53,6 @@ export function RegisterPage() {
 
   return (
     <section className="auth-card" aria-labelledby="register-title">
-      <div className="mobile-brand">
-        <RahafitLogo />
-      </div>
       <p className="eyebrow">YOUR NEXT CHAPTER</p>
       <h2 id="register-title">Build a stronger routine.</h2>
       <p className="muted-text">Create your account. We’ll tailor the next steps later.</p>

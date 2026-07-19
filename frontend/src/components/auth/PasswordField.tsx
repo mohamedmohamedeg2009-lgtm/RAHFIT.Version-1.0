@@ -31,6 +31,7 @@ export function PasswordField({ label, value, onChange, autoComplete, error }: P
           type="button"
           onClick={() => setVisible((current) => !current)}
           aria-pressed={visible}
+          aria-label={visible ? "Hide password" : "Show password"}
         >
           {visible ? "Hide" : "Show"}
         </button>

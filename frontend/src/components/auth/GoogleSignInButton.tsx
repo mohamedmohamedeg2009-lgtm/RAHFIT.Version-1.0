@@ -59,9 +59,8 @@ export function GoogleSignInButton() {
             setError(null);
             try {
               await loginWithGoogle(response.credential);
-            } catch (err: unknown) {
-              const msg = err instanceof Error ? err.message : String(err);
-              setError(msg || "Google authentication failed.");
+            } catch {
+              setError("Google sign-in is temporarily unavailable. Please use email and password.");
             } finally {
               setLoading(false);
             }
@@ -79,8 +78,8 @@ export function GoogleSignInButton() {
             locale: locale === "ar" ? "ar" : "en",
           });
         }
-      } catch (err) {
-        console.error("Google authentication initialization failed:", err);
+      } catch {
+        setError("Google sign-in is temporarily unavailable. Please use email and password.");
       }
     };
 

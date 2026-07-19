@@ -1,11 +1,10 @@
-import { Link } from "react-router-dom";
-import { Globe, LogOut } from "lucide-react";
+import { Link, NavLink } from "react-router-dom";
+import { Brain, Dumbbell, Globe, LayoutDashboard, LogOut, Utensils } from "lucide-react";
 
 import { Button } from "../ui";
 import { useLocale } from "../../contexts/LocaleContext";
 import { useAuth } from "../../hooks/useAuth";
 import { dashboardCopy } from "../../i18n/dashboard";
-import { RahafitLogo } from "../common/RahafitLogo";
 
 interface DashboardHeaderProps {
   displayName: string;
@@ -29,9 +28,6 @@ export function DashboardHeader({ displayName, email }: DashboardHeaderProps) {
 
   return (
     <header className="dashboard-topbar">
-      <Link className="dashboard-brand" to="/app" aria-label="Rahafit Today">
-        <RahafitLogo size="md" />
-      </Link>
       <nav className="dashboard-controls" aria-label={copy.dashboard}>
         <Link
           className="ds-button ds-button-ghost ds-button-sm"
@@ -69,6 +65,24 @@ export function DashboardHeader({ displayName, email }: DashboardHeaderProps) {
             {getInitials(displayName)}
           </div>
         </div>
+      </nav>
+      <nav className="dashboard-mobile-nav" aria-label={copy.dashboard}>
+        <NavLink to="/app" end>
+          <LayoutDashboard size={19} aria-hidden="true" />
+          <span>{locale === "ar" ? "الرئيسية" : "Home"}</span>
+        </NavLink>
+        <NavLink to="/intelligent-workouts">
+          <Dumbbell size={19} aria-hidden="true" />
+          <span>{locale === "ar" ? "التدريب" : "Training"}</span>
+        </NavLink>
+        <NavLink to="/nutrition">
+          <Utensils size={19} aria-hidden="true" />
+          <span>{locale === "ar" ? "التغذية" : "Nutrition"}</span>
+        </NavLink>
+        <NavLink to="/ai-coach">
+          <Brain size={19} aria-hidden="true" />
+          <span>{locale === "ar" ? "المدرب" : "Coach"}</span>
+        </NavLink>
       </nav>
     </header>
   );

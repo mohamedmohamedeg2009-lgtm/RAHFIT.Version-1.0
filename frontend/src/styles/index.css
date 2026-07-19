@@ -558,23 +558,24 @@ a {
   min-height: 100vh;
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
+  background: radial-gradient(circle at 18% 15%, rgba(20, 216, 196, 0.14), transparent 32%), #071218;
 }
-.auth-brand-panel {
+.auth-info-panel {
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding: clamp(2rem, 7vw, 7rem);
   color: #f8fbff;
-  background: linear-gradient(145deg, #122b3f, #1f5362);
+  background: linear-gradient(145deg, #0c1f2a, #123d47 65%, #192617);
 }
-.auth-brand-panel h1 {
+.auth-info-panel h1 {
   max-width: 540px;
   margin: 1rem 0;
   font-size: clamp(2.5rem, 5vw, 5rem);
   line-height: 1.02;
   letter-spacing: -0.04em;
 }
-.auth-brand-panel p:not(.eyebrow) {
+.auth-info-panel p:not(.eyebrow) {
   max-width: 460px;
   color: #d8edf0;
   font-size: 1.1rem;
@@ -600,6 +601,7 @@ a {
   display: grid;
   place-items: center;
   padding: 2rem;
+  background: rgba(4, 13, 19, 0.76);
 }
 .auth-divider {
   display: flex;
@@ -632,10 +634,11 @@ a {
 .auth-card {
   width: min(100%, 440px);
   padding: clamp(1.5rem, 4vw, 3rem);
-  background: #fff;
-  border: 1px solid #dce4e8;
+  color: #f8fbff;
+  background: linear-gradient(155deg, rgba(18, 31, 39, 0.98), rgba(10, 22, 28, 0.98));
+  border: 1px solid rgba(201, 212, 221, 0.18);
   border-radius: 20px;
-  box-shadow: 0 24px 70px rgba(18, 43, 63, 0.1);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
 }
 .auth-card h2 {
   margin: 0.65rem 0 0.5rem;
@@ -645,13 +648,13 @@ a {
 }
 .eyebrow {
   margin: 0;
-  color: #287987;
+  color: #14d8c4;
   font-size: 0.73rem;
   font-weight: 800;
   letter-spacing: 0.15em;
 }
 .muted-text {
-  color: #687984;
+  color: #c9d4dd;
   line-height: 1.55;
 }
 .field-group {
@@ -660,7 +663,7 @@ a {
 .field-group label {
   display: block;
   margin-bottom: 0.45rem;
-  color: #243642;
+  color: #f8fbff;
   font-size: 0.9rem;
   font-weight: 700;
 }
@@ -668,15 +671,15 @@ a {
   width: 100%;
   min-height: 48px;
   padding: 0.75rem 0.85rem;
-  color: #17202f;
-  background: #fbfcfd;
-  border: 1px solid #b9c8cf;
+  color: #f8fbff;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(201, 212, 221, 0.28);
   border-radius: 10px;
   outline: none;
 }
 .field-group input:focus {
-  border-color: #287987;
-  box-shadow: 0 0 0 3px rgba(40, 121, 135, 0.18);
+  border-color: #14d8c4;
+  box-shadow: 0 0 0 3px rgba(20, 216, 196, 0.22);
 }
 .field-group input[aria-invalid="true"] {
   border-color: #b24646;
@@ -693,7 +696,7 @@ a {
   right: 0.5rem;
   min-height: 34px;
   padding: 0.3rem 0.45rem;
-  color: #287987;
+  color: #14d8c4;
   background: transparent;
   border: 0;
   border-radius: 6px;
@@ -710,7 +713,7 @@ button:focus-visible {
 }
 .field-hint {
   margin: 0.4rem 0 0;
-  color: #687984;
+  color: #c9d4dd;
   font-size: 0.78rem;
   line-height: 1.45;
 }
@@ -722,9 +725,9 @@ button:focus-visible {
 .form-alert {
   margin: 1rem 0;
   padding: 0.85rem 1rem;
-  color: #8f3535;
-  background: #fff3f2;
-  border: 1px solid #efc8c6;
+  color: #ffd2cf;
+  background: rgba(160, 48, 48, 0.18);
+  border: 1px solid rgba(255, 150, 144, 0.45);
   border-radius: 9px;
   font-size: 0.88rem;
   line-height: 1.45;
@@ -744,10 +747,11 @@ button:focus-visible {
 }
 .button-primary {
   color: #fff;
-  background: #1f6875;
+  color: #06211f;
+  background: #14d8c4;
 }
 .button-primary:hover {
-  background: #185563;
+  background: #43e5d2;
 }
 .button:disabled {
   opacity: 0.65;
@@ -762,16 +766,13 @@ button:focus-visible {
 }
 .auth-switch {
   margin: 1.5rem 0 0;
-  color: #687984;
+  color: #c9d4dd;
   text-align: center;
   font-size: 0.9rem;
 }
 .auth-switch a {
-  color: #1f6875;
+  color: #14d8c4;
   font-weight: 800;
-}
-.mobile-brand {
-  display: none;
 }
 .spinner {
   display: inline-block;
@@ -839,16 +840,12 @@ button:focus-visible {
   .auth-shell {
     display: block;
   }
-  .auth-brand-panel {
+  .auth-info-panel {
     display: none;
   }
   .auth-form-panel {
     min-height: 100vh;
     padding: 1rem;
-  }
-  .mobile-brand {
-    display: block;
-    margin-bottom: 2rem;
   }
   .auth-card {
     padding: 1.5rem;
@@ -868,16 +865,12 @@ button:focus-visible {
   .auth-shell {
     display: block;
   }
-  .auth-brand-panel {
+  .auth-info-panel {
     display: none;
   }
   .auth-form-panel {
     min-height: 100vh;
     padding: 1rem;
-  }
-  .mobile-brand {
-    display: block;
-    margin-bottom: 2rem;
   }
   .auth-card {
     padding: 1.5rem;
@@ -1855,6 +1848,9 @@ button:focus-visible {
     radial-gradient(ellipse 60% 40% at 90% 90%, rgba(20, 184, 166, 0.05) 0%, transparent 60%),
     var(--color-background);
 }
+.dashboard-mobile-nav {
+  display: none;
+}
 
 /* Subtle dot grid overlay */
 .dashboard-page::before {
@@ -1888,65 +1884,6 @@ button:focus-visible {
     var(--shadow-xs);
 }
 
-/* ── Brand / Logo ───────────────────────────────────────── */
-.dashboard-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-12);
-  color: var(--color-text-primary);
-  text-decoration: none;
-  flex-shrink: 0;
-}
-
-.rahafit-logo-container {
-  align-items: center;
-  line-height: 1;
-}
-
-.rahafit-logo-icon {
-  filter: drop-shadow(0 3px 8px rgba(20, 184, 166, 0.12));
-}
-
-.rahafit-logo-text {
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.rahafit-logo-text {
-  background-image: linear-gradient(90deg, #67e8f9 0%, #5eead4 40%, #fbbf24 100%);
-}
-
-.dashboard-brand-mark {
-  display: grid;
-  width: 2.25rem;
-  height: 2.25rem;
-  place-items: center;
-  color: #fff;
-  border-radius: var(--radius-md);
-  background: var(--gradient-brand);
-  box-shadow: var(--shadow-soft);
-  flex-shrink: 0;
-  transition: transform var(--motion-normal) var(--motion-easing);
-}
-.dashboard-brand:hover .dashboard-brand-mark {
-  transform: scale(1.06) rotate(-4deg);
-}
-
-.dashboard-brand > span:last-child {
-  display: grid;
-  gap: 1px;
-  line-height: 1.1;
-}
-
-.dashboard-brand strong {
-  font-size: var(--font-body);
-  font-weight: 800;
-  letter-spacing: 0.04em;
-}
-
-.dashboard-brand small,
 .dashboard-account-label,
 .dashboard-freshness,
 .dashboard-unavailable {
@@ -2804,12 +2741,55 @@ button:focus-visible {
 
 /* ── Mobile ──────────────────────────────────────────────── */
 @media (max-width: 680px) {
+  .dashboard-page {
+    padding-bottom: calc(5.4rem + env(safe-area-inset-bottom));
+  }
+  .dashboard-topbar {
+    min-height: 4rem;
+    padding-inline: 1rem;
+  }
+  .dashboard-controls > a,
+  .header-user-info {
+    display: none;
+  }
+  .dashboard-mobile-nav {
+    position: fixed;
+    z-index: 50;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 0.45rem 0.5rem calc(0.45rem + env(safe-area-inset-bottom));
+    background: color-mix(in srgb, var(--color-surface) 94%, transparent);
+    border-top: 1px solid var(--color-border);
+    box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(16px);
+  }
+  .dashboard-mobile-nav a {
+    display: grid;
+    min-height: 44px;
+    place-items: center;
+    align-content: center;
+    gap: 0.1rem;
+    color: var(--color-text-secondary);
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .dashboard-mobile-nav a.active {
+    color: var(--color-primary);
+  }
+  .dashboard-mobile-nav a:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: -3px;
+    border-radius: 0.65rem;
+  }
   .dashboard-topbar {
     min-height: 4rem;
     padding-inline: var(--space-16);
   }
 
-  .dashboard-brand small,
   .dashboard-controls .ds-button:not(:first-child):not(:last-child):not(.lang-btn) {
     display: none;
   }
@@ -2924,22 +2904,6 @@ button:focus-visible {
   border-bottom: 1px solid var(--color-border);
   background: color-mix(in srgb, var(--color-background) 88%, transparent);
   backdrop-filter: blur(18px);
-}
-.workout-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-8);
-  color: var(--color-text-primary);
-  font-weight: 800;
-}
-.workout-brand span {
-  display: grid;
-  width: 2rem;
-  height: 2rem;
-  place-items: center;
-  border-radius: var(--radius-md);
-  color: white;
-  background: var(--color-primary);
 }
 .workout-topbar nav {
   display: flex;

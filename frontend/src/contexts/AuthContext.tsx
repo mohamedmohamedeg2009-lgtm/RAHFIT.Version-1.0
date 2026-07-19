@@ -22,13 +22,16 @@ function userMessage(error: unknown): string {
       : "We could not reach the service. Please try again.";
   }
   if (error instanceof ApiError) {
+    if (error.status === 401 || error.status === 403) {
+      return "We could not sign you in with those credentials. Please try again.";
+    }
     if (error.status === 409) return "An account already exists for this email.";
     if (error.status === 422 || error.code === "validation_error") {
       return "Please check your email and password and try again.";
     }
     if (error.status === 429) return "Too many attempts. Please try again shortly.";
     if (error.status >= 500) return "The service is temporarily unavailable. Please try again.";
-    return error.message;
+    return "We could not complete your request. Please try again.";
   }
   return "Something went wrong while processing your request. Please try again.";
 }

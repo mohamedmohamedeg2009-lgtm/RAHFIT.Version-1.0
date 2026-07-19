@@ -5,7 +5,6 @@ import { Globe } from "lucide-react";
 import { Button } from "../ui";
 import { useLocale } from "../../contexts/LocaleContext";
 import { discoveryCopy } from "../../i18n/discovery";
-import { RahafitLogo } from "../common/RahafitLogo";
 
 export function PublicHeader() {
   const { locale, toggleLocale } = useLocale();
@@ -24,13 +23,7 @@ export function PublicHeader() {
       className="public-topbar sticky top-0 z-50 backdrop-blur-md"
       aria-label="Public Navigation"
     >
-      <div className="public-topbar-inner flex items-center justify-between max-w-7xl mx-auto px-4 py-3">
-        {/* Brand Logo (Far right in RTL, Far left in LTR) */}
-        <Link className="dashboard-brand flex items-center gap-2" to="/" aria-label="Rahafit Home">
-          <RahafitLogo size="md" />
-        </Link>
-
-        {/* Navigation Links */}
+      <div className="public-topbar-inner flex items-center justify-end gap-6 max-w-7xl mx-auto px-4 py-3">
         <nav className="public-nav-links hidden md:flex items-center gap-6" aria-label="Sections">
           <a
             href="#how-it-works"

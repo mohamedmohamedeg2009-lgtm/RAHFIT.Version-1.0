@@ -10,7 +10,6 @@ import type {
   WorkoutSessionResponse,
 } from "../../types/intelligentWorkout";
 import { Alert, Badge, Button, Card, LinearProgress } from "../ui";
-import { RahafitLogo } from "../common/RahafitLogo";
 
 export function IntelligentWorkoutShell({
   children,
@@ -26,9 +25,6 @@ export function IntelligentWorkoutShell({
   return (
     <div className="iw-page">
       <header className="iw-topbar">
-        <Link to="/app" className="workout-brand">
-          <RahafitLogo size="sm" />
-        </Link>
         <nav aria-label={t("navigation")}>
           <NavLink to="/intelligent-workouts" end>
             {t("overview")}

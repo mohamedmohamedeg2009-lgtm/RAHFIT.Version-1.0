@@ -4,7 +4,6 @@ import { Mail, ShieldCheck } from "lucide-react";
 
 import { useLocale } from "../../contexts/LocaleContext";
 import { discoveryCopy } from "../../i18n/discovery";
-import { RahafitLogo } from "../common/RahafitLogo";
 
 export const PublicFooter: React.FC = () => {
   const { locale, direction } = useLocale();
@@ -14,12 +13,8 @@ export const PublicFooter: React.FC = () => {
   return (
     <footer className="public-footer-container" dir={direction}>
       <div className="public-footer-inner-grid">
-        {/* Brand & Description Column */}
-        <div className="footer-col footer-col-brand">
-          <Link to="/" aria-label="Rahafit Home">
-            <RahafitLogo size="md" />
-          </Link>
-          <p className="footer-brand-desc mt-3 text-sm text-slate-400 max-w-sm">
+        <div className="footer-col footer-col-intro">
+          <p className="footer-intro-desc text-sm text-slate-400 max-w-sm">
             {copy.footerDescription ||
               (isRtl
                 ? "تمارين مخصصة، تغذية متوازنة، وتوجيه آمن يراعي صحتك وسلامتك البدنية في كل خطوة."

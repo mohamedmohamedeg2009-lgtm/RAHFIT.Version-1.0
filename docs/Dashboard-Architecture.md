@@ -88,7 +88,7 @@ The frontend announces partial data while retaining valid logout and retry behav
 | --- | --- |
 | `DashboardPage` | Fetch lifecycle, retry, error selection, and composition. |
 | `dashboardService` | Centralized authenticated request and transport-to-view mapping. |
-| `DashboardHeader` | Brand, greeting, account context, theme, locale, and logout controls. |
+| `DashboardHeader` | Greeting, account context, theme, locale, and logout controls. |
 | `DailyPriorityCard` | Visually dominant backend-selected action and its explanation. |
 | `SafetyNoticeCard` | Assertive `STOP` or polite `CAUTION` announcement. |
 | `AssessmentSummaryCard` | Server-owned status, completeness, readiness, risk, and missing categories. |

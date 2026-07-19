@@ -15,7 +15,6 @@ import {
 
 import { useLocale } from "../../contexts/LocaleContext";
 import { discoveryCopy } from "../../i18n/discovery";
-import { RahafitLogo } from "../common/RahafitLogo";
 import { HeroFloatingCard } from "./HeroFloatingCard";
 
 export const HeroPhoneMockup: React.FC = () => {
@@ -67,10 +66,9 @@ export const HeroPhoneMockup: React.FC = () => {
           className="hero-phone-screen bg-slate-900 rounded-[32px] p-3 text-slate-100 flex flex-col gap-2.5 border border-slate-800/60 overflow-hidden"
           dir={isRtl ? "rtl" : "ltr"}
         >
-          {/* Header Bar with Rahafit Logo */}
           <div className="mockup-header flex items-center justify-between border-b border-slate-800/80 pb-2">
-            <div className="flex items-center gap-2">
-              <RahafitLogo size="sm" />
+            <div className="text-[10px] font-extrabold text-slate-200">
+              {isRtl ? "Ù…Ù„Ø®Øµ Ø§Ù„ÙŠÙˆÙ…" : "TODAY'S PLAN"}
             </div>
             <div className="mockup-badge-live flex items-center gap-1 bg-teal-500/10 text-teal-400 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-teal-500/20">
               <Sparkles size={10} color="#14b8a6" />
