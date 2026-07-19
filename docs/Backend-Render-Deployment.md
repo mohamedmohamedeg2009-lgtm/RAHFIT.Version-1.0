@@ -14,7 +14,8 @@ Uvicorn to Render's dynamic `PORT`, and checks `/health` before routing traffic.
 4. Verify `https://<render-service-host>/health`. It must return
    `{"status":"ok","database":"ok"}`.
 5. In Vercel, set `VITE_API_BASE_URL` for **Production** to
-   `https://<render-service-host>/api/v1`, then redeploy the frontend.
+   `https://<render-service-host>`, then redeploy the frontend. The frontend adds `/api/v1`
+   exactly once.
 
 ## Required Render environment variables
 

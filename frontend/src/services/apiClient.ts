@@ -1,4 +1,5 @@
 const localApiBaseUrl = "http://127.0.0.1:8000/api/v1";
+const apiVersionPrefix = "/api/v1";
 
 export class ApiConfigurationError extends Error {
   constructor(message: string) {
@@ -29,7 +30,7 @@ export function normalizeApiBaseUrl(
       );
     }
     const normalizedPath = candidate.replace(/\/+$/, "");
-    if (!normalizedPath.endsWith("/api/v1")) {
+    if (!normalizedPath.endsWith(apiVersionPrefix)) {
       throw new Error("VITE_API_BASE_URL must include the /api/v1 prefix.");
     }
     return normalizedPath;
@@ -50,10 +51,9 @@ export function normalizeApiBaseUrl(
     throw new ApiConfigurationError("VITE_API_BASE_URL must not point to localhost in production.");
   }
   const normalizedPath = parsed.pathname.replace(/\/+$/, "");
-  if (!normalizedPath.endsWith("/api/v1")) {
-    throw new Error("VITE_API_BASE_URL must include the /api/v1 prefix.");
-  }
-  parsed.pathname = normalizedPath;
+  parsed.pathname = normalizedPath.endsWith(apiVersionPrefix)
+    ? normalizedPath
+    : `${normalizedPath}${apiVersionPrefix}`;
   return parsed.toString().replace(/\/$/, "");
 }
 

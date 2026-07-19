@@ -250,6 +250,7 @@ describe("api refresh boundary", () => {
 describe("authentication integration boundary", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllEnvs();
     window.localStorage.clear();
     authService.clearSession();
   });
@@ -276,6 +277,26 @@ describe("authentication integration boundary", () => {
       email: "new@example.com",
       password: "secure-password-123",
     });
+  });
+
+  it("uses the Render backend origin from VITE_API_BASE_URL for registration", async () => {
+    vi.stubEnv("VITE_API_BASE_URL", "https://rahfit-backend.onrender.com");
+    const fetchMock = vi.spyOn(window, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          access_token: "access",
+          refresh_token: "refresh",
+          access_token_expires_in: 1800,
+        }),
+        { status: 201 },
+      ),
+    );
+
+    await authService.register({ email: "new@example.com", password: "secure-password-123" });
+
+    expect(String(fetchMock.mock.calls[0][0])).toBe(
+      "https://rahfit-backend.onrender.com/api/v1/auth/register",
+    );
   });
 
   it("login uses the login endpoint without an auth refresh request", async () => {
@@ -384,7 +405,7 @@ describe("authentication integration boundary", () => {
     expect(normalizeApiBaseUrl("http://localhost:8000/api/v1/")).toBe(
       "http://localhost:8000/api/v1",
     );
-    expect(() => normalizeApiBaseUrl("http://localhost:8000")).toThrow("/api/v1");
+    expect(normalizeApiBaseUrl("http://localhost:8000")).toBe("http://localhost:8000/api/v1");
     expect(() => normalizeApiBaseUrl("not-a-url")).toThrow("valid absolute URL");
   });
 
@@ -405,6 +426,9 @@ describe("authentication integration boundary", () => {
     );
     expect(normalizeApiBaseUrl("https://api.example.com/api/v1/", "production")).toBe(
       "https://api.example.com/api/v1",
+    );
+    expect(normalizeApiBaseUrl("https://rahfit-backend.onrender.com", "production")).toBe(
+      "https://rahfit-backend.onrender.com/api/v1",
     );
   });
 

@@ -132,11 +132,11 @@ The frontend must never use a local or same-origin API URL on Vercel.
    if previews must call the API):
 
    ```text
-   VITE_API_BASE_URL=https://<render-service-host>/api/v1
+   VITE_API_BASE_URL=https://<render-service-host>
    ```
 
-   It must be the public HTTPS Render URL, include `/api/v1`, and must not be `localhost`,
-   `127.0.0.1`, or `/api/v1`.
+   It must be the public HTTPS Render origin and must not be `localhost` or `127.0.0.1`.
+   The frontend adds `/api/v1` exactly once.
 5. Redeploy Render after changing `ALLOWED_ORIGINS`, then redeploy Vercel after changing
    `VITE_API_BASE_URL`. Vite embeds `VITE_*` values during the frontend build; changing the
    Vercel variable alone does not update an existing deployment.
