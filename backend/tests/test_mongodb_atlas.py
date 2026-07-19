@@ -3,12 +3,22 @@ from typing import Any, cast
 import pytest
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from pydantic import ValidationError
-from pymongo.errors import OperationFailure, ServerSelectionTimeoutError
+from pymongo.errors import (
+    ConfigurationError,
+    OperationFailure,
+    ServerSelectionTimeoutError,
+)
 
 from app.config.settings import Settings
 from app.database import mongodb
 from app.database.indexes import REQUIRED_INDEXES, initialize_indexes, verify_required_indexes
-from app.database.mongodb import DatabaseConnectionError, MongoDatabase, redact_mongodb_uri
+from app.database.mongodb import (
+    DatabaseConnectionError,
+    MongoDatabase,
+    classify_mongodb_connection_error,
+    mongodb_uri_scheme,
+    redact_mongodb_uri,
+)
 
 
 def required_environment(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -24,6 +34,31 @@ def test_settings_accept_local_mongodb_uri(monkeypatch: pytest.MonkeyPatch) -> N
 
     assert settings.mongodb_uri.unicode_string() == "mongodb://localhost:27017"
     assert settings.mongodb_database == "rahfit_test"
+
+
+def test_settings_read_exact_render_mongodb_environment_aliases(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    required_environment(monkeypatch)
+    monkeypatch.setenv("MONGODB_URI", "mongodb+srv://user:password@cluster.example.mongodb.net/")
+    monkeypatch.setenv("MONGODB_DATABASE", "rahfit")
+
+    settings = Settings(_env_file=None)
+
+    assert settings.mongodb_uri.unicode_string().startswith("mongodb+srv://")
+    assert settings.mongodb_database == "rahfit"
+
+
+def test_invalid_mongodb_uri_validation_hides_credential_input(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    required_environment(monkeypatch)
+    monkeypatch.setenv("MONGODB_URI", "not-a-uri-with-secret-password")
+
+    with pytest.raises(ValidationError) as error:
+        Settings(_env_file=None)
+
+    assert "not-a-uri-with-secret-password" not in str(error.value)
 
 
 def test_settings_accept_atlas_srv_uri(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -63,6 +98,63 @@ def test_mongodb_uri_redaction_removes_password() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    ("error", "safe_reason", "message"),
+    [
+        (
+            OperationFailure("Authentication failed.", code=18),
+            "authentication_failed",
+            "MongoDB authentication failed.",
+        ),
+        (
+            ServerSelectionTimeoutError("server selection timed out"),
+            "server_selection_timeout",
+            "MongoDB server selection timed out.",
+        ),
+        (
+            ConfigurationError("unknown option"),
+            "configuration_error",
+            "MongoDB driver configuration is invalid.",
+        ),
+        (
+            ConfigurationError("The DNS query name does not exist"),
+            "dns_srv_resolution_failed",
+            "MongoDB DNS/SRV resolution failed.",
+        ),
+        (
+            OSError("[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed"),
+            "tls_certificate_failed",
+            "MongoDB TLS or certificate validation failed.",
+        ),
+        (
+            ConfigurationError("Invalid URI scheme"),
+            "invalid_uri",
+            "MongoDB URI is invalid.",
+        ),
+    ],
+)
+def test_connection_errors_have_distinct_safe_diagnostics(
+    error: BaseException, safe_reason: str, message: str
+) -> None:
+    diagnostic = classify_mongodb_connection_error(error)
+
+    assert diagnostic.exception_class == type(error).__name__
+    assert diagnostic.safe_reason == safe_reason
+    assert diagnostic.message.startswith(message)
+
+
+@pytest.mark.parametrize(
+    ("uri", "expected_scheme"),
+    [
+        ("mongodb://user:password@localhost:27017", "mongodb"),
+        ("mongodb+srv://user:password@cluster.example.mongodb.net/", "mongodb+srv"),
+        ("postgres://user:password@localhost/db", "invalid"),
+    ],
+)
+def test_mongodb_uri_scheme_never_includes_credentials(uri: str, expected_scheme: str) -> None:
+    assert mongodb_uri_scheme(uri) == expected_scheme
+
+
 class FakeAdmin:
     def __init__(self, result: object) -> None:
         self.result = result
@@ -86,6 +178,7 @@ class FakeClient:
 @pytest.mark.asyncio
 async def test_connect_reports_safe_health_failure(monkeypatch: pytest.MonkeyPatch) -> None:
     settings = Settings(
+        _env_file=None,
         mongodb_uri="mongodb://atlas-user:secret-password@localhost:27017",
         mongodb_database="rahfit_test",
         jwt_secret_key="a" * 32,
@@ -93,7 +186,7 @@ async def test_connect_reports_safe_health_failure(monkeypatch: pytest.MonkeyPat
     client = FakeClient(ServerSelectionTimeoutError("network timeout"))
     monkeypatch.setattr(mongodb, "AsyncIOMotorClient", lambda *args, **kwargs: client)
 
-    with pytest.raises(DatabaseConnectionError, match="unreachable or timed out") as error:
+    with pytest.raises(DatabaseConnectionError, match="server selection timed out") as error:
         await MongoDatabase(settings).connect()
 
     assert "secret-password" not in str(error.value)
@@ -101,8 +194,41 @@ async def test_connect_reports_safe_health_failure(monkeypatch: pytest.MonkeyPat
 
 
 @pytest.mark.asyncio
+async def test_connect_logs_only_safe_connection_diagnostic(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    settings = Settings(
+        _env_file=None,
+        mongodb_uri="mongodb+srv://atlas-user:secret-password@cluster.example.mongodb.net/",
+        mongodb_database="rahfit",
+        jwt_secret_key="a" * 32,
+    )
+    client = FakeClient(OperationFailure("Authentication failed for atlas-user", code=18))
+    logged: dict[str, object] = {}
+
+    class Logger:
+        def error(self, event: str, **kwargs: object) -> None:
+            logged["event"] = event
+            logged.update(kwargs)
+
+    monkeypatch.setattr(mongodb, "AsyncIOMotorClient", lambda *args, **kwargs: client)
+    monkeypatch.setattr(mongodb, "logger", Logger())
+
+    with pytest.raises(DatabaseConnectionError, match="authentication failed"):
+        await MongoDatabase(settings).connect()
+
+    assert logged == {
+        "event": "mongodb_startup_failed",
+        "exception_class": "OperationFailure",
+        "safe_reason": "authentication_failed",
+        "uri_scheme": "mongodb+srv",
+    }
+
+
+@pytest.mark.asyncio
 async def test_connect_accepts_mocked_atlas_client(monkeypatch: pytest.MonkeyPatch) -> None:
     settings = Settings(
+        _env_file=None,
         mongodb_uri=(
             "mongodb+srv://atlas-user:encoded-password@cluster.example.mongodb.net/"
             "?retryWrites=true&w=majority"
@@ -137,6 +263,7 @@ async def test_connect_reports_atlas_authentication_failure(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     settings = Settings(
+        _env_file=None,
         mongodb_uri="mongodb://localhost:27017",
         mongodb_database="rahfit_test",
         jwt_secret_key="a" * 32,

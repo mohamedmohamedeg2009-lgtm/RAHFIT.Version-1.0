@@ -5,13 +5,35 @@ Run from the backend directory:
 """
 
 import asyncio
+import ssl
 import sys
+from pathlib import Path
+from urllib.parse import urlsplit
 
+import dns.resolver
 from pydantic import ValidationError
 
-from app.config import get_settings
-from app.database.indexes import initialize_indexes, verify_required_indexes
-from app.database.mongodb import DatabaseConnectionError, MongoDatabase
+BACKEND_ROOT = Path(__file__).resolve().parents[1]
+if str(BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(BACKEND_ROOT))
+
+from app.config import get_settings  # noqa: E402
+from app.database.indexes import initialize_indexes, verify_required_indexes  # noqa: E402
+from app.database.mongodb import (  # noqa: E402
+    DatabaseConnectionError,
+    MongoDatabase,
+    mongodb_uri_scheme,
+)
+
+
+def srv_lookup(uri: str) -> None:
+    """Resolve the Atlas SRV record without printing the hostname or URI."""
+    if mongodb_uri_scheme(uri) != "mongodb+srv":
+        return
+    hostname = urlsplit(uri).hostname
+    if not hostname:
+        raise ValueError("MongoDB SRV URI does not contain a host.")
+    dns.resolver.resolve(f"_mongodb._tcp.{hostname}", "SRV")
 
 
 async def verify() -> int:
@@ -27,6 +49,21 @@ async def verify() -> int:
 
     database = MongoDatabase(settings)
     try:
+        uri = settings.mongodb_uri.unicode_string()
+        scheme = mongodb_uri_scheme(uri)
+        if scheme == "invalid":
+            print("MongoDB diagnostic: invalid URI scheme.", file=sys.stderr)
+            return 1
+        try:
+            srv_lookup(uri)
+        except (ValueError, dns.exception.DNSException, OSError, ssl.SSLError) as exc:
+            print(
+                "MongoDB diagnostic: "
+                f"exception_class={type(exc).__name__} safe_reason=dns_srv_resolution_failed "
+                f"uri_scheme={scheme}",
+                file=sys.stderr,
+            )
+            return 1
         await database.connect()
         await initialize_indexes(database.database)
         await verify_required_indexes(database.database)

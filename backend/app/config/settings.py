@@ -8,7 +8,13 @@ from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 class Settings(BaseSettings):
     """Validated runtime configuration loaded only from environment variables."""
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+        hide_input_in_errors=True,
+        populate_by_name=True,
+    )
 
     app_name: str = "RAHFIT AI API"
     app_env: Literal["development", "test", "staging", "production"] = "development"
@@ -25,8 +31,8 @@ class Settings(BaseSettings):
             "http://127.0.0.1:5174",
         ]
     )
-    mongodb_uri: MongoDsn
-    mongodb_database: str = Field(min_length=1)
+    mongodb_uri: MongoDsn = Field(validation_alias="MONGODB_URI")
+    mongodb_database: str = Field(min_length=1, validation_alias="MONGODB_DATABASE")
     mongodb_server_selection_timeout_ms: int = Field(
         default=5000,
         ge=1000,

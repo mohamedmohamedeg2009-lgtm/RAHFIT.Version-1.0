@@ -35,10 +35,10 @@ $env:MONGODB_URI = "mongodb+srv://<username>:<password>@<cluster-host>/?retryWri
 $env:MONGODB_DATABASE = "rahfit"
 $env:JWT_SECRET_KEY = "<existing-backend-jwt-secret>"
 Set-Location backend
-.\.venv\Scripts\python.exe scripts\verify_mongodb_atlas.py
+..\.venv\Scripts\python.exe scripts\verify_mongodb_atlas.py
 ```
 
-The script pings MongoDB, prints the selected database name, initializes the existing application indexes, and verifies the required indexes. It never prints the URI or password. Startup uses the same ping and index-initialization lifecycle; failures report safe messages for missing configuration, authentication, DNS/SRV resolution, and unreachable databases.
+The script validates the URI scheme, resolves the SRV record for `mongodb+srv` connections, pings MongoDB, initializes the existing application indexes, and verifies the required indexes. It never prints the URI, host, username, password, or URI options. Startup uses the same fail-closed ping and index-initialization lifecycle. A failed startup emits only `exception_class`, `safe_reason`, and `uri_scheme`; supported reasons include `authentication_failed`, `server_selection_timeout`, `configuration_error`, `dns_srv_resolution_failed`, `tls_certificate_failed`, and `invalid_uri`.
 
 ## Migrate local data when credentials are available
 
