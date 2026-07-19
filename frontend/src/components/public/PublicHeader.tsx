@@ -20,7 +20,10 @@ export function PublicHeader() {
   };
 
   return (
-    <header className="public-topbar sticky top-0 z-50 backdrop-blur-md" aria-label="Public Navigation">
+    <header
+      className="public-topbar sticky top-0 z-50 backdrop-blur-md"
+      aria-label="Public Navigation"
+    >
       <div className="public-topbar-inner flex items-center justify-between max-w-7xl mx-auto px-4 py-3">
         {/* Brand Logo (Far right in RTL, Far left in LTR) */}
         <Link className="dashboard-brand flex items-center gap-2" to="/" aria-label="Rahafit Home">

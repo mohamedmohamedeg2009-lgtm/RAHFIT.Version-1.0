@@ -1,8 +1,5 @@
 import type { Locale } from "../contexts/LocaleContext";
-import type {
-  ReadinessLevel,
-  RecommendedAction,
-} from "../services/dailyCheckInService";
+import type { ReadinessLevel, RecommendedAction } from "../services/dailyCheckInService";
 
 export const dailyCheckInCopy = {
   en: {
@@ -13,7 +10,7 @@ export const dailyCheckInCopy = {
     notCompletedToday: "No check-in recorded for today yet",
     startCheckIn: "Complete Check-in",
     updateCheckIn: "Update Check-in",
-    
+
     inputs: {
       sleepHours: "Sleep Duration (Hours)",
       sleepQuality: "Sleep Quality (1-5)",
@@ -40,7 +37,8 @@ export const dailyCheckInCopy = {
       warnings: "Key Signals & Warnings",
       askCoach: "Explain Today's Readiness with AI Coach",
       calmNoticeTitle: "Safety Guidance Notice",
-      calmNoticeText: "High physical discomfort or pain reported. We recommend prioritizing rest and consulting a qualified professional.",
+      calmNoticeText:
+        "High physical discomfort or pain reported. We recommend prioritizing rest and consulting a qualified professional.",
     },
   },
   ar: {
@@ -78,7 +76,8 @@ export const dailyCheckInCopy = {
       warnings: "الإشارات والإنذارات الرئيسية",
       askCoach: "اشرح جاهزيتي اليوم مع المدرب الذكي",
       calmNoticeTitle: "تنبيه التوجيه والسلامة",
-      calmNoticeText: "تم تسجيل مستويات إجهاد أو ألم مرتفعة. نوصي بمنح جسمك الراحة واستشارة أخصائي عند الحاجة.",
+      calmNoticeText:
+        "تم تسجيل مستويات إجهاد أو ألم مرتفعة. نوصي بمنح جسمك الراحة واستشارة أخصائي عند الحاجة.",
     },
   },
 };

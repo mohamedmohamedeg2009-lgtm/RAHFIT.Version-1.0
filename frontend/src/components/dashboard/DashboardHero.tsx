@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
 import { Droplet, Flame, BarChart3 } from "lucide-react";
-import type { DashboardData } from "../../types/dashboard";
+import type { DashboardSummaryData } from "../../types/dashboard";
 import type { Locale } from "../../contexts/LocaleContext";
 
 interface DashboardHeroProps {
-  data: DashboardData;
+  data: DashboardSummaryData;
   locale: Locale;
 }
 
@@ -61,7 +61,7 @@ function CircularProgressRing({
 }
 
 export function DashboardHero({ data, locale }: DashboardHeroProps) {
-  const { user, assessment, nutrition, progress } = data;
+  const { user, assessment, nutrition, latestCheckIn, workout } = data;
 
   const currentHour = new Date().getHours();
   let greeting: string;
@@ -71,10 +71,7 @@ export function DashboardHero({ data, locale }: DashboardHeroProps) {
     greeting = currentHour < 12 ? "Good morning" : "Good afternoon";
   }
 
-  // Derive scores
-  const healthScore = assessment.readinessScore ?? 80;
-  const recoveryScore = progress.latestReadinessScore ?? healthScore;
-  const sleepScore = healthScore ? Math.round(healthScore * 0.92) : 85;
+  const readinessScore = latestCheckIn?.readinessScore ?? assessment.readinessScore;
 
   const labels = {
     en: {
@@ -125,20 +122,27 @@ export function DashboardHero({ data, locale }: DashboardHeroProps) {
         </div>
 
         <div className="dashboard-hero-grid">
-          <div className="dashboard-hero-ring-card">
-            <span className="dashboard-hero-ring-title">{labels.healthScore}</span>
-            <CircularProgressRing value={healthScore} color="var(--color-primary)" />
-          </div>
-
-          <div className="dashboard-hero-ring-card">
-            <span className="dashboard-hero-ring-title">{labels.recovery}</span>
-            <CircularProgressRing value={recoveryScore} color="var(--color-accent)" />
-          </div>
-
-          <div className="dashboard-hero-ring-card">
-            <span className="dashboard-hero-ring-title">{labels.sleep}</span>
-            <CircularProgressRing value={sleepScore} color="var(--color-ai)" />
-          </div>
+          {readinessScore !== null && readinessScore !== undefined ? (
+            <div className="dashboard-hero-ring-card">
+              <span className="dashboard-hero-ring-title">{labels.healthScore}</span>
+              <CircularProgressRing value={readinessScore} color="var(--color-primary)" />
+            </div>
+          ) : (
+            <div className="dashboard-hero-ring-card">
+              <span className="dashboard-hero-ring-title">{labels.healthScore}</span>
+              <span>No check-in recorded yet</span>
+            </div>
+          )}
+          {workout?.completionPercentage !== null &&
+            workout?.completionPercentage !== undefined && (
+              <div className="dashboard-hero-ring-card">
+                <span className="dashboard-hero-ring-title">{labels.workoutToday}</span>
+                <CircularProgressRing
+                  value={workout.completionPercentage}
+                  color="var(--color-accent)"
+                />
+              </div>
+            )}
         </div>
       </div>
 
@@ -150,11 +154,13 @@ export function DashboardHero({ data, locale }: DashboardHeroProps) {
             {labels.hydration}
           </span>
           <div className="dashboard-hero-metric-box-value">
-            {nutrition?.waterConsumedMl ?? 1200}{" "}
+            {nutrition?.waterConsumedMl ?? "—"}{" "}
             <span style={{ fontSize: "14px", fontWeight: 500 }}>ml</span>
           </div>
           <span className="dashboard-hero-metric-box-sub">
-            / {nutrition?.waterTargetMl ?? 3000} ml {labels.water}
+            {nutrition?.waterTargetMl !== null && nutrition?.waterTargetMl !== undefined
+              ? `/ ${nutrition.waterTargetMl} ml ${labels.water}`
+              : "No hydration target recorded"}
           </span>
         </div>
 
@@ -165,12 +171,13 @@ export function DashboardHero({ data, locale }: DashboardHeroProps) {
             {labels.nutrition}
           </span>
           <div className="dashboard-hero-metric-box-value">
-            {nutrition?.caloriesRemaining ?? 1450}{" "}
+            {nutrition?.caloriesConsumed ?? "—"}{" "}
             <span style={{ fontSize: "14px", fontWeight: 500 }}>kcal</span>
           </div>
           <span className="dashboard-hero-metric-box-sub">
-            {labels.calories}: {nutrition?.caloriesConsumed ?? 800} /{" "}
-            {nutrition?.targetCalories ?? 2250}
+            {nutrition?.targetCalories !== null && nutrition?.targetCalories !== undefined
+              ? `${labels.calories}: ${nutrition?.caloriesConsumed ?? "—"} / ${nutrition.targetCalories}`
+              : "No calorie target recorded"}
           </span>
         </div>
 
@@ -181,14 +188,7 @@ export function DashboardHero({ data, locale }: DashboardHeroProps) {
             {labels.weeklyProgress}
           </span>
           <div className="weekly-bars-container">
-            {[75, 40, 85, 60, 90, 0, 0].map((h, i) => (
-              <div key={i} className="weekly-bar-wrapper">
-                <div className="weekly-bar-track">
-                  <div className="weekly-bar-fill" style={{ height: `${h}%` }} />
-                </div>
-                <span className="weekly-bar-day">{labels.weekDays[i].slice(0, 3)}</span>
-              </div>
-            ))}
+            <span>{workout ? `${workout.status}` : "No workouts recorded yet"}</span>
           </div>
         </div>
       </div>

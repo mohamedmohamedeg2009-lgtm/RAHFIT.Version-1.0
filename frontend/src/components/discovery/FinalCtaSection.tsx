@@ -11,7 +11,10 @@ export function FinalCtaSection() {
   const ArrowIcon = direction === "rtl" ? ArrowLeft : ArrowRight;
 
   return (
-    <section className="discovery-section discovery-final-cta pb-8" aria-labelledby="final-cta-title">
+    <section
+      className="discovery-section discovery-final-cta pb-8"
+      aria-labelledby="final-cta-title"
+    >
       <Card className="p-8 md:p-12 bg-gradient-to-r from-slate-900 via-teal-950/40 to-slate-900 border-teal-500/30 text-center flex flex-col items-center gap-4 rounded-3xl shadow-2xl relative overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"

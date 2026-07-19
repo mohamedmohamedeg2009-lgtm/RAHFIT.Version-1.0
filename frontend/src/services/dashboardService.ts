@@ -7,6 +7,7 @@ import type {
   DashboardMetadata,
   DashboardSafetyNotice,
   DashboardUserSummary,
+  DashboardSummaryData,
 } from "../types/dashboard";
 
 type RawAction = {
@@ -194,5 +195,115 @@ function mapDashboard(raw: RawDashboard): DashboardData {
 export const dashboardService = {
   async getDashboard(options?: Parameters<typeof apiRequest>[1]): Promise<DashboardData> {
     return mapDashboard(await apiRequest<RawDashboard>("/dashboard", options));
+  },
+  async getSummary(options?: Parameters<typeof apiRequest>[1]): Promise<DashboardSummaryData> {
+    const raw = await apiRequest<{
+      user: RawUser;
+      assessment: RawAssessment;
+      latest_check_in: {
+        has_checked_in_today: boolean;
+        date: string | null;
+        readiness_score: number | null;
+        readiness_level: string | null;
+        recommended_action: string | null;
+        warning_codes: string[];
+      } | null;
+      nutrition: {
+        date: string;
+        calories_consumed: number | null;
+        protein_consumed: number | null;
+        water_consumed_ml: number | null;
+        target_calories: number | null;
+        water_target_ml: number | null;
+      } | null;
+      workout: {
+        session_id: string;
+        status: string;
+        completion_percentage: number | null;
+        started_at: string;
+        completed_at: string | null;
+      } | null;
+      recent_activities: {
+        id: string;
+        occurred_at: string;
+        kind: string;
+        title: string;
+        detail: string | null;
+        status: string;
+      }[];
+      history: {
+        date: string;
+        calories_consumed: number | null;
+        workouts_completed: number | null;
+        active_minutes: number | null;
+        readiness_score: number | null;
+      }[];
+      metadata: RawMetadata;
+    }>("/dashboard/summary", options);
+    return {
+      user: {
+        displayName: raw.user.display_name,
+        primaryGoal: raw.user.primary_goal,
+        preferredUnits: raw.user.preferred_units,
+        assessmentStatus: raw.user.assessment_status,
+        profileCompleteness: raw.user.profile_completeness,
+        missingProfileFields: raw.user.missing_profile_fields,
+      },
+      assessment: {
+        status: raw.assessment.status,
+        sessionId: raw.assessment.session_id,
+        completionPercentage: raw.assessment.completion_percentage,
+        readinessScore: raw.assessment.readiness_score,
+        riskLevel: raw.assessment.risk_level,
+        safetyStatus: raw.assessment.safety_status,
+        missingCategories: raw.assessment.missing_categories,
+        latestCompletionDate: raw.assessment.latest_completion_date,
+        reassessmentRecommended: raw.assessment.reassessment_recommended,
+      },
+      latestCheckIn: raw.latest_check_in && {
+        hasCheckedInToday: raw.latest_check_in.has_checked_in_today,
+        date: raw.latest_check_in.date,
+        readinessScore: raw.latest_check_in.readiness_score,
+        readinessLevel: raw.latest_check_in.readiness_level,
+        recommendedAction: raw.latest_check_in.recommended_action,
+        warningCodes: raw.latest_check_in.warning_codes,
+      },
+      nutrition: raw.nutrition && {
+        date: raw.nutrition.date,
+        caloriesConsumed: raw.nutrition.calories_consumed,
+        proteinConsumed: raw.nutrition.protein_consumed,
+        waterConsumedMl: raw.nutrition.water_consumed_ml,
+        targetCalories: raw.nutrition.target_calories,
+        waterTargetMl: raw.nutrition.water_target_ml,
+      },
+      workout: raw.workout && {
+        sessionId: raw.workout.session_id,
+        status: raw.workout.status,
+        completionPercentage: raw.workout.completion_percentage,
+        startedAt: raw.workout.started_at,
+        completedAt: raw.workout.completed_at,
+      },
+      recentActivities: raw.recent_activities.map((item) => ({
+        id: item.id,
+        occurredAt: item.occurred_at,
+        kind: item.kind,
+        title: item.title,
+        detail: item.detail,
+        status: item.status,
+      })),
+      history: raw.history.map((item) => ({
+        date: item.date,
+        caloriesConsumed: item.calories_consumed,
+        workoutsCompleted: item.workouts_completed,
+        activeMinutes: item.active_minutes,
+        readinessScore: item.readiness_score,
+      })),
+      metadata: {
+        generatedAt: raw.metadata.generated_at,
+        dataFreshness: raw.metadata.data_freshness,
+        partialData: raw.metadata.partial_data,
+        dashboardVersion: raw.metadata.dashboard_version,
+      },
+    };
   },
 };

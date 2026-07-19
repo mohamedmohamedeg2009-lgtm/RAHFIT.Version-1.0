@@ -3,10 +3,7 @@ import { apiRequest } from "./apiClient";
 export type HydrationStatus = "low" | "moderate" | "good";
 export type ReadinessLevel = "high" | "moderate" | "low" | "recovery_required";
 export type RecommendedAction =
-  | "normal_training"
-  | "reduced_intensity"
-  | "recovery_session"
-  | "rest_and_professional_guidance";
+  "normal_training" | "reduced_intensity" | "recovery_session" | "rest_and_professional_guidance";
 
 export interface DailyCheckInInputs {
   sleep_hours: number;
@@ -68,9 +65,7 @@ export const dailyCheckInService = {
     });
   },
 
-  async getTodayCheckIn(
-    options?: Parameters<typeof apiRequest>[1],
-  ): Promise<DailyCheckInResponse> {
+  async getTodayCheckIn(options?: Parameters<typeof apiRequest>[1]): Promise<DailyCheckInResponse> {
     return apiRequest<DailyCheckInResponse>("/api/v1/check-ins/daily/today", {
       method: "GET",
       ...options,

@@ -39,9 +39,7 @@ export function AiCoachShowcaseSection() {
             {copy.coachHeading}
           </h2>
 
-          <p className="text-sm text-slate-300 leading-relaxed">
-            {copy.coachSubheading}
-          </p>
+          <p className="text-sm text-slate-300 leading-relaxed">{copy.coachSubheading}</p>
 
           {/* Capability Chips */}
           <div className="flex flex-wrap gap-2 pt-2">
@@ -70,7 +68,9 @@ export function AiCoachShowcaseSection() {
               </div>
               <div>
                 <div className="text-xs font-bold text-white">Rahafit AI Coach</div>
-                <div className="text-[10px] text-slate-400">{isRtl ? "مُوجَّه بقواعد الأمان" : "Safety-bounded"}</div>
+                <div className="text-[10px] text-slate-400">
+                  {isRtl ? "مُوجَّه بقواعد الأمان" : "Safety-bounded"}
+                </div>
               </div>
             </div>
             <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/20 text-[10px] font-bold">

@@ -106,3 +106,51 @@ export interface DashboardData {
   quickActions: DashboardAction[];
   metadata: DashboardMetadata;
 }
+
+export interface DashboardActivity {
+  id: string;
+  occurredAt: string;
+  kind: string;
+  title: string;
+  detail: string | null;
+  status: string;
+}
+
+export interface DashboardHistoryPoint {
+  date: string;
+  caloriesConsumed: number | null;
+  workoutsCompleted: number | null;
+  activeMinutes: number | null;
+  readinessScore: number | null;
+}
+
+export interface DashboardSummaryData {
+  user: DashboardUserSummary;
+  assessment: DashboardAssessmentSummary;
+  latestCheckIn: {
+    hasCheckedInToday: boolean;
+    date: string | null;
+    readinessScore: number | null;
+    readinessLevel: string | null;
+    recommendedAction: string | null;
+    warningCodes: string[];
+  } | null;
+  nutrition: {
+    date: string;
+    caloriesConsumed: number | null;
+    proteinConsumed: number | null;
+    waterConsumedMl: number | null;
+    targetCalories: number | null;
+    waterTargetMl: number | null;
+  } | null;
+  workout: {
+    sessionId: string;
+    status: string;
+    completionPercentage: number | null;
+    startedAt: string;
+    completedAt: string | null;
+  } | null;
+  recentActivities: DashboardActivity[];
+  history: DashboardHistoryPoint[];
+  metadata: DashboardMetadata;
+}

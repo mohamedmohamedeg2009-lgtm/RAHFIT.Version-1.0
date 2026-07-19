@@ -77,9 +77,7 @@ export function ProductAreasSection() {
               {copy.featureWorkoutTitle}
             </h3>
 
-            <p className="text-sm text-slate-300 leading-relaxed mb-6">
-              {copy.featureWorkoutDesc}
-            </p>
+            <p className="text-sm text-slate-300 leading-relaxed mb-6">{copy.featureWorkoutDesc}</p>
 
             {/* 3 Supporting Bullet Points */}
             <div className="flex flex-col gap-2.5 mb-8 pt-4 border-t border-slate-800/80">
@@ -170,9 +168,7 @@ export function ProductAreasSection() {
               {copy.featureAiCoachTitle}
             </h3>
 
-            <p className="text-xs text-slate-300 leading-relaxed mb-4">
-              {copy.featureAiCoachDesc}
-            </p>
+            <p className="text-xs text-slate-300 leading-relaxed mb-4">{copy.featureAiCoachDesc}</p>
 
             {/* Topic Chips */}
             <div className="flex flex-wrap items-center gap-2 mb-3">
@@ -188,9 +184,7 @@ export function ProductAreasSection() {
             </div>
 
             {/* Non-Medical Disclaimer Note */}
-            <p className="text-[10px] text-slate-400 leading-tight">
-              {copy.featureAiDisclaimer}
-            </p>
+            <p className="text-[10px] text-slate-400 leading-tight">{copy.featureAiDisclaimer}</p>
           </article>
         </div>
       </div>

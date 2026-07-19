@@ -107,8 +107,14 @@ export function HowItWorksSection() {
       </div>
 
       <div className="relative z-10 mb-12">
-        <div className="timeline-connector hidden lg:block absolute top-16 left-[8%] right-[8%] h-[2px] rounded-full" aria-hidden="true" />
-        <div className="timeline-connector-mobile lg:hidden absolute top-8 bottom-8 left-8 w-[2px] rounded-full" aria-hidden="true" />
+        <div
+          className="timeline-connector hidden lg:block absolute top-16 left-[8%] right-[8%] h-[2px] rounded-full"
+          aria-hidden="true"
+        />
+        <div
+          className="timeline-connector-mobile lg:hidden absolute top-8 bottom-8 left-8 w-[2px] rounded-full"
+          aria-hidden="true"
+        />
 
         <ol className="grid grid-cols-1 lg:grid-cols-4 gap-5 lg:gap-6 relative">
           {steps.map((step) => {

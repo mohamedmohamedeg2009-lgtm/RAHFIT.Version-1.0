@@ -56,7 +56,14 @@ export const RahafitLogo: React.FC<RahafitLogoProps> = ({
         className="rahafit-logo-icon shrink-0"
       >
         <defs>
-          <linearGradient id={iconGradientId} x1="10" y1="10" x2="34" y2="34" gradientUnits="userSpaceOnUse">
+          <linearGradient
+            id={iconGradientId}
+            x1="10"
+            y1="10"
+            x2="34"
+            y2="34"
+            gradientUnits="userSpaceOnUse"
+          >
             <stop offset="0%" stopColor="#06b6d4" />
             <stop offset="45%" stopColor="#14b8a6" />
             <stop offset="100%" stopColor="#f59e0b" />

@@ -63,7 +63,10 @@ export const HeroPhoneMockup: React.FC = () => {
         </div>
 
         {/* Screen inner UI */}
-        <div className="hero-phone-screen bg-slate-900 rounded-[32px] p-3 text-slate-100 flex flex-col gap-2.5 border border-slate-800/60 overflow-hidden" dir={isRtl ? "rtl" : "ltr"}>
+        <div
+          className="hero-phone-screen bg-slate-900 rounded-[32px] p-3 text-slate-100 flex flex-col gap-2.5 border border-slate-800/60 overflow-hidden"
+          dir={isRtl ? "rtl" : "ltr"}
+        >
           {/* Header Bar with Rahafit Logo */}
           <div className="mockup-header flex items-center justify-between border-b border-slate-800/80 pb-2">
             <div className="flex items-center gap-2">
@@ -126,7 +129,9 @@ export const HeroPhoneMockup: React.FC = () => {
                     transform="rotate(-90 22 22)"
                   />
                 </svg>
-                <span className="mockup-ring-text absolute text-[9px] font-bold text-teal-300">88%</span>
+                <span className="mockup-ring-text absolute text-[9px] font-bold text-teal-300">
+                  88%
+                </span>
               </div>
             </div>
 
@@ -150,7 +155,9 @@ export const HeroPhoneMockup: React.FC = () => {
                 </span>
               </div>
               <div className="text-xs font-extrabold text-white">2.1 L</div>
-              <div className="text-[8px] text-teal-400 font-semibold">{isRtl ? "ممتاز" : "Good"}</div>
+              <div className="text-[8px] text-teal-400 font-semibold">
+                {isRtl ? "ممتاز" : "Good"}
+              </div>
             </div>
 
             {/* Sleep Card */}
@@ -162,7 +169,9 @@ export const HeroPhoneMockup: React.FC = () => {
                 </span>
               </div>
               <div className="text-xs font-extrabold text-white">7.8 h</div>
-              <div className="text-[8px] text-teal-400 font-semibold">{isRtl ? "مثالي" : "Optimal"}</div>
+              <div className="text-[8px] text-teal-400 font-semibold">
+                {isRtl ? "مثالي" : "Optimal"}
+              </div>
             </div>
 
             {/* Heart Rate Card */}

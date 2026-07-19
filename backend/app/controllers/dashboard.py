@@ -7,9 +7,10 @@ from app.config import get_settings
 from app.controllers.auth import get_current_user
 from app.models.user import User
 from app.repositories.assessments import AssessmentRepository
+from app.repositories.dashboard_summary import DashboardSummaryRepository
 from app.repositories.nutrition import NutritionRepository
 from app.repositories.workouts import WorkoutRepository
-from app.schemas.dashboard import DashboardResponse
+from app.schemas.dashboard import DashboardResponse, DashboardSummaryResponse
 from app.services.ai_availability import AIAvailabilityService
 from app.services.assessment import AssessmentService
 from app.services.dashboard import DashboardService
@@ -96,6 +97,7 @@ def get_dashboard_service(request: Request) -> DashboardService:
         nutrition,
         AIAvailabilityService(settings),
         daily_check_in_reader=check_in_service,
+        summary_repository=DashboardSummaryRepository(database),
     )
 
 
@@ -114,3 +116,15 @@ async def get_dashboard(
 ) -> DashboardResponse:
     dashboard = await service.get_dashboard(user)
     return DashboardResponse.model_validate(dashboard.model_dump())
+
+
+@router.get(
+    "/summary",
+    response_model=DashboardSummaryResponse,
+    summary="Get record-backed dashboard summary",
+)
+async def get_dashboard_summary(
+    user: Annotated[User, Depends(get_current_user)],
+    service: Annotated[DashboardService, Depends(get_dashboard_service)],
+) -> DashboardSummaryResponse:
+    return DashboardSummaryResponse.model_validate((await service.get_summary(user)).model_dump())

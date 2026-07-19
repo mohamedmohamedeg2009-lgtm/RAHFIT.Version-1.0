@@ -50,21 +50,25 @@ export function SafetySection() {
               <ShieldCheck size={24} />
             </div>
             <div>
-              <h2 id="safety-section-title" className="text-2xl sm:text-3xl font-extrabold text-white">
+              <h2
+                id="safety-section-title"
+                className="text-2xl sm:text-3xl font-extrabold text-white"
+              >
                 {copy.safetyHeading}
               </h2>
             </div>
           </div>
 
-          <p className="text-sm text-slate-300 leading-relaxed">
-            {copy.safetySubheading}
-          </p>
+          <p className="text-sm text-slate-300 leading-relaxed">{copy.safetySubheading}</p>
 
           <div className="flex flex-col gap-4">
             {safetyPoints.map((point, idx) => {
               const Icon = point.icon;
               return (
-                <div key={idx} className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-950/60 border border-slate-800">
+                <div
+                  key={idx}
+                  className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-950/60 border border-slate-800"
+                >
                   <div className="w-8 h-8 rounded-lg bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center shrink-0 mt-0.5">
                     <Icon size={18} />
                   </div>
@@ -103,12 +107,16 @@ export function SafetySection() {
 
             <div className="flex items-center justify-between text-xs font-semibold text-slate-200">
               <span>{isRtl ? "متابعة الألم" : "Pain Flag Boundaries"}</span>
-              <span className="text-teal-400 font-bold">{isRtl ? "تنبيه تلقائي" : "Active Check"}</span>
+              <span className="text-teal-400 font-bold">
+                {isRtl ? "تنبيه تلقائي" : "Active Check"}
+              </span>
             </div>
 
             <div className="flex items-center justify-between text-xs font-semibold text-slate-200">
               <span>{isRtl ? "سرية البيانات" : "Data Scope"}</span>
-              <span className="text-amber-400 font-bold">{isRtl ? "حساب شخصي مشفر" : "Owner Scoped"}</span>
+              <span className="text-amber-400 font-bold">
+                {isRtl ? "حساب شخصي مشفر" : "Owner Scoped"}
+              </span>
             </div>
           </div>
 

@@ -69,9 +69,13 @@ export function DashboardPreviewSection() {
                   <Dumbbell size={20} />
                 </div>
                 <div>
-                  <div className="text-xs text-teal-400 font-extrabold">{copy.previewBadgeWorkout}</div>
+                  <div className="text-xs text-teal-400 font-extrabold">
+                    {copy.previewBadgeWorkout}
+                  </div>
                   <div className="text-sm font-bold text-white">
-                    {isRtl ? "تمرين القوة والجزء العلوي (45 دقيقة)" : "Upper Body Strength (45 min)"}
+                    {isRtl
+                      ? "تمرين القوة والجزء العلوي (45 دقيقة)"
+                      : "Upper Body Strength (45 min)"}
                   </div>
                 </div>
               </div>

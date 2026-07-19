@@ -56,7 +56,9 @@ describe("Public Discovery & Landing Page Journey", () => {
     expect(await screen.findByText("ابدأ رحلتك مع Rahafit")).toBeInTheDocument();
     expect(screen.getAllByText("أنشئ حسابك")[0]).toBeInTheDocument();
     expect(screen.getAllByText("استكشف المميزات")[0]).toBeInTheDocument();
-    expect(screen.getByText("رحلتك مع Rahafit في أربع خطوات")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "رحلتك مع Rahafit في أربع خطوات" }),
+    ).toBeInTheDocument();
     expect(screen.getAllByText("أنشئ حسابك")[0]).toBeInTheDocument();
     expect(screen.getByText("حدّد أهدافك وحالتك")).toBeInTheDocument();
     expect(screen.getByText("احصل على تجربة مخصصة")).toBeInTheDocument();

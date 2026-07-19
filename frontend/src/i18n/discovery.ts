@@ -69,7 +69,8 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
     featureAiChip2: "Nutrition",
     featureAiChip3: "Recovery",
     featureAiChip4: "Progress",
-    featureAiDisclaimer: "AI recommendations provide fitness guidance and do not replace professional medical advice.",
+    featureAiDisclaimer:
+      "AI recommendations provide fitness guidance and do not replace professional medical advice.",
 
     // Dashboard Preview Section
     previewEyebrow: "PRODUCT PREVIEW",
@@ -79,7 +80,8 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
     previewBadgeReadiness: "Readiness 88%",
     previewBadgeWorkout: "Workout Ready",
     previewBadgeNutrition: "Macro Targets",
-    previewInsightText: "Recovery signals optimal — proceed with today's planned upper body strength workout.",
+    previewInsightText:
+      "Recovery signals optimal — proceed with today's planned upper body strength workout.",
 
     // AI Coach Showcase Section
     coachEyebrow: "AI COACH SHOWCASE",
@@ -103,7 +105,8 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
     // Platform Scope Pillars
     scopeEyebrow: "PLATFORM SCOPE",
     scopeHeading: "Five Core Pillars for Your Athletic Lifestyle",
-    scopeSubheading: "Comprehensive coverage ensuring consistency and physical safety at every step.",
+    scopeSubheading:
+      "Comprehensive coverage ensuring consistency and physical safety at every step.",
     pillar1Title: "Intelligent Workouts",
     pillar1Desc: "Deterministic workout plans tailored to your equipment and experience.",
     pillar2Title: "Nutrition & Water",
@@ -147,7 +150,8 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
     pricingHeading: "Simple & Transparent Access",
     pricingSubheading: "Start for free today and unlock full intelligent coaching capabilities.",
     pricingFreeTitle: "Free Discovery Tier",
-    pricingFreeDesc: "Full access to smart assessment, workout tracking, and daily readiness check-in.",
+    pricingFreeDesc:
+      "Full access to smart assessment, workout tracking, and daily readiness check-in.",
 
     // Final CTA
     finalCtaHeading: "Ready to Start Your Journey?",
@@ -239,8 +243,7 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
 
     featureAssessmentBadge: "تقييم آمن",
     featureAssessmentTitle: "التقييم الذكي والإقرار الصحي",
-    featureAssessmentDesc:
-      "حصر القيود الصحية ومستوى الرياضة لبناء ملف صحي متكامل يراعي سلامتك.",
+    featureAssessmentDesc: "حصر القيود الصحية ومستوى الرياضة لبناء ملف صحي متكامل يراعي سلامتك.",
 
     featureAiCoachBadge: "توجيه ذكي وآمن",
     featureAiCoachTitle: "المدرب الذكي والتوجيه الآمن",
@@ -250,13 +253,13 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
     featureAiChip2: "تغذية",
     featureAiChip3: "تعافٍ",
     featureAiChip4: "تقدم",
-    featureAiDisclaimer: "توجيهات نموذج الذكاء الاصطناعي هي إرشادات لأسلوب الحياة ولا بديل عن الاستشارة الطبية.",
+    featureAiDisclaimer:
+      "توجيهات نموذج الذكاء الاصطناعي هي إرشادات لأسلوب الحياة ولا بديل عن الاستشارة الطبية.",
 
     // Dashboard Preview Section
     previewEyebrow: "معاينة الواجهة",
     previewHeading: "لوحة تحكم ذكية تضع أهم بياناتك بين يديك",
-    previewSubheading:
-      "متابعة حية للجاهزية، التمرين، التغذية، وتوصيات المدرب الذكي في مكان واحد.",
+    previewSubheading: "متابعة حية للجاهزية، التمرين، التغذية، وتوصيات المدرب الذكي في مكان واحد.",
     previewBadgeReadiness: "الجاهزية 88%",
     previewBadgeWorkout: "التمرين جاهز",
     previewBadgeNutrition: "أهداف الماكروز",
@@ -265,8 +268,7 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
     // AI Coach Showcase Section
     coachEyebrow: "المدرب الذكي",
     coachHeading: "استشارات رياضية آمنة محكومة بقواعد السلامة",
-    coachSubheading:
-      "احصل على توجيهات رياضية مخصصة تراعي إقرارك الصحي وحالتك البدنية.",
+    coachSubheading: "احصل على توجيهات رياضية مخصصة تراعي إقرارك الصحي وحالتك البدنية.",
     coachSamplePrompt: "كيف أتمرن اليوم إذا كنت أشعر بإجهاد بسيط؟",
     coachSampleReply:
       "بناءً على إقرارك الصحي اليومي وجاهزيتك (88%)، تم تعديل كثافة التمرين وتقليل الأوزان 15% لحماية عضلاتك وضمان التعافي الآمن.",

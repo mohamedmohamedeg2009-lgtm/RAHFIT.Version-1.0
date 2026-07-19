@@ -47,7 +47,11 @@ export function LandingPage() {
 
   if (isLoading) {
     return (
-      <main className="auth-shell flex items-center justify-center min-h-screen" aria-busy="true" aria-live="polite">
+      <main
+        className="auth-shell flex items-center justify-center min-h-screen"
+        aria-busy="true"
+        aria-live="polite"
+      >
         <div className="loading-card text-center p-8">
           <span className="spinner mb-4" aria-hidden="true" />
           <p className="text-slate-300 font-semibold">Loading experience…</p>
@@ -61,7 +65,10 @@ export function LandingPage() {
   }
 
   return (
-    <div className="public-shell min-h-screen flex flex-col bg-slate-950 text-slate-100" dir={direction}>
+    <div
+      className="public-shell min-h-screen flex flex-col bg-slate-950 text-slate-100"
+      dir={direction}
+    >
       <PublicHeader />
 
       <main className="public-main-content flex-1 max-w-7xl w-full mx-auto px-4 py-6 flex flex-col gap-12">

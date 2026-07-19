@@ -11,7 +11,7 @@ from app.models.assessment import (
 )
 from app.services.assessment_branching import AdaptiveBranchingEngine
 
-CURRENT_ASSESSMENT_VERSION = 1
+CURRENT_ASSESSMENT_VERSION = 2
 
 
 def _options(*items: tuple[str, str]) -> tuple[QuestionOption, ...]:
@@ -399,4 +399,46 @@ class QuestionCatalog:
         return {category: tuple(questions) for category, questions in groups.items()}
 
 
-ASSESSMENT_QUESTION_CATALOG = QuestionCatalog(versions={1: VERSION_1_QUESTIONS})
+_ESSENTIAL_SETUP_IDS = {
+    "age",
+    "height",
+    "current_weight",
+    "primary_goal",
+    "has_injury",
+    "injury_area",
+    "serious_injury",
+    "experience",
+    "home_training",
+    "equipment_available",
+    "commercial_gym_equipment",
+    "pregnancy",
+    "medical_red_flags",
+}
+
+
+def _essential_setup_question(question: AssessmentQuestion) -> AssessmentQuestion:
+    """Version 2 asks only what is needed for safe, initial personalization.
+
+    Nutrition habits, target weight, sleep/stress, gender-specific branches and
+    sport specialization are deliberately collected in their respective feature
+    flows instead of blocking the first experience.
+    """
+    description = question.description
+    if question.id == "medical_red_flags":
+        description = (
+            "For your safety, tell us if a clinician has asked you to avoid exercise or "
+            "if you have a serious health concern that needs clearance."
+        )
+    return question.model_copy(update={"version": 2, "description": description})
+
+
+VERSION_2_QUESTIONS: tuple[AssessmentQuestion, ...] = tuple(
+    _essential_setup_question(question)
+    for question in VERSION_1_QUESTIONS
+    if question.id in _ESSENTIAL_SETUP_IDS
+)
+
+
+ASSESSMENT_QUESTION_CATALOG = QuestionCatalog(
+    versions={1: VERSION_1_QUESTIONS, 2: VERSION_2_QUESTIONS}
+)

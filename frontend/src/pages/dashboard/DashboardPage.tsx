@@ -1,20 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-
-import {
-  AssessmentSummaryCard,
-  DailyPriorityCard,
-  FeatureStatusGrid,
-  NutritionSnapshotCard,
-  ProgressSnapshotCard,
-  QuickActions,
-  SafetyNoticeCard,
-} from "../../components/dashboard/DashboardCards";
 import { DashboardAnalytics } from "../../components/dashboard/DashboardAnalytics";
-import { DashboardGoals } from "../../components/dashboard/DashboardGoals";
 import { DashboardHeader } from "../../components/dashboard/DashboardHeader";
 import { DashboardHero } from "../../components/dashboard/DashboardHero";
-import { DashboardMetricRingCard } from "../../components/dashboard/DashboardMetricRingCard";
 import { DashboardErrorState, DashboardSkeleton } from "../../components/dashboard/DashboardStates";
 import { DashboardTimeline } from "../../components/dashboard/DashboardTimeline";
 import { Alert } from "../../components/ui";
@@ -23,17 +11,16 @@ import { dashboardCopy } from "../../i18n/dashboard";
 import { useAuth } from "../../hooks/useAuth";
 import { ApiConnectionError, ApiError } from "../../services/apiClient";
 import { dashboardService } from "../../services/dashboardService";
-import type { DashboardData } from "../../types/dashboard";
+import type { DashboardSummaryData } from "../../types/dashboard";
 
 export default function DashboardPage() {
   const { locale } = useLocale();
   const { user, logout } = useAuth();
   const copy = dashboardCopy[locale];
-  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
+  const [dashboard, setDashboard] = useState<DashboardSummaryData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<unknown>(null);
   const controllerRef = useRef<AbortController | null>(null);
-
   const load = useCallback(async () => {
     controllerRef.current?.abort();
     const controller = new AbortController();
@@ -41,17 +28,18 @@ export default function DashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const next = await dashboardService.getDashboard({ signal: controller.signal });
+      const next = await dashboardService.getSummary({ signal: controller.signal });
       if (controllerRef.current === controller) setDashboard(next);
     } catch (cause) {
-      if (cause instanceof ApiConnectionError && cause.message === "The request was cancelled.")
-        return;
-      if (controllerRef.current === controller) setError(cause);
+      if (
+        !(cause instanceof ApiConnectionError && cause.message === "The request was cancelled.") &&
+        controllerRef.current === controller
+      )
+        setError(cause);
     } finally {
       if (controllerRef.current === controller) setLoading(false);
     }
   }, []);
-
   useEffect(() => {
     const task = window.setTimeout(() => void load(), 0);
     return () => {
@@ -59,10 +47,9 @@ export default function DashboardPage() {
       controllerRef.current?.abort();
     };
   }, [load]);
-
   const leaveSession = () => void logout().catch(() => undefined);
   if (loading && !dashboard) return <DashboardSkeleton locale={locale} />;
-  if (!dashboard) {
+  if (!dashboard)
     return (
       <DashboardErrorState
         locale={locale}
@@ -71,33 +58,40 @@ export default function DashboardPage() {
         onSignIn={leaveSession}
       />
     );
-  }
 
-  const nutritionGoals = dashboard.nutrition
-    ? [
-        {
-          id: "water",
-          title: "Water Intake",
-          titleAr: "ترطيب الجسم",
-          current: dashboard.nutrition.waterConsumedMl,
-          target: dashboard.nutrition.waterTargetMl,
-          unit: "ml",
-          unitAr: "مل",
-          iconType: "water" as const,
-        },
-        {
-          id: "meals",
-          title: "Meals completed",
-          titleAr: "الوجبات المكتملة",
-          current: dashboard.nutrition.mealsCompleted,
-          target: dashboard.nutrition.totalMeals,
-          unit: "",
-          unitAr: "",
-          iconType: "workout" as const,
-        },
-      ]
-    : [];
-
+  // The current chart needs all its displayed dimensions. Do not turn absent
+  // measurements into zeroes just to draw a chart.
+  const analytics = dashboard.history
+    .filter(
+      (p) =>
+        p.caloriesConsumed !== null &&
+        p.workoutsCompleted !== null &&
+        p.activeMinutes !== null &&
+        p.readinessScore !== null,
+    )
+    .map((p) => ({
+      day: p.date,
+      dayAr: p.date,
+      calories: p.caloriesConsumed!,
+      activeMinutes: p.activeMinutes!,
+      workouts: p.workoutsCompleted!,
+      healthScore: p.readinessScore!,
+    }));
+  const events = dashboard.recentActivities.map((item) => ({
+    id: item.id,
+    time: new Intl.DateTimeFormat(locale, { hour: "numeric", minute: "2-digit" }).format(
+      new Date(item.occurredAt),
+    ),
+    timeAr: new Intl.DateTimeFormat("ar", { hour: "numeric", minute: "2-digit" }).format(
+      new Date(item.occurredAt),
+    ),
+    title: item.title,
+    titleAr: item.title,
+    description: item.detail ?? undefined,
+    descriptionAr: item.detail ?? undefined,
+    type: item.kind === "workout" ? ("workout" as const) : ("recovery" as const),
+    status: item.status === "completed" ? ("completed" as const) : ("upcoming" as const),
+  }));
   return (
     <div className="dashboard-page">
       <DashboardHeader displayName={dashboard.user.displayName} email={user?.email} />
@@ -120,45 +114,13 @@ export default function DashboardPage() {
             </button>
           </Alert>
         )}
-
         <DashboardHero data={dashboard} locale={locale} />
-        <DailyPriorityCard priority={dashboard.dailyPriority} locale={locale} onRefresh={load} />
-        {dashboard.safetyNotice && (
-          <SafetyNoticeCard notice={dashboard.safetyNotice} locale={locale} />
-        )}
-
-        {dashboard.nutrition && (
-          <div className="dashboard-row-p3-metrics">
-            <DashboardMetricRingCard
-              type="hydration"
-              current={dashboard.nutrition.waterConsumedMl}
-              target={dashboard.nutrition.waterTargetMl}
-            />
-            <DashboardMetricRingCard
-              type="calories"
-              current={dashboard.nutrition.caloriesConsumed}
-              target={dashboard.nutrition.targetCalories}
-            />
-          </div>
-        )}
         <div className="dashboard-grid-layout-p2">
-          <DashboardAnalytics state="empty" data={[]} />
-          <DashboardGoals goals={nutritionGoals} />
+          <DashboardAnalytics state={analytics.length ? "ready" : "empty"} data={analytics} />
           <div className="dashboard-timeline-full">
-            <DashboardTimeline events={[]} />
+            <DashboardTimeline state={events.length ? "ready" : "empty"} events={events} />
           </div>
         </div>
-        <div className="dashboard-primary-grid">
-          <AssessmentSummaryCard assessment={dashboard.assessment} locale={locale} />
-          <ProgressSnapshotCard
-            progress={dashboard.progress}
-            user={dashboard.user}
-            locale={locale}
-          />
-        </div>
-        {dashboard.nutrition && <NutritionSnapshotCard nutrition={dashboard.nutrition} />}
-        <FeatureStatusGrid features={dashboard.features} locale={locale} dashboard={dashboard} />
-        <QuickActions actions={dashboard.quickActions} locale={locale} onLogout={leaveSession} />
         <footer className="dashboard-freshness">
           <span>{dashboard.metadata.dataFreshness}</span>
           <span>Dashboard v{dashboard.metadata.dashboardVersion}</span>

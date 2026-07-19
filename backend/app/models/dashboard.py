@@ -133,6 +133,66 @@ class DailyCheckInSummary(BaseModel):
     destination_route: str = "/check-in"
 
 
+class DashboardNutritionSummary(BaseModel):
+    """Only values recorded by the member are present; targets require a real plan."""
+
+    model_config = ConfigDict(frozen=True)
+
+    date: str
+    calories_consumed: int | None = None
+    protein_consumed: float | None = None
+    water_consumed_ml: int | None = None
+    target_calories: int | None = None
+    water_target_ml: int | None = None
+    has_record: bool = True
+
+
+class DashboardWorkoutSummary(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    session_id: str
+    status: str
+    completion_percentage: int | None = Field(default=None, ge=0, le=100)
+    started_at: datetime
+    completed_at: datetime | None = None
+
+
+class DashboardActivity(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    id: str
+    occurred_at: datetime
+    kind: str
+    title: str
+    detail: str | None = None
+    status: str
+
+
+class DashboardHistoryPoint(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    date: str
+    calories_consumed: int | None = None
+    workouts_completed: int | None = None
+    active_minutes: int | None = Field(default=None, ge=0)
+    readiness_score: int | None = Field(default=None, ge=0, le=100)
+
+
+class DashboardSummaryView(BaseModel):
+    """Database-backed dashboard payload. Null/empty values mean no stored measurement."""
+
+    model_config = ConfigDict(frozen=True)
+
+    user: DashboardUserSummary
+    assessment: DashboardAssessmentSummary
+    latest_check_in: DailyCheckInSummary | None = None
+    nutrition: DashboardNutritionSummary | None = None
+    workout: DashboardWorkoutSummary | None = None
+    recent_activities: tuple[DashboardActivity, ...] = ()
+    history: tuple[DashboardHistoryPoint, ...] = ()
+    metadata: DashboardMetadata
+
+
 class DashboardView(BaseModel):
     model_config = ConfigDict(frozen=True)
 
