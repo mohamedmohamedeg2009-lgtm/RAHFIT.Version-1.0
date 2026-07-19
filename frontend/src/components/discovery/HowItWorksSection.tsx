@@ -28,6 +28,21 @@ export function HowItWorksSection() {
     }
   };
 
+  const renderHeadingText = (heading: string) => {
+    const parts = heading.split("Rahafit");
+    if (parts.length > 1) {
+      return (
+        <>
+          {parts[0]}
+          <span className="heading-accent-text">Rahafit</span>
+          {parts[1]}
+        </>
+      );
+    }
+
+    return heading;
+  };
+
   const steps = [
     {
       number: "01",
@@ -62,56 +77,40 @@ export function HowItWorksSection() {
   return (
     <section
       id="how-it-works"
-      className="how-it-works-section relative py-12 px-4 max-w-7xl mx-auto rounded-3xl bg-slate-900/40 border border-slate-800/80 overflow-hidden"
+      className="how-it-works-section relative overflow-hidden py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto rounded-[2rem] border border-slate-200/80 shadow-[0_40px_120px_rgba(15,23,42,0.08)]"
       aria-labelledby="how-it-works-title"
     >
-      {/* Background Soft Radial Glow */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 50% 30%, rgba(20, 184, 166, 0.08) 0%, transparent 70%)",
-        }}
-        aria-hidden="true"
-      />
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(20,184,166,0.18),_transparent_38%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,_rgba(14,165,233,0.14),_transparent_34%)]" />
+        <div className="absolute left-8 top-10 h-32 w-32 rounded-full bg-amber-400/10 blur-3xl" />
+        <div className="absolute right-10 bottom-12 h-36 w-36 rounded-full bg-sky-400/10 blur-3xl" />
+        <div className="absolute inset-0 opacity-[0.45] [background-image:linear-gradient(rgba(15,23,42,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.04)_1px,transparent_1px)] [background-size:36px_36px]" />
+      </div>
 
-      {/* 1. Section Header */}
       <div className="text-center max-w-3xl mx-auto mb-12 relative z-10">
-        <Badge className="inline-flex items-center gap-1.5 px-3 py-1 mb-3 bg-teal-500/10 border border-teal-500/20 text-teal-400 font-extrabold text-xs tracking-wider rounded-full uppercase">
-          <Sparkles size={12} className="text-amber-400" />
+        <Badge className="section-badge inline-flex items-center gap-2 px-3.5 py-2 mb-5 rounded-full border border-white/60 text-[11px] font-black tracking-[0.24em] uppercase shadow-[0_10px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+          <Sparkles size={12} className="text-amber-500" />
           <span>{copy.howItWorksEyebrow}</span>
         </Badge>
 
         <h2
           id="how-it-works-title"
-          className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight mb-3"
+          className="section-title text-3xl sm:text-4xl lg:text-5xl font-black tracking-[-0.03em] mb-4 leading-[0.95]"
         >
-          {copy.howItWorksHeading}
+          {renderHeadingText(copy.howItWorksHeading)}
         </h2>
 
-        <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
+        <p className="section-subtitle text-base sm:text-lg leading-8 font-medium max-w-2xl mx-auto">
           {copy.howItWorksSubheading}
         </p>
       </div>
 
-      {/* 2. Connected Timeline Container */}
       <div className="relative z-10 mb-12">
-        {/* Desktop Horizontal Progress Connecting Line (Hidden on Mobile) */}
-        <div
-          className="hidden lg:block absolute top-12 left-16 right-16 h-1 bg-gradient-to-r from-teal-500/30 via-amber-500/40 to-teal-500/30 rounded-full"
-          aria-hidden="true"
-        />
+        <div className="timeline-connector hidden lg:block absolute top-16 left-[8%] right-[8%] h-[2px] rounded-full" aria-hidden="true" />
+        <div className="timeline-connector-mobile lg:hidden absolute top-8 bottom-8 left-8 w-[2px] rounded-full" aria-hidden="true" />
 
-        {/* Mobile Vertical Progress Connecting Line (Hidden on Desktop) */}
-        <div
-          className={`lg:hidden absolute top-6 bottom-6 ${
-            isRtl ? "right-8" : "left-8"
-          } w-1 bg-gradient-to-b from-teal-500/40 via-amber-500/40 to-teal-500/40 rounded-full`}
-          aria-hidden="true"
-        />
-
-        {/* Semantic Ordered Steps List */}
-        <ol className="grid grid-cols-1 lg:grid-cols-4 gap-6 relative">
+        <ol className="grid grid-cols-1 lg:grid-cols-4 gap-5 lg:gap-6 relative">
           {steps.map((step) => {
             const Icon = step.icon;
             const isGold = step.accent === "gold";
@@ -119,62 +118,58 @@ export function HowItWorksSection() {
             return (
               <li
                 key={step.number}
-                className="step-timeline-card relative group flex flex-col p-6 rounded-2xl bg-slate-950/60 border border-slate-800/80 hover:border-slate-700 transition-all duration-300 hover:-translate-y-1 shadow-lg"
+                className="step-timeline-card relative group flex flex-col p-6 sm:p-7 rounded-[1.6rem] border border-slate-200/80 bg-white/90 backdrop-blur-xl transition-all duration-300 hover:-translate-y-2"
               >
-                {/* Step Header: Large Number & Icon Container */}
-                <div className="flex items-center justify-between mb-4 z-10">
-                  {/* Icon Node Container */}
+                <div className="flex items-center justify-between mb-6 z-10">
                   <div
-                    className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-transform duration-300 group-hover:scale-105 ${
+                    className={`step-icon-wrapper flex h-13 w-13 items-center justify-center rounded-[1.15rem] border transition-all duration-300 group-hover:scale-110 ${
                       isGold
-                        ? "bg-amber-500/10 border-amber-500/30 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.15)]"
-                        : "bg-teal-500/10 border-teal-500/30 text-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.15)]"
+                        ? "bg-amber-500/12 border-amber-500/30 text-amber-600"
+                        : "bg-teal-500/12 border-teal-500/30 text-teal-600"
                     }`}
                   >
                     <Icon size={22} />
                   </div>
 
-                  {/* Large Step Number Badge */}
                   <span
-                    className={`text-2xl font-black tracking-tight ${
-                      isGold ? "text-amber-400/90" : "text-teal-400/90"
+                    className={`step-number text-2xl font-black tracking-[-0.03em] ${
+                      isGold ? "text-amber-500" : "text-teal-600"
                     }`}
                   >
                     {step.number}
                   </span>
                 </div>
 
-                {/* Step Text Content */}
-                <div className="flex flex-col gap-1.5 z-10">
-                  <h3 className="text-base font-bold text-white group-hover:text-amber-300 transition-colors">
+                <div className="flex flex-col gap-2 z-10">
+                  <h3 className="step-title text-lg font-black tracking-[-0.02em]">
                     {step.title}
                   </h3>
-                  <p className="text-xs text-slate-300 leading-relaxed font-normal">
+                  <p className="step-desc text-sm sm:text-[15px] leading-7 font-medium">
                     {step.desc}
                   </p>
                 </div>
+
+                <div className="mt-6 h-1.5 w-20 rounded-full bg-gradient-to-r from-teal-500/40 via-sky-500/40 to-amber-500/50" />
+                <div className="timeline-node absolute hidden lg:block" aria-hidden="true" />
               </li>
             );
           })}
         </ol>
       </div>
 
-      {/* 3. Compact CTA Row Below Timeline */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 relative z-10 pt-2 border-t border-slate-800/60">
-        {/* Primary Gold CTA */}
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 relative z-10 pt-6 border-t border-slate-200/80">
         <Link
           to="/register"
-          className="ds-button ds-button-primary bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold px-6 py-3 rounded-xl shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all text-sm w-full sm:w-auto justify-center"
+          className="cta-primary ds-button ds-button-primary flex w-full sm:w-auto items-center justify-center gap-2 rounded-full px-7 py-3.5 text-sm font-black shadow-[0_18px_40px_rgba(14,165,233,0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_55px_rgba(14,165,233,0.28)]"
         >
           <span>{copy.howItWorksPrimaryCta}</span>
           <ArrowIcon size={16} />
         </Link>
 
-        {/* Secondary Teal Outline CTA */}
         <a
           href="#features"
           onClick={handleScrollToFeatures}
-          className="ds-button ds-button-outline border border-teal-500/40 text-teal-300 hover:bg-teal-500/10 font-bold px-6 py-3 rounded-xl flex items-center gap-2 transition-all text-sm w-full sm:w-auto justify-center"
+          className="cta-secondary ds-button ds-button-outline flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-slate-300/90 px-7 py-3.5 text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:bg-slate-50"
         >
           <span>{copy.howItWorksSecondaryCta}</span>
           <ChevronDown size={16} />

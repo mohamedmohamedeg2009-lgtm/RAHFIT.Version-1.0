@@ -4835,9 +4835,175 @@ button:focus-visible {
   transition: transform var(--motion-normal) var(--motion-easing), border-color var(--motion-normal) var(--motion-easing), box-shadow var(--motion-normal) var(--motion-easing);
 }
 
+.how-it-works-section .step-timeline-card:hover {
+  box-shadow: 0 24px 55px rgba(15, 23, 42, 0.09);
+}
+
+.how-it-works-section .timeline-connector {
+  background: linear-gradient(90deg, rgba(20, 184, 166, 0.16), rgba(14, 165, 233, 0.46), rgba(245, 158, 11, 0.3));
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85), 0 0 28px rgba(20, 184, 166, 0.08);
+}
+
+.how-it-works-section .timeline-connector-mobile {
+  background: linear-gradient(180deg, rgba(20, 184, 166, 0.18), rgba(14, 165, 233, 0.45), rgba(245, 158, 11, 0.3));
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85);
+}
+
+.how-it-works-section .timeline-node {
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  background: #ffffff;
+  border: 3px solid rgba(20, 184, 166, 0.26);
+  box-shadow: 0 0 0 6px rgba(20, 184, 166, 0.08), 0 0 22px rgba(14, 165, 233, 0.16);
+}
+
+.how-it-works-section .heading-accent-text {
+  display: inline-block;
+  background: linear-gradient(120deg, #14b8a6 0%, #0ea5e9 50%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .how-it-works-section .step-timeline-card {
+  .how-it-works-section .step-timeline-card,
+  .featured-product-card,
+  .supporting-product-card {
     transition: none !important;
     transform: none !important;
   }
+}
+
+/* ── Core Areas & Features Showcase Styles ── */
+.featured-product-card,
+.supporting-product-card {
+  transition: transform var(--motion-normal) var(--motion-easing), border-color var(--motion-normal) var(--motion-easing), box-shadow var(--motion-normal) var(--motion-easing);
+}
+
+/* ── Light Theme Visual Polish Overrides ── */
+html:not([data-theme="dark"]) {
+  color: var(--color-text-primary);
+  background-color: var(--color-background);
+}
+
+html:not([data-theme="dark"]) .public-topbar {
+  background-color: rgba(253, 251, 247, 0.9);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+html:not([data-theme="dark"]) .public-nav-link {
+  color: #1e293b !important;
+}
+
+html:not([data-theme="dark"]) .public-nav-link:hover {
+  color: #0f766e !important;
+}
+
+html:not([data-theme="dark"]) .landing-hero-card {
+  background: linear-gradient(145deg, #ffffff 0%, #fcfbfa 100%) !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08) !important;
+}
+
+html:not([data-theme="dark"]) .how-it-works-section,
+html:not([data-theme="dark"]) .features-section {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+html:not([data-theme="dark"]) .how-it-works-section {
+  background:
+    radial-gradient(circle at top left, rgba(20, 184, 166, 0.16), transparent 38%),
+    radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.12), transparent 34%),
+    linear-gradient(135deg, #fcfeff 0%, #f8fafc 100%) !important;
+  box-shadow: 0 30px 90px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+html:not([data-theme="dark"]) .how-it-works-section .section-badge {
+  background: rgba(255, 255, 255, 0.78) !important;
+  border-color: rgba(20, 184, 166, 0.18) !important;
+  color: #0f766e !important;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06) !important;
+}
+
+html:not([data-theme="dark"]) .how-it-works-section .section-title {
+  color: #0f172a !important;
+}
+
+html:not([data-theme="dark"]) .how-it-works-section .section-subtitle {
+  color: #475569 !important;
+}
+
+html:not([data-theme="dark"]) .step-timeline-card,
+html:not([data-theme="dark"]) .supporting-product-card {
+  background: linear-gradient(135deg, #ffffff 0%, rgba(248, 250, 252, 0.98) 100%) !important;
+  border-color: rgba(15, 23, 42, 0.08) !important;
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.06) !important;
+}
+
+html:not([data-theme="dark"]) .how-it-works-section .step-timeline-card {
+  position: relative;
+}
+
+html:not([data-theme="dark"]) .how-it-works-section .step-icon-wrapper {
+  box-shadow: 0 16px 32px rgba(20, 184, 166, 0.12) !important;
+}
+
+html:not([data-theme="dark"]) .how-it-works-section .step-number {
+  color: #0f766e !important;
+}
+
+html:not([data-theme="dark"]) .how-it-works-section .step-title {
+  color: #0f172a !important;
+}
+
+html:not([data-theme="dark"]) .how-it-works-section .step-desc {
+  color: #475569 !important;
+}
+
+html:not([data-theme="dark"]) .how-it-works-section .cta-primary {
+  background: linear-gradient(135deg, #14b8a6 0%, #0ea5e9 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 18px 40px rgba(14, 165, 233, 0.24) !important;
+}
+
+html:not([data-theme="dark"]) .how-it-works-section .cta-secondary {
+  background: rgba(255, 255, 255, 0.85) !important;
+  color: #0f766e !important;
+  border-color: rgba(20, 184, 166, 0.22) !important;
+}
+
+html:not([data-theme="dark"]) .step-timeline-card h3,
+html:not([data-theme="dark"]) .supporting-product-card h3,
+html:not([data-theme="dark"]) .featured-product-card h3 {
+  color: #0f172a !important;
+}
+
+html:not([data-theme="dark"]) .step-timeline-card p,
+html:not([data-theme="dark"]) .supporting-product-card p,
+html:not([data-theme="dark"]) .featured-product-card p {
+  color: #334155 !important;
+}
+
+html:not([data-theme="dark"]) .featured-product-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%) !important;
+  border-color: #0f766e !important;
+}
+
+html:not([data-theme="dark"]) .hero-floating-card {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12) !important;
+}
+
+html:not([data-theme="dark"]) .hero-floating-card-title {
+  color: #0f172a !important;
+}
+
+html:not([data-theme="dark"]) .hero-floating-card-subtitle {
+  color: #475569 !important;
 }
