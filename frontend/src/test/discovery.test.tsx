@@ -53,16 +53,40 @@ describe("Public Discovery & Landing Page Journey", () => {
       </TestProviders>,
     );
 
-    expect(await screen.findByText("ابدأ رحلتك مع Rahfit")).toBeInTheDocument();
+    expect(await screen.findByText("ابدأ رحلتك مع Rahafit")).toBeInTheDocument();
     expect(screen.getAllByText("أنشئ حسابك")[0]).toBeInTheDocument();
     expect(screen.getByText("استكشف المميزات")).toBeInTheDocument();
-    expect(screen.getByText("كيف تعمل منصة Rahfit")).toBeInTheDocument();
+    expect(screen.getByText("كيف تعمل منصة Rahafit")).toBeInTheDocument();
     expect(screen.getByText("المناطق والخصائص الأساسية")).toBeInTheDocument();
     expect(screen.getByText("الأمان والتخصيص الذكي")).toBeInTheDocument();
     expect(screen.getByText("جاهز تبدأ خطوتك الأولى؟")).toBeInTheDocument();
   });
 
-  it("navigates from Landing Page CTA to /discover", async () => {
+  it("renders redesigned Landing Page hero headline, copy, and smartphone mockup without authentication", async () => {
+    render(
+      <TestProviders>
+        <AuthContext.Provider value={mockAuthContext()}>
+          <MemoryRouter initialEntries={["/"]}>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+            </Routes>
+          </MemoryRouter>
+        </AuthContext.Provider>
+      </TestProviders>,
+    );
+
+    expect(screen.getByText("تمرّن بذكاء. عِش أفضل.")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "كل ما تحتاجه لبناء حياة أصح: تمرين، تغذية، تعافٍ، ومتابعة ذكية في مكان واحد.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText("ابدأ مجاناً")).toBeInTheDocument();
+    expect(screen.getByText("شاهد كيف يعمل")).toBeInTheDocument();
+    expect(screen.getByLabelText("Rahfit App Demo Interface")).toBeInTheDocument();
+  });
+
+  it("navigates from Landing Page primary CTA ('ابدأ مجاناً') to /discover", async () => {
     const userActions = userEvent.setup();
     render(
       <TestProviders>
@@ -77,9 +101,9 @@ describe("Public Discovery & Landing Page Journey", () => {
       </TestProviders>,
     );
 
-    const exploreButton = screen.getAllByRole("link", { name: /استكشف/i })[0];
-    expect(exploreButton).toBeInTheDocument();
-    await userActions.click(exploreButton);
+    const startFreeButton = screen.getByRole("link", { name: /ابدأ مجاناً/i });
+    expect(startFreeButton).toBeInTheDocument();
+    await userActions.click(startFreeButton);
 
     expect(await screen.findByText("Discovery Page Content")).toBeInTheDocument();
   });
@@ -184,5 +208,23 @@ describe("Public Discovery & Landing Page Journey", () => {
 
     const mainShell = screen.getByRole("banner").closest(".public-shell");
     expect(mainShell).toHaveAttribute("dir", "rtl");
+  });
+
+  it("renders PublicFooter with honest contact notice and no invented email or phone placeholders", async () => {
+    render(
+      <TestProviders>
+        <AuthContext.Provider value={mockAuthContext()}>
+          <MemoryRouter initialEntries={["/discover"]}>
+            <Routes>
+              <Route path="/discover" element={<DiscoveryPage />} />
+            </Routes>
+          </MemoryRouter>
+        </AuthContext.Provider>
+      </TestProviders>,
+    );
+
+    expect(screen.getByText("معلومات التواصل قريباً.")).toBeInTheDocument();
+    expect(screen.queryByText("support@rahafit.ai")).not.toBeInTheDocument();
+    expect(screen.queryByText("+966 800 123 4567")).not.toBeInTheDocument();
   });
 });

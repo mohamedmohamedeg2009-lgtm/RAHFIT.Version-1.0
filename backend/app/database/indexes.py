@@ -86,6 +86,7 @@ REQUIRED_INDEXES: dict[str, frozenset[str]] = {
             "ai_decisions_version_status",
         }
     ),
+    "daily_check_ins": frozenset({"daily_check_ins_user_date_unique"}),
 }
 
 
@@ -269,6 +270,11 @@ async def initialize_indexes(database: AsyncIOMotorDatabase[dict[str, Any]]) -> 
         name="users_provider_subject_unique",
     )
     await ensure_ai_decision_indexes(database)
+    await database["daily_check_ins"].create_index(
+        [("user_id", 1), ("date", 1)],
+        unique=True,
+        name="daily_check_ins_user_date_unique",
+    )
 
 
 async def ensure_ai_decision_indexes(database: Any) -> None:

@@ -82,12 +82,20 @@ def get_dashboard_service(request: Request) -> DashboardService:
     nutrition = NutritionService(
         NutritionRepository(database), assessment, WorkoutRepository(database)
     )
+    from app.repositories.daily_check_in import MongoDailyCheckInRepository
+    from app.services.daily_check_in import DailyCheckInService
+    from app.services.daily_check_in_engine import DailyCheckInEngine
+
+    check_in_service = DailyCheckInService(
+        MongoDailyCheckInRepository(database), DailyCheckInEngine()
+    )
     settings = get_settings()
     return DashboardService(
         assessment,
         workout,
         nutrition,
         AIAvailabilityService(settings),
+        daily_check_in_reader=check_in_service,
     )
 
 

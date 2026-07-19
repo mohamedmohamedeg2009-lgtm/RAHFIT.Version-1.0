@@ -146,7 +146,7 @@ describe("AI Insights and Insight rules Engine", () => {
   it("generates onboarding fallback when data is missing", () => {
     const insights = buildDashboardInsights(null, "en");
     expect(insights[0].id).toBe("onboard");
-    expect(insights[0].title).toBe("Welcome to RAHFIT platform");
+    expect(insights[0].title).toBe("Welcome to Rahafit platform");
   });
 
   it("renders expandable whyExplanation upon user interaction", () => {

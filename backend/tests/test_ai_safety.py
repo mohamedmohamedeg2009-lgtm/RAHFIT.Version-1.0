@@ -810,9 +810,9 @@ def test_logs_include_only_safe_metadata(
     assert "ai_safety_evaluated" in caplog.text
 
 
-def test_no_public_safety_or_ai_coach_message_endpoint_exists() -> None:
+def test_no_public_safety_endpoint_exists_and_messages_endpoint_is_registered() -> None:
     paths = {route.path for route in router.routes if isinstance(route, APIRoute)}
 
     assert all("safety" not in path for path in paths)
     assert "/ai-coach/messages" not in paths
-    assert "/ai-coach/conversations/{conversation_id}/messages" not in paths
+    assert "/ai-coach/conversations/{conversation_id}/messages" in paths

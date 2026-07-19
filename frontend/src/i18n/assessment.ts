@@ -9,7 +9,7 @@ import type {
 
 export const assessmentCopy = {
   en: {
-    brand: "RAHFIT AI",
+    brand: "Rahafit",
     assessment: "Smart Assessment",
     welcomeEyebrow: "Your plan starts with understanding you",
     welcomeTitle: "A smarter path begins with the right questions.",
@@ -17,7 +17,7 @@ export const assessmentCopy = {
       "This adaptive assessment learns about your goals, routine, experience, equipment, and safety needs. You will only see questions relevant to you.",
     start: "Start assessment",
     starting: "Preparing your assessment",
-    privacy: "Your answers stay private and are used to personalize your RAHFIT experience.",
+    privacy: "Your answers stay private and are used to personalize your Rahafit experience.",
     adaptive: "Adaptive",
     adaptiveBody: "The next question is selected from your previous answers.",
     safe: "Safety first",
@@ -55,7 +55,7 @@ export const assessmentCopy = {
     completedEyebrow: "Assessment complete",
     completedTitle: "Your foundation is ready.",
     completedBody:
-      "RAHFIT now has the structured context needed to personalize your next experience safely.",
+      "Rahafit now has the structured context needed to personalize your next experience safely.",
     continueDashboard: "Continue to Dashboard",
     summary: "Assessment summary",
     goals: "Goals",
@@ -79,7 +79,7 @@ export const assessmentCopy = {
     notAnswered: "Not answered",
   },
   ar: {
-    brand: "RAHFIT AI",
+    brand: "Rahafit",
     assessment: "التقييم الذكي",
     welcomeEyebrow: "خطتك تبدأ بفهمك جيدًا",
     welcomeTitle: "الطريق الأذكى يبدأ بالأسئلة الصحيحة.",
@@ -87,7 +87,7 @@ export const assessmentCopy = {
       "يتعرّف هذا التقييم المتكيّف على أهدافك وروتينك وخبرتك ومعداتك واحتياجات السلامة، ولن يعرض إلا الأسئلة المناسبة لك.",
     start: "ابدأ التقييم",
     starting: "جارٍ تجهيز تقييمك",
-    privacy: "تبقى إجاباتك خاصة وتُستخدم لتخصيص تجربتك داخل RAHFIT.",
+    privacy: "تبقى إجاباتك خاصة وتُستخدم لتخصيص تجربتك داخل Rahafit.",
     adaptive: "متكيّف",
     adaptiveBody: "يتم اختيار السؤال التالي بناءً على إجاباتك السابقة.",
     safe: "السلامة أولًا",
@@ -124,7 +124,7 @@ export const assessmentCopy = {
     stopComplete: "تم إيقاف الإكمال حتى معالجة قيد السلامة.",
     completedEyebrow: "اكتمل التقييم",
     completedTitle: "أصبح أساس رحلتك جاهزًا.",
-    completedBody: "يمتلك RAHFIT الآن المعلومات المنظمة اللازمة لتخصيص تجربتك التالية بأمان.",
+    completedBody: "يمتلك Rahafit الآن المعلومات المنظمة اللازمة لتخصيص تجربتك التالية بأمان.",
     continueDashboard: "المتابعة إلى لوحة التحكم",
     summary: "ملخص التقييم",
     goals: "الأهداف",

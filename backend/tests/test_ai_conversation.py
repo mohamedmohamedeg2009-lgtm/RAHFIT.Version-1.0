@@ -448,21 +448,19 @@ async def test_public_message_endpoints_remain_unregistered() -> None:
     async with httpx.AsyncClient(
         transport=httpx.ASGITransport(app=app), base_url="http://test"
     ) as client:
-        responses = [
+        # Top level unregistered message paths return 404
+        unregistered = [
             await client.get("/api/v1/ai-coach/messages"),
             await client.post("/api/v1/ai-coach/messages", json={"content": "hello"}),
-            await client.get(f"/api/v1/ai-coach/conversations/{conversation_id}/messages"),
-            await client.post(
-                f"/api/v1/ai-coach/conversations/{conversation_id}/messages",
-                json={"content": "hello"},
-            ),
         ]
+        get_on_messages = await client.get(f"/api/v1/ai-coach/conversations/{conversation_id}/messages")
 
-    assert all(response.status_code == 404 for response in responses)
+    assert all(response.status_code == 404 for response in unregistered)
+    assert get_on_messages.status_code == 405
 
 
 @pytest.mark.asyncio
-async def test_message_endpoint_remains_unavailable_for_an_authenticated_conversation() -> None:
+async def test_message_endpoint_is_available_for_an_authenticated_conversation() -> None:
     service, _ = conversation_service()
     current_user = {"value": authenticated_user("owner-user")}
     app = FastAPI()
@@ -477,12 +475,6 @@ async def test_message_endpoint_remains_unavailable_for_an_authenticated_convers
         created = await client.post("/api/v1/ai-coach/conversations", json={"title": "Chat"})
         conversation_id = created.json()["id"]
 
-        # The lifecycle remains private until a bounded public message contract is released.
+        # GET messages returns 405 Method Not Allowed
         msgs_before = await client.get(f"/api/v1/ai-coach/conversations/{conversation_id}/messages")
-        assert msgs_before.status_code == 404
-
-        sent = await client.post(
-            f"/api/v1/ai-coach/conversations/{conversation_id}/messages",
-            json={"content": "Please explain my workout plan."},
-        )
-        assert sent.status_code == 404
+        assert msgs_before.status_code == 405

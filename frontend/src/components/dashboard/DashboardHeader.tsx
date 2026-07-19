@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
-import { Sun, Moon, Globe, LogOut, Heart } from "lucide-react";
+import { Sun, Moon, Globe, LogOut } from "lucide-react";
 
 import { Button } from "../ui";
 import { useLocale } from "../../contexts/LocaleContext";
 import { useAuth } from "../../hooks/useAuth";
 import { dashboardCopy } from "../../i18n/dashboard";
 import { useTheme } from "../../theme";
+import { RahafitLogo } from "../common/RahafitLogo";
 
 interface DashboardHeaderProps {
   displayName: string;
@@ -30,14 +31,8 @@ export function DashboardHeader({ displayName, email }: DashboardHeaderProps) {
 
   return (
     <header className="dashboard-topbar">
-      <Link className="dashboard-brand" to="/app" aria-label={`${copy.brand} ${copy.dashboard}`}>
-        <div className="dashboard-brand-mark" aria-hidden="true">
-          <Heart size={20} fill="#ffffff" color="#ffffff" style={{ transform: "rotate(-10deg)" }} />
-        </div>
-        <span>
-          <strong style={{ letterSpacing: "0.05em", fontWeight: 800 }}>{copy.brand}</strong>
-          <small style={{ fontWeight: 600 }}>{copy.dashboard}</small>
-        </span>
+      <Link className="dashboard-brand" to="/app" aria-label="Rahafit Today">
+        <RahafitLogo size="md" />
       </Link>
       <nav className="dashboard-controls" aria-label={copy.dashboard}>
         <Link

@@ -4,6 +4,7 @@ import { Alert, Badge, Button, Card, LinearProgress, Select, Skeleton } from "..
 import { ApiError } from "../../services/apiClient";
 import { nutritionService } from "../../services/nutritionService";
 import type { NutritionState } from "../../types/nutrition";
+import { RahafitLogo } from "../../components/common/RahafitLogo";
 
 export default function NutritionPage() {
   const [state, setState] = useState<NutritionState | null>(null);
@@ -35,7 +36,9 @@ export default function NutritionPage() {
   return (
     <div className="nutrition-page">
       <header className="nutrition-header">
-        <Link to="/app">RAHFIT AI</Link>
+        <Link to="/app" aria-label="Rahafit Home">
+          <RahafitLogo size="sm" />
+        </Link>
         <nav>
           <Link to="/nutrition/history">History</Link> <Link to="/app">Dashboard</Link>
         </nav>

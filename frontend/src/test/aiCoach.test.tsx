@@ -184,13 +184,28 @@ describe("AI Coach Page tests", () => {
     });
 
     vi.mocked(aiCoachService.sendMessage).mockResolvedValue({
-      id: "msg-2",
       conversation_id: "conv-1",
-      role: "assistant",
-      content: "This is the coach reply.",
-      source: "application",
+      capability: "explain_workout",
+      safety_decision: "allow",
       created_at: "2026-07-16T12:01:00Z",
-      schema_version: 1,
+      user_message: {
+        id: "msg-1",
+        conversation_id: "conv-1",
+        role: "user",
+        content: "What is my plan?",
+        source: "user",
+        created_at: "2026-07-16T12:00:59Z",
+        schema_version: 1,
+      },
+      assistant_message: {
+        id: "msg-2",
+        conversation_id: "conv-1",
+        role: "assistant",
+        content: "This is the coach reply.",
+        source: "application",
+        created_at: "2026-07-16T12:01:00Z",
+        schema_version: 1,
+      },
     });
 
     vi.mocked(aiCoachService.getConversation).mockResolvedValue({

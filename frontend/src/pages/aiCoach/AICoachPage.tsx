@@ -23,7 +23,7 @@ export default function AICoachPage() {
   const { locale } = useLocale();
   const { user } = useAuth();
   const copy = dashboardCopy[locale];
-  const messageSendingEnabled = false;
+  const messageSendingEnabled = true;
 
   const [available, setAvailable] = useState<boolean>(true);
   const [conversations, setConversations] = useState<AIConversation[]>([]);
@@ -136,10 +136,6 @@ export default function AICoachPage() {
 
   // 7. Send user message
   const handleSendMessage = async (textToSend?: string) => {
-    if (!messageSendingEnabled) {
-      setError("AI Coach messaging is not available in this deployment.");
-      return;
-    }
     const text = (textToSend || input).trim();
     if (!text || !selectedId || submitting) return;
 
@@ -160,20 +156,25 @@ export default function AICoachPage() {
     setMessages((prev) => [...prev, tempUserMsg]);
 
     try {
-      await aiCoachService.sendMessage(selectedId, text);
-      // Replace optimistic messages with actual conversation log
+      const response = await aiCoachService.sendMessage(selectedId, text);
       await loadMessages(selectedId);
+      if (
+        response &&
+        (response.safety_decision === "refuse" ||
+          response.safety_decision === "professional_guidance_required")
+      ) {
+        setError(copy.safetyNoticeHeader);
+      }
     } catch (err) {
       if (err instanceof ApiError) {
-        setError(copy.safetyNoticeHeader);
-        // Append safety notice locally for instant user feedback
+        setError(err.message || copy.safetyNoticeHeader);
         const safetyNotice: AIMessage = {
           id: "temp-safety-" + Date.now(),
           conversation_id: selectedId,
           role: "system_notice",
           content:
             err.message ||
-            "The RAHFIT Safety Engine has refused this request to maintain medical guidelines.",
+            "The Rahafit Safety Engine has refused this request to maintain medical guidelines.",
           source: "lifecycle",
           created_at: new Date().toISOString(),
           schema_version: 1,
@@ -408,8 +409,8 @@ export default function AICoachPage() {
           {selectedId && available && (
             <div className="coach-composer-container">
               {!messageSendingEnabled && (
-                <p className="text-sm text-slate-500" role="status">
-                  AI Coach messaging is not available in this deployment.
+                <p className="text-sm text-slate-500 font-medium" role="status">
+                  {copy.readOnlyNotice}
                 </p>
               )}
               {isClosed ? (

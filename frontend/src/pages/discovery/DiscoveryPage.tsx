@@ -1,4 +1,5 @@
 import { PublicHeader } from "../../components/public/PublicHeader";
+import { PublicFooter } from "../../components/public/PublicFooter";
 import { HeroSection } from "../../components/discovery/HeroSection";
 import { HowItWorksSection } from "../../components/discovery/HowItWorksSection";
 import { ProductAreasSection } from "../../components/discovery/ProductAreasSection";
@@ -9,7 +10,7 @@ import { useLocale } from "../../contexts/LocaleContext";
 
 export function DiscoveryPage() {
   const { locale } = useLocale();
-  useDocumentTitle(locale === "ar" ? "استكشف Rahfit | RAHFIT AI" : "Discover Rahfit | RAHFIT AI");
+  useDocumentTitle(locale === "ar" ? "استكشف Rahafit" : "Discover Rahafit");
 
   return (
     <div className="public-shell" dir={locale === "ar" ? "rtl" : "ltr"}>
@@ -21,14 +22,7 @@ export function DiscoveryPage() {
         <SafetySection />
         <FinalCtaSection />
       </main>
-      <footer className="public-footer">
-        <div className="public-footer-inner">
-          <p className="public-footer-brand">RAHFIT AI — Intelligent, Safe & Sustainable Fitness</p>
-          <p className="public-footer-copy">
-            © {new Date().getFullYear()} RAHFIT AI. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 }

@@ -1,10 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
-import { Sun, Moon, Globe, Heart, Compass } from "lucide-react";
+import { Sun, Moon, Globe, Compass } from "lucide-react";
 
 import { Button } from "../ui";
 import { useLocale } from "../../contexts/LocaleContext";
 import { discoveryCopy } from "../../i18n/discovery";
 import { useTheme } from "../../theme";
+import { RahafitLogo } from "../common/RahafitLogo";
 
 export function PublicHeader() {
   const { locale, toggleLocale } = useLocale();
@@ -17,19 +18,8 @@ export function PublicHeader() {
   return (
     <header className="public-topbar" aria-label="Public Navigation">
       <div className="public-topbar-inner">
-        <Link className="dashboard-brand" to="/" aria-label="RAHFIT AI Home">
-          <div className="dashboard-brand-mark" aria-hidden="true">
-            <Heart
-              size={20}
-              fill="#ffffff"
-              color="#ffffff"
-              style={{ transform: "rotate(-10deg)" }}
-            />
-          </div>
-          <span>
-            <strong style={{ letterSpacing: "0.05em", fontWeight: 800 }}>RAHFIT AI</strong>
-            <small style={{ fontWeight: 600 }}>{isDiscover ? "Discover" : "Public"}</small>
-          </span>
+        <Link className="dashboard-brand" to="/" aria-label="Rahafit Home">
+          <RahafitLogo size="md" />
         </Link>
 
         <nav className="public-nav-links" aria-label="Sections">

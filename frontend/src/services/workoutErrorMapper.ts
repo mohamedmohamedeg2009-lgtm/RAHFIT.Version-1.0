@@ -28,7 +28,7 @@ const known: Record<string, Omit<WorkoutClientError, "code">> = {
   workout_readiness_blocked: {
     title: "Training is paused",
     message:
-      "Your readiness result does not currently allow plan generation. Follow the professional guidance provided by RAHFIT AI.",
+      "Your readiness result does not currently allow plan generation. Follow the professional guidance provided by Rahafit.",
     retryable: false,
   },
   workout_medical_clearance_required: {
@@ -111,7 +111,7 @@ const knownArabic: Record<
   },
   workout_readiness_blocked: {
     title: "التدريب متوقف مؤقتًا",
-    message: "نتيجة استعدادك لا تسمح بإنشاء خطة حاليًا. اتبع الإرشاد المتخصص الذي يقدمه RAHFIT AI.",
+    message: "نتيجة استعدادك لا تسمح بإنشاء خطة حاليًا. اتبع الإرشاد المتخصص الذي يقدمه Rahafit.",
   },
   workout_medical_clearance_required: {
     title: "يلزم تصريح طبي",

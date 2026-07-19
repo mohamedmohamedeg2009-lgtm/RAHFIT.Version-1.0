@@ -205,7 +205,7 @@ async def test_lifespan_closes_mongodb_when_index_initialization_fails(
     get_settings.cache_clear()
 
 
-def test_ai_provider_and_conversation_routes_exclude_public_messages() -> None:
+def test_ai_provider_and_conversation_routes_include_messaging() -> None:
     ai_paths = {
         route.path
         for route in router.routes
@@ -216,6 +216,7 @@ def test_ai_provider_and_conversation_routes_exclude_public_messages() -> None:
         "/ai-coach/conversations",
         "/ai-coach/conversations/{conversation_id}",
         "/ai-coach/conversations/{conversation_id}/close",
+        "/ai-coach/conversations/{conversation_id}/messages",
     }
 
 

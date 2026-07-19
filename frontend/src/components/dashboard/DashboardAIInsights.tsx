@@ -82,7 +82,7 @@ export function DashboardAIInsights({ dashboardData }: DashboardAIInsightsProps)
           <div>
             <span className="dashboard-eyebrow">{copy.aiInsights}</span>
             <h2 className="text-xl md:text-2xl font-extrabold text-[var(--color-text-primary)] mt-1">
-              {isRtl ? "استشارات الذكاء الاصطناعي" : "RAHFIT AI Coach Insights"}
+              {isRtl ? "استشارات الذكاء الاصطناعي" : "Rahafit AI Coach Insights"}
             </h2>
           </div>
         </div>

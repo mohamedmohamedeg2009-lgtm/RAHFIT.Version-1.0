@@ -50,3 +50,24 @@ class AIConversationListResponse(BaseModel):
     limit: int = Field(ge=1, le=AI_CONVERSATION_LIMITS.maximum_page_size)
     offset: int = Field(ge=0)
     has_more: bool
+
+
+class SendAIMessageRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    content: str = Field(
+        min_length=1,
+        max_length=AI_CONVERSATION_LIMITS.maximum_message_length,
+    )
+
+
+class AICoachMessageResponse(BaseModel):
+    conversation_id: str
+    user_message: AIMessageResponse
+    assistant_message: AIMessageResponse
+    capability: str
+    safety_decision: str
+    safe_reason_code: str | None = None
+    provider_used: str | None = None
+    created_at: datetime
+

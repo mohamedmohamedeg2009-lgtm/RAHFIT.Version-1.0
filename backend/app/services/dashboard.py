@@ -5,6 +5,7 @@ from typing import Protocol
 from app.models.ai_provider import AIAvailability, AIAvailabilityStatus
 from app.models.assessment import AssessmentResult, SafetyStatus
 from app.models.dashboard import (
+    DailyCheckInSummary,
     DashboardAction,
     DashboardActionType,
     DashboardAssessmentStatus,
@@ -60,12 +61,14 @@ class DashboardService:
         nutrition: DashboardNutritionReader | None = None,
         ai_coach: DashboardAICoachReader | None = None,
         clock: Callable[[], datetime] | None = None,
+        daily_check_in_reader: Any | None = None,
     ) -> None:
         self.assessment = assessment
         self.workout = workout
         self.nutrition = nutrition
         self.ai_coach = ai_coach
         self.clock = clock or (lambda: datetime.now(UTC))
+        self.daily_check_in_reader = daily_check_in_reader
 
     async def get_dashboard(self, user: User) -> DashboardView:
         now = self.clock()
@@ -75,6 +78,7 @@ class DashboardService:
         workout_state: WorkoutDashboardState | None = None
         nutrition_state: NutritionDashboardState | None = None
         ai_availability: AIAvailability | None = None
+        daily_check_in_summary: DailyCheckInSummary | None = None
         try:
             active = await self.assessment.get_active_assessment(user.id)
             if active and active.session.user_id != user.id:
@@ -99,15 +103,34 @@ class DashboardService:
                 nutrition_state = await self.nutrition.dashboard(user.id)
             except Exception:
                 partial_data = True
-        if self.ai_coach:
+        if self.ai_coach and not partial_data:
             try:
                 ai_availability = await self.ai_coach.get_availability()
             except Exception:
-                ai_availability = AIAvailability(
-                    feature_enabled=True,
-                    status=AIAvailabilityStatus.TEMPORARILY_UNAVAILABLE,
-                    reason_code="ai_availability_check_failed",
-                    message="AI provider infrastructure is temporarily unavailable.",
+                partial_data = True
+
+        if self.daily_check_in_reader:
+            try:
+                today_check_in = await self.daily_check_in_reader.get_today_check_in(user.id, now.date())
+                if today_check_in:
+                    daily_check_in_summary = DailyCheckInSummary(
+                        has_checked_in_today=True,
+                        date=today_check_in.date.isoformat(),
+                        readiness_score=today_check_in.readiness_result.readiness_score,
+                        readiness_level=today_check_in.readiness_result.readiness_level.value,
+                        recommended_action=today_check_in.readiness_result.recommended_action.value,
+                        warning_codes=tuple(w.value for w in today_check_in.readiness_result.warning_codes),
+                        destination_route="/check-in",
+                    )
+                else:
+                    daily_check_in_summary = DailyCheckInSummary(
+                        has_checked_in_today=False,
+                        destination_route="/check-in",
+                    )
+            except Exception:
+                daily_check_in_summary = DailyCheckInSummary(
+                    has_checked_in_today=False,
+                    destination_route="/check-in",
                 )
 
         status = self._assessment_status(active, result, partial_data)
@@ -133,6 +156,7 @@ class DashboardService:
             assessment=assessment_summary,
             workout=workout_state,
             nutrition=nutrition_state,
+            daily_check_in=daily_check_in_summary,
             daily_priority=priority,
             features=self._features(
                 assessment_summary,

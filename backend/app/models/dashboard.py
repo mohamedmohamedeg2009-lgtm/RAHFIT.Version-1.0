@@ -121,6 +121,18 @@ class DashboardMetadata(BaseModel):
     dashboard_version: str
 
 
+class DailyCheckInSummary(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    has_checked_in_today: bool
+    date: str | None = None
+    readiness_score: int | None = Field(default=None, ge=0, le=100)
+    readiness_level: str | None = None
+    recommended_action: str | None = None
+    warning_codes: tuple[str, ...] = ()
+    destination_route: str = "/check-in"
+
+
 class DashboardView(BaseModel):
     model_config = ConfigDict(frozen=True)
 
@@ -128,6 +140,7 @@ class DashboardView(BaseModel):
     assessment: DashboardAssessmentSummary
     workout: WorkoutDashboardState | None = None
     nutrition: NutritionDashboardState | None = None
+    daily_check_in: DailyCheckInSummary | None = None
     daily_priority: DashboardAction
     features: tuple[DashboardFeature, ...]
     safety_notice: DashboardSafetyNotice | None = None

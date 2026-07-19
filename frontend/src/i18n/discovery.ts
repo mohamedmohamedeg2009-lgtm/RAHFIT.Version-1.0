@@ -3,25 +3,25 @@ import type { Locale } from "../contexts/LocaleContext";
 export const discoveryCopy: Record<Locale, Record<string, string>> = {
   en: {
     // Header & Nav
-    navBrand: "RAHFIT AI",
+    navBrand: "Rahafit",
     navFeatures: "Features",
     navHowItWorks: "How it works",
     navSafety: "Safety & Privacy",
     navLogin: "Sign in",
-    navDiscover: "Explore Rahfit",
+    navDiscover: "Explore Rahafit",
     navRegister: "Create account",
 
     // Hero Section
-    heroHeading: "Start Your Journey with Rahfit",
+    heroHeading: "Start Your Journey with Rahafit",
     heroSubheading:
-      "Rahfit connects your fitness programming, nutrition tracking, recovery insights, and safety-aware AI guidance into one seamless experience.",
+      "Rahafit connects your fitness programming, nutrition tracking, recovery insights, and safety-aware AI guidance into one seamless experience.",
     heroPrimaryCta: "Create account",
     heroSecondaryCta: "Explore features",
     heroSkipLink: "Skip to registration",
     heroTrustBadge: "Safe, adaptive & privacy-first fitness coaching",
 
     // How it works
-    howItWorksHeading: "How Rahfit Works",
+    howItWorksHeading: "How Rahafit Works",
     howItWorksSubheading: "Four simple steps to transform your daily health and fitness routine.",
     step1Title: "1. Create your account",
     step1Desc: "Quick registration with email or Google to secure your personal health profile.",
@@ -55,10 +55,10 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
       "Daily macronutrient target tracking, quick water logging, and dietary restriction management.",
     featureNutritionBadge: "Active & Usable",
 
-    featureAiCoachTitle: "AI Coach & Safety Assistance",
+    featureAiCoachTitle: "AI Coach & Safety Guidance",
     featureAiCoachDesc:
-      "Context-aware assistant for training questions, recovery advice, and exercise form clarification.",
-    featureAiCoachBadge: "Active & Usable",
+      "Safety-bounded guidance for fitness questions, workout recovery advice, and medical declaration checks.",
+    featureAiCoachBadge: "Read-only & Safe",
 
     featureAssessmentTitle: "Smart Assessment & Health Declaration",
     featureAssessmentDesc:
@@ -81,18 +81,33 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
     // Final CTA
     finalCtaHeading: "Ready to take your first step?",
     finalCtaSubheading:
-      "Join Rahfit AI today and experience intelligent, safe, and personalized coaching.",
+      "Join Rahafit today and experience intelligent, safe, and personalized coaching.",
     finalCtaPrimary: "Get started now",
     finalCtaSecondary: "I already have an account",
 
     // Landing Page Specifics
+    landingHeroHeadline: "Train smarter. Live better.",
+    landingHeroSubheading:
+      "Everything you need to build a healthier life: training, nutrition, recovery, and intelligent progress tracking in one place.",
+    landingHeroPrimaryCta: "Start for free",
+    landingHeroSecondaryCta: "See how it works",
     landingHeroTitle: "Intelligent Coaching Built For Real Progress",
     landingHeroSubtitle:
-      "Rahfit brings workout planning, nutrition management, and safety-focused AI advice together to help you build sustainable health habits.",
-    landingHeroCta: "Explore Rahfit",
+      "Rahafit brings workout planning, nutrition management, and safety-focused AI advice together to help you build sustainable health habits.",
+    landingHeroCta: "Explore Rahafit",
     landingLoginCta: "Sign in",
 
-    landingValueTitle: "Why Choose Rahfit AI?",
+    // Floating Cards Copy
+    heroCardStreak: "12 day streak",
+    heroCardGoal: "Next goal: Lose 2 kg",
+    heroCardCoach: "AI Coach: Live guidance",
+    heroCardWorkout: "Workout ready — start when ready",
+
+    // HUD Copy
+    heroHudLabel: "SYSTEM INTERACTION HUD",
+    heroHudStatus: "Optimizing recovery, movement, and daily readiness",
+
+    landingValueTitle: "Why Choose Rahafit?",
     landingValue1Title: "Personalized Programming",
     landingValue1Desc: "Tailored workouts designed for your exact equipment and experience level.",
     landingValue2Title: "Safety Boundary Guard",
@@ -101,28 +116,34 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
     landingValue3Title: "Comprehensive Tracking",
     landingValue3Desc:
       "Unified dashboard keeping workout history, nutrition logs, and progress in sync.",
+
+    // Footer Copy
+    footerDescription:
+      "Intelligent training, adaptive nutrition, and safety-guided coaching for sustainable health.",
+    footerContactHeading: "Contact & Support",
+    footerContactNotice: "Contact information coming soon.",
   },
   ar: {
     // Header & Nav
-    navBrand: "RAHFIT AI",
+    navBrand: "Rahafit",
     navFeatures: "المميزات",
     navHowItWorks: "كيف يعمل",
     navSafety: "الأمان والخصوصية",
     navLogin: "تسجيل الدخول",
-    navDiscover: "استكشف منصة Rahfit",
+    navDiscover: "استكشف منصة Rahafit",
     navRegister: "أنشئ حسابك",
 
     // Hero Section
-    heroHeading: "ابدأ رحلتك مع Rahfit",
+    heroHeading: "ابدأ رحلتك مع Rahafit",
     heroSubheading:
-      "يربط منصة Rahfit بين التخطيط الرياضي، متابعة التغذية، مؤشرات الاستشفاء، والتوجيه الذكي الذي يراعي أمانك وصحتك في تجربة متكاملة واحدة.",
+      "تربط منصة Rahafit بين التخطيط الرياضي، متابعة التغذية، مؤشرات الاستشفاء، والتوجيه الذكي الذي يراعي أمانك وصحتك في تجربة متكاملة واحدة.",
     heroPrimaryCta: "أنشئ حسابك",
     heroSecondaryCta: "استكشف المميزات",
     heroSkipLink: "تخطي إلى التسجيل",
     heroTrustBadge: "تدريب رياضي آمن، متكيف، ويحافظ على خصوصيتك",
 
     // How it works
-    howItWorksHeading: "كيف تعمل منصة Rahfit",
+    howItWorksHeading: "كيف تعمل منصة Rahafit",
     howItWorksSubheading: "أربع خطوات بسيطة لتحويل روتينك الرياضي والصحي اليومي.",
     step1Title: "1. أنشئ حسابك",
     step1Desc: "تسجيل سريع عبر البريد الإلكتروني أو حساب Google لحفظ ملفك الصحي الشخصي.",
@@ -154,8 +175,8 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
 
     featureAiCoachTitle: "المدرب الذكي والتوجيه الآمن",
     featureAiCoachDesc:
-      "مساعد ذكي للإجابة عن أسئلة التدريب، نصائح الاستشفاء، وتوضيح أداء التمارين.",
-    featureAiCoachBadge: "متاح ومكتمل",
+      "توجيه ذكي خاضع لقواعد الأمان للإجابة عن أسئلة التدريب، نصائح الاستشفاء، والإقرار الصحي.",
+    featureAiCoachBadge: "قراءة ومراجعة آمنة",
 
     featureAssessmentTitle: "التقييم الذكي والإقرار الصحي",
     featureAssessmentDesc:
@@ -177,23 +198,44 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
 
     // Final CTA
     finalCtaHeading: "جاهز تبدأ خطوتك الأولى؟",
-    finalCtaSubheading: "انضم إلى Rahfit AI اليوم واستمتع بتدريب ذكي، آمن، ومخصص لك.",
+    finalCtaSubheading: "انضم إلى Rahafit اليوم واستمتع بتدريب ذكي، آمن، ومخصص لك.",
     finalCtaPrimary: "ابدأ الآن",
     finalCtaSecondary: "لدي حساب بالفعل",
 
     // Landing Page Specifics
+    landingHeroHeadline: "تمرّن بذكاء. عِش أفضل.",
+    landingHeroSubheading:
+      "كل ما تحتاجه لبناء حياة أصح: تمرين، تغذية، تعافٍ، ومتابعة ذكية في مكان واحد.",
+    landingHeroPrimaryCta: "ابدأ مجاناً",
+    landingHeroSecondaryCta: "شاهد كيف يعمل",
     landingHeroTitle: "تدريب ذكي مصمم لتقدم حقيقي واستدامة",
     landingHeroSubtitle:
-      "يجمع Rahfit بين التخطيط الرياضي، متابعة التغذية، واستشارات الذكاء الاصطناعي الآمنة لبناء عادات صحية مستدامة.",
-    landingHeroCta: "استكشف Rahfit",
+      "تجمع منصة Rahafit بين التخطيط الرياضي، متابعة التغذية، واستشارات الذكاء الاصطناعي الآمنة لبناء عادات صحية مستدامة.",
+    landingHeroCta: "استكشف Rahafit",
     landingLoginCta: "تسجيل الدخول",
 
-    landingValueTitle: "لماذا تختار Rahfit AI؟",
+    // Floating Cards Copy
+    heroCardStreak: "12 يوم متتالي",
+    heroCardGoal: "هدفك القادم: خسارة 2 كجم",
+    heroCardCoach: "المدرب الذكي: متابعة حية",
+    heroCardWorkout: "التمرين جاهز — ابدأ لما تكون جاهز",
+
+    // HUD Copy
+    heroHudLabel: "SYSTEM INTERACTION HUD",
+    heroHudStatus: "Optimizing recovery, movement, and daily readiness",
+
+    landingValueTitle: "لماذا تختار Rahafit؟",
     landingValue1Title: "برامج تدريبية مخصصة",
     landingValue1Desc: "تمارين مصممة بدقة لتناسب أدواتك المتاحة ومستواك البدني الحالي.",
     landingValue2Title: "حماية وحدود آمنة",
     landingValue2Desc: "إقرار صحي دقيق وتقارير ألم فورية لضمان التمرين بدون مخاطر.",
     landingValue3Title: "متابعة شاملة ودقيقة",
     landingValue3Desc: "لوحة تحكم واحدة تربط سجل التمارين، الوجبات، ومستويات التقدم.",
+
+    // Footer Copy
+    footerDescription:
+      "تمارين مخصصة، تغذية متوازنة، وتوجيه آمن يراعي صحتك وسلامتك البدنية في كل خطوة.",
+    footerContactHeading: "التواصل والدعم",
+    footerContactNotice: "معلومات التواصل قريباً.",
   },
 };

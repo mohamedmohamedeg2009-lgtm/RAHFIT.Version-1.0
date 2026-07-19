@@ -18,15 +18,15 @@ function LocaleSwitcherAndTitle({ en, ar }: { en: string; ar: string }) {
 
 describe("document title hook and router integration", () => {
   beforeEach(() => {
-    document.title = "RAHFIT AI";
+    document.title = "Rahafit";
     window.localStorage.removeItem("rahfit.locale");
   });
 
   it("sets the document title on mount and restores default on unmount", () => {
     const { unmount } = render(<TestPage title="Dashboard" />);
-    expect(document.title).toBe("Dashboard — RAHFIT AI");
+    expect(document.title).toBe("Dashboard — Rahafit");
     unmount();
-    expect(document.title).toBe("RAHFIT AI");
+    expect(document.title).toBe("Rahafit");
   });
 
   it("updates title dynamically when language changes", async () => {
@@ -37,20 +37,20 @@ describe("document title hook and router integration", () => {
     );
 
     // Default locale (en) is loaded first
-    expect(document.title).toBe("Dashboard — RAHFIT AI");
+    expect(document.title).toBe("Dashboard — Rahafit");
 
     // Click the toggle button to switch to ar
     await userEvent.click(screen.getByRole("button", { name: "Toggle Locale" }));
 
     // The title should update to Arabic
     await waitFor(() => {
-      expect(document.title).toBe("لوحة التحكم — RAHFIT AI");
+      expect(document.title).toBe("لوحة التحكم — Rahafit");
     });
 
     // Toggle back to en
     await userEvent.click(screen.getByRole("button", { name: "Toggle Locale" }));
     await waitFor(() => {
-      expect(document.title).toBe("Dashboard — RAHFIT AI");
+      expect(document.title).toBe("Dashboard — Rahafit");
     });
   });
 });

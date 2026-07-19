@@ -6,6 +6,7 @@ import { PasswordField } from "../../components/auth/PasswordField";
 import { useAuth } from "../../hooks/useAuth";
 import { GoogleSignInButton } from "../../components/auth/GoogleSignInButton";
 import { useLocale } from "../../contexts/LocaleContext";
+import { RahafitLogo } from "../../components/common/RahafitLogo";
 
 export function LoginPage() {
   const { login, error, clearError, isLoading } = useAuth();
@@ -54,7 +55,7 @@ export function LoginPage() {
   return (
     <section className="auth-card" aria-labelledby="login-title">
       <div className="mobile-brand">
-        <p className="eyebrow">RAHFIT AI</p>
+        <RahafitLogo size="md" />
       </div>
       <p className="eyebrow">WELCOME BACK</p>
       <h2 id="login-title">Let’s keep your momentum.</h2>
@@ -100,7 +101,7 @@ export function LoginPage() {
         </button>
       </form>
       <p className="auth-switch">
-        New to RAHFIT AI? <Link to="/register">Create an account</Link>
+        New to Rahafit? <Link to="/register">Create an account</Link>
       </p>
     </section>
   );

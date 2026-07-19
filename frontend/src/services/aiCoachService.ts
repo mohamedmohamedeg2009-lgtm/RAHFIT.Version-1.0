@@ -40,6 +40,17 @@ export interface AIAvailability {
   status: "available" | "unavailable";
 }
 
+export interface AICoachMessageFlowResponse {
+  conversation_id: string;
+  user_message: AIMessage;
+  assistant_message: AIMessage;
+  capability: string;
+  safety_decision: string;
+  safe_reason_code?: string | null;
+  provider_used?: string | null;
+  created_at: string;
+}
+
 export const aiCoachService = {
   async getAvailability(options?: Parameters<typeof apiRequest>[1]): Promise<AIAvailability> {
     return apiRequest<AIAvailability>("/ai-coach/availability", options);
@@ -95,12 +106,15 @@ export const aiCoachService = {
     conversationId: string,
     content: string,
     options?: Parameters<typeof apiRequest>[1],
-  ): Promise<AIMessage> {
-    return apiRequest<AIMessage>(`/ai-coach/conversations/${conversationId}/messages`, {
-      ...options,
-      method: "POST",
-      body: { content },
-    });
+  ): Promise<AICoachMessageFlowResponse> {
+    return apiRequest<AICoachMessageFlowResponse>(
+      `/ai-coach/conversations/${conversationId}/messages`,
+      {
+        ...options,
+        method: "POST",
+        body: { content },
+      },
+    );
   },
 
   async getMessages(

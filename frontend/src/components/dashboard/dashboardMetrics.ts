@@ -64,7 +64,7 @@ const insightsTranslation = {
     nutritionWhy:
       "Aligning protein, fat, and carbohydrate intake with targets stabilizes blood glucose levels and ensures sustained muscle glycogen synthesis.",
 
-    onboardTitle: "Welcome to RAHFIT platform",
+    onboardTitle: "Welcome to Rahafit platform",
     onboardDesc:
       "Complete your wellness assessments to receive personalized coaching insights and adaptations.",
     onboardWhy:
@@ -105,7 +105,7 @@ const insightsTranslation = {
     nutritionWhy:
       "يؤدي ضبط تناول البروتين والدهون والكربوهيدرات مع الأهداف إلى استقرار مستويات الجلوكوز وضمان بناء الجليكوجين العضلي.",
 
-    onboardTitle: "مرحبًا بك في منصة RAHFIT",
+    onboardTitle: "مرحبًا بك في منصة Rahafit",
     onboardDesc: "أكمل تقييماتك الصحية البدنية والطبية للحصول على توصيات وخطط مخصصة وآمنة.",
     onboardWhy:
       "يتطلب محرك السلامة الخاص بنا مؤشرات حيوية أساسية لبناء بوابات تدريب مخصصة وخطط تغذية دقيقة.",

@@ -1,4 +1,12 @@
-import { LayoutDashboard, Dumbbell, Utensils, Bot, FileCheck2, CheckCircle2 } from "lucide-react";
+import {
+  LayoutDashboard,
+  Dumbbell,
+  Utensils,
+  Bot,
+  FileCheck2,
+  CheckCircle2,
+  ShieldCheck,
+} from "lucide-react";
 
 import { useLocale } from "../../contexts/LocaleContext";
 import { discoveryCopy } from "../../i18n/discovery";
@@ -78,8 +86,16 @@ export function ProductAreasSection() {
                 >
                   <Icon size={24} color={feature.color} />
                 </div>
-                <Badge className="discovery-status-badge">
-                  <CheckCircle2 size={14} color="var(--color-success)" />
+                <Badge
+                  className={`discovery-status-badge ${
+                    feature.id === "aiCoach" ? "discovery-status-readonly" : ""
+                  }`}
+                >
+                  {feature.id === "aiCoach" ? (
+                    <ShieldCheck size={14} color="var(--color-ai)" />
+                  ) : (
+                    <CheckCircle2 size={14} color="var(--color-success)" />
+                  )}
                   <span>{feature.badge}</span>
                 </Badge>
               </div>

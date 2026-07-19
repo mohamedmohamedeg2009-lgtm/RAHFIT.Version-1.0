@@ -146,7 +146,7 @@ const en = {
     "AI may explain an already validated plan. Exercise selection remains deterministic and server-controlled.",
   beforeGeneration: "Before generation",
   beforeGenerationDescription:
-    "Your profile and explicit health declaration must be complete. RAHFIT AI does not replace professional medical advice.",
+    "Your profile and explicit health declaration must be complete. Rahafit does not replace professional medical advice.",
   generateSafePlan: "Generate safe plan",
   safePlanCreated: "Safe deterministic plan created",
   safePlanCreatedDescription:
@@ -176,7 +176,7 @@ const en = {
   reviewEvidence: "Review current evidence",
   reviewEvidenceDescription:
     "The server reviews completed and in-progress session evidence. Recommendations remain advisory and are never applied automatically.",
-  noDiagnosis: "RAHFIT AI does not diagnose injury or replace professional guidance.",
+  noDiagnosis: "Rahafit does not diagnose injury or replace professional guidance.",
   planHistoryTitle: "Plan history",
   planHistoryDescription: "Review your owner-scoped active and archived training plans.",
   loadingPlanHistory: "Loading plan history",
@@ -372,7 +372,7 @@ const ar: Record<IntelligentWorkoutKey, string> = {
     "يمكن للذكاء الاصطناعي شرح خطة معتمدة مسبقًا. يظل اختيار التمارين حتميًا وتحت تحكم الخادم.",
   beforeGeneration: "قبل الإنشاء",
   beforeGenerationDescription:
-    "يجب اكتمال ملفك وإقرارك الصحي الصريح. لا يحل RAHFIT AI محل الاستشارة الطبية المتخصصة.",
+    "يجب اكتمال ملفك وإقرارك الصحي الصريح. لا يحل Rahafit محل الاستشارة الطبية المتخصصة.",
   generateSafePlan: "إنشاء خطة آمنة",
   safePlanCreated: "تم إنشاء خطة حتمية آمنة",
   safePlanCreatedDescription:
@@ -400,7 +400,7 @@ const ar: Record<IntelligentWorkoutKey, string> = {
   reviewEvidence: "مراجعة البيانات الحالية",
   reviewEvidenceDescription:
     "يراجع الخادم بيانات الجلسات المكتملة والجارية. تظل التوصيات إرشادية ولا تُطبّق تلقائيًا.",
-  noDiagnosis: "لا يشخّص RAHFIT AI الإصابات ولا يحل محل الإرشاد المتخصص.",
+  noDiagnosis: "لا يشخّص Rahafit الإصابات ولا يحل محل الإرشاد المتخصص.",
   planHistoryTitle: "سجل الخطط",
   planHistoryDescription: "راجع خطط التدريب النشطة والمؤرشفة الخاصة بحسابك.",
   loadingPlanHistory: "جارٍ تحميل سجل الخطط",

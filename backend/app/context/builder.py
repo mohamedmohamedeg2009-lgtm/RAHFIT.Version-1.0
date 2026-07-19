@@ -19,6 +19,7 @@ from app.models.ai_context import (
     AIContextSourceType,
     AIRecommendationSource,
 )
+from app.models.daily_check_in import DailyCheckIn
 from app.models.user import User
 from app.readiness import ReadinessChecker, ReadinessResult, ReadinessStatus
 from app.services.ai_classifier import CapabilityClassifier
@@ -57,6 +58,7 @@ class UserIntelligenceContextBuilder:
         self,
         authenticated_user: User,
         request: AIContextRequest,
+        daily_check_in: DailyCheckIn | None = None,
     ) -> AIApprovedContext:
         question = CapabilityClassifier.normalize(request.current_user_question or "")
         if not question:
@@ -162,6 +164,46 @@ class UserIntelligenceContextBuilder:
                     },
                     (AIContextSourceType.AUTHENTICATED_USER,),
                     "Only nutrition-relevant measurements and restrictions are included.",
+                )
+            )
+        if (
+            daily_check_in is not None
+            and daily_check_in.user_id == authenticated_user.id
+            and request.purpose
+            in {
+                AIContextPurpose.EXPLAIN_ASSESSMENT,
+                AIContextPurpose.EXPLAIN_WORKOUT_PLAN,
+                AIContextPurpose.EXPLAIN_NUTRITION_PLAN,
+                AIContextPurpose.GENERAL_FITNESS_QUESTION,
+                AIContextPurpose.GENERAL_NUTRITION_QUESTION,
+                AIContextPurpose.SAFE_MOTIVATION,
+                AIContextPurpose.SUMMARIZE_CURRENT_PLAN,
+                AIContextPurpose.SUGGEST_APPROVED_WORKOUT_ALTERNATIVE,
+            }
+        ):
+            sections.append(
+                self._section(
+                    AIContextSectionName.PROGRESS,
+                    6,
+                    {
+                        "daily_check_in_date": daily_check_in.date.isoformat(),
+                        "readiness_score": daily_check_in.readiness_result.readiness_score,
+                        "readiness_level": daily_check_in.readiness_result.readiness_level.value,
+                        "recommended_action": daily_check_in.readiness_result.recommended_action.value,
+                        "warning_codes": [
+                            w.value for w in daily_check_in.readiness_result.warning_codes
+                        ],
+                        "recovery_score": daily_check_in.readiness_result.recovery_score,
+                        "sleep_hours": daily_check_in.inputs.sleep_hours,
+                        "sleep_quality": daily_check_in.inputs.sleep_quality,
+                        "energy_level": daily_check_in.inputs.energy_level,
+                        "stress_level": daily_check_in.inputs.stress_level,
+                        "muscle_soreness": daily_check_in.inputs.muscle_soreness,
+                        "pain_level": daily_check_in.inputs.pain_level,
+                        "hydration_status": daily_check_in.inputs.hydration_status.value,
+                    },
+                    (AIContextSourceType.AUTHENTICATED_USER,),
+                    "Minimum necessary daily readiness signals excluding raw private notes.",
                 )
             )
         sections.sort(key=lambda item: (item.priority, item.name.value))

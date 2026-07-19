@@ -23,6 +23,7 @@ class ContextBuilder(Protocol):
         self,
         authenticated_user: User,
         request: AIContextRequest,
+        daily_check_in: Any | None = None,
     ) -> AIApprovedContext: ...
 
 
@@ -50,6 +51,7 @@ class AIService:
         context_builder: ContextBuilder,
         safety_engine: SafetyEvaluator,
         logger: StructuredLogger | None = None,
+        daily_check_in_repository: Any | None = None,
     ) -> None:
         self.provider = provider
         self.context_builder = context_builder
@@ -58,6 +60,7 @@ class AIService:
             StructuredLogger,
             structlog.get_logger("app.ai.service"),
         )
+        self.daily_check_in_repository = daily_check_in_repository
 
     async def generate_text(
         self,
@@ -128,9 +131,16 @@ class AIService:
         context_request = request.context_request.model_copy(
             update={"current_user_question": normalized_prompt}
         )
+        daily_check_in = None
+        if self.daily_check_in_repository is not None:
+            from datetime import UTC, datetime
+            daily_check_in = await self.daily_check_in_repository.get_by_date(
+                authenticated_user.id, datetime.now(UTC).date()
+            )
         approved_context = await self.context_builder.build_context(
             authenticated_user,
             context_request,
+            daily_check_in=daily_check_in,
         )
         safety = self.safety_engine.evaluate_safety(
             authenticated_user,

@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 
 import { useAuth } from "../hooks/useAuth";
+import { RahafitLogo } from "../components/common/RahafitLogo";
 
 export function AuthLayout() {
   const { user, isLoading } = useAuth();
@@ -23,7 +24,9 @@ export function AuthLayout() {
   return (
     <main className="auth-shell">
       <div className="auth-brand-panel">
-        <p className="eyebrow">RAHFIT AI</p>
+        <div className="mb-6">
+          <RahafitLogo size="lg" themeMode="dark" />
+        </div>
         <h1>Small steps. Stronger you.</h1>
         <p>
           A thoughtful personal coach for training, nutrition, recovery, and the habits that make
