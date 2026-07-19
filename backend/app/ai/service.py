@@ -1,5 +1,5 @@
 import json
-from typing import Protocol, cast
+from typing import Any, Protocol, cast
 
 import structlog
 from pydantic import ValidationError
