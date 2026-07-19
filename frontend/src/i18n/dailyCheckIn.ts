@@ -1,6 +1,5 @@
 import type { Locale } from "../contexts/LocaleContext";
 import type {
-  HydrationStatus,
   ReadinessLevel,
   RecommendedAction,
 } from "../services/dailyCheckInService";

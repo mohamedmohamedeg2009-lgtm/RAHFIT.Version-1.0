@@ -46,6 +46,7 @@ class RecordingContextBuilder:
         self,
         authenticated_user: User,
         request: AIContextRequest,
+        **kwargs: object,
     ) -> AIApprovedContext:
         assert authenticated_user.id == self.context.owner_reference
         self.requests.append(request)

@@ -3,17 +3,23 @@ import { Link, Navigate } from "react-router-dom";
 import {
   Sparkles,
   ShieldCheck,
-  Bot,
   Activity,
   HeartHandshake,
   ArrowRight,
   ArrowLeft,
-  Dumbbell,
   Eye,
-  CheckCircle2,
 } from "lucide-react";
 
 import { HowItWorksSection } from "../../components/discovery/HowItWorksSection";
+import { ProductAreasSection } from "../../components/discovery/ProductAreasSection";
+import { DashboardPreviewSection } from "../../components/discovery/DashboardPreviewSection";
+import { AiCoachShowcaseSection } from "../../components/discovery/AiCoachShowcaseSection";
+import { SafetySection } from "../../components/discovery/SafetySection";
+import { TrustMetricsSection } from "../../components/discovery/TrustMetricsSection";
+import { ProductScopeSection } from "../../components/discovery/ProductScopeSection";
+import { PricingSection } from "../../components/discovery/PricingSection";
+import { FinalCtaSection } from "../../components/discovery/FinalCtaSection";
+
 import { PublicHeader } from "../../components/public/PublicHeader";
 import { PublicFooter } from "../../components/public/PublicFooter";
 import { HeroPhoneMockup } from "../../components/public/HeroPhoneMockup";
@@ -21,7 +27,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import { useLocale } from "../../contexts/LocaleContext";
 import { discoveryCopy } from "../../i18n/discovery";
-import { Card, Badge } from "../../components/ui";
+import { Badge } from "../../components/ui";
 
 export function LandingPage() {
   const { user, isLoading } = useAuth();
@@ -59,7 +65,7 @@ export function LandingPage() {
       <PublicHeader />
 
       <main className="public-main-content flex-1 max-w-7xl w-full mx-auto px-4 py-6 flex flex-col gap-12">
-        {/* Main Hero Card Container */}
+        {/* 1. Main Hero Card Container */}
         <section
           className="landing-hero-card relative rounded-3xl p-6 md:p-10 border border-slate-800/80 bg-slate-900/60 shadow-2xl overflow-hidden"
           aria-labelledby="landing-hero-title"
@@ -135,7 +141,6 @@ export function LandingPage() {
 
           {/* Four Bottom Value Items */}
           <div className="hero-value-pillars border-t border-slate-800/80 mt-10 pt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 z-10 relative">
-            {/* Value Item 1: Secure & Trusted */}
             <div className="value-item-card flex items-start gap-3.5 p-3 rounded-2xl bg-slate-950/40 border border-slate-800/60 hover:border-teal-500/30 transition-all">
               <div className="icon-wrapper shrink-0 w-10 h-10 rounded-full bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400">
                 <ShieldCheck size={20} />
@@ -146,10 +151,9 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* Value Item 2: Personalized AI */}
             <div className="value-item-card flex items-start gap-3.5 p-3 rounded-2xl bg-slate-950/40 border border-slate-800/60 hover:border-teal-500/30 transition-all">
               <div className="icon-wrapper shrink-0 w-10 h-10 rounded-full bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400">
-                <Bot size={20} />
+                <Sparkles size={20} />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white mb-0.5">{copy.valueItem2Title}</h3>
@@ -157,7 +161,6 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* Value Item 3: Comprehensive Tracking */}
             <div className="value-item-card flex items-start gap-3.5 p-3 rounded-2xl bg-slate-950/40 border border-slate-800/60 hover:border-teal-500/30 transition-all">
               <div className="icon-wrapper shrink-0 w-10 h-10 rounded-full bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400">
                 <Activity size={20} />
@@ -168,7 +171,6 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* Value Item 4: Continuous Support */}
             <div className="value-item-card flex items-start gap-3.5 p-3 rounded-2xl bg-slate-950/40 border border-slate-800/60 hover:border-teal-500/30 transition-all">
               <div className="icon-wrapper shrink-0 w-10 h-10 rounded-full bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400">
                 <HeartHandshake size={20} />
@@ -181,129 +183,32 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* How It Works Section */}
+        {/* 2. How It Works Section */}
         <HowItWorksSection />
 
-        {/* Features Grid Section */}
-        <section id="features" className="discovery-section py-8" aria-labelledby="landing-value-title">
-          <div className="text-center mb-8">
-            <h2 id="landing-value-title" className="text-2xl sm:text-3xl font-extrabold text-white mb-2">
-              {copy.productAreasHeading}
-            </h2>
-            <p className="text-slate-400 text-sm max-w-2xl mx-auto">{copy.productAreasSubheading}</p>
-          </div>
+        {/* 3. Core Features Section */}
+        <ProductAreasSection />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="p-6 bg-slate-900/40 border-slate-800 flex flex-col gap-3">
-              <div className="w-12 h-12 rounded-xl bg-teal-500/10 text-teal-400 flex items-center justify-center">
-                <Dumbbell size={24} />
-              </div>
-              <h3 className="font-bold text-lg text-white">{copy.featureWorkoutTitle}</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">{copy.featureWorkoutDesc}</p>
-            </Card>
+        {/* 4. Dashboard Preview Section */}
+        <DashboardPreviewSection />
 
-            <Card className="p-6 bg-slate-900/40 border-slate-800 flex flex-col gap-3">
-              <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
-                <ShieldCheck size={24} />
-              </div>
-              <h3 className="font-bold text-lg text-white">{copy.featureAssessmentTitle}</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">{copy.featureAssessmentDesc}</p>
-            </Card>
+        {/* 5. AI Coach Showcase Section */}
+        <AiCoachShowcaseSection />
 
-            <Card className="p-6 bg-slate-900/40 border-slate-800 flex flex-col gap-3">
-              <div className="w-12 h-12 rounded-xl bg-teal-500/10 text-teal-400 flex items-center justify-center">
-                <Bot size={24} />
-              </div>
-              <h3 className="font-bold text-lg text-white">{copy.featureAiCoachTitle}</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">{copy.featureAiCoachDesc}</p>
-            </Card>
-          </div>
-        </section>
+        {/* 6. Safety & Privacy Section */}
+        <SafetySection />
 
-        {/* Safety & Privacy Section */}
-        <section id="safety-section" className="discovery-section py-8" aria-labelledby="safety-title">
-          <Card className="p-8 bg-slate-900/60 border-teal-500/20">
-            <div className="flex items-center gap-3 mb-4 text-teal-400">
-              <ShieldCheck size={28} />
-              <h2 id="safety-title" className="text-xl sm:text-2xl font-extrabold text-white">
-                {copy.safetyHeading}
-              </h2>
-            </div>
-            <p className="text-sm text-slate-300 mb-6">{copy.safetySubheading}</p>
+        {/* 7. Honest Quality Metrics Section */}
+        <TrustMetricsSection />
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="flex flex-col gap-1.5">
-                <h3 className="font-bold text-sm text-white flex items-center gap-2">
-                  <CheckCircle2 size={16} className="text-teal-400" />
-                  {copy.safetyPoint1Title}
-                </h3>
-                <p className="text-xs text-slate-400">{copy.safetyPoint1Desc}</p>
-              </div>
+        {/* 8. Platform Scope Pillars */}
+        <ProductScopeSection />
 
-              <div className="flex flex-col gap-1.5">
-                <h3 className="font-bold text-sm text-white flex items-center gap-2">
-                  <CheckCircle2 size={16} className="text-teal-400" />
-                  {copy.safetyPoint2Title}
-                </h3>
-                <p className="text-xs text-slate-400">{copy.safetyPoint2Desc}</p>
-              </div>
+        {/* 9. Pricing Section */}
+        <PricingSection />
 
-              <div className="flex flex-col gap-1.5">
-                <h3 className="font-bold text-sm text-white flex items-center gap-2">
-                  <CheckCircle2 size={16} className="text-teal-400" />
-                  {copy.safetyPoint3Title}
-                </h3>
-                <p className="text-xs text-slate-400">{copy.safetyPoint3Desc}</p>
-              </div>
-            </div>
-          </Card>
-        </section>
-
-        {/* Pricing Section Placeholder */}
-        <section id="pricing" className="discovery-section py-8" aria-labelledby="pricing-title">
-          <div className="text-center mb-8">
-            <h2 id="pricing-title" className="text-2xl sm:text-3xl font-extrabold text-white mb-2">
-              {copy.pricingHeading}
-            </h2>
-            <p className="text-slate-400 text-sm max-w-2xl mx-auto">{copy.pricingSubheading}</p>
-          </div>
-
-          <Card className="max-w-md mx-auto p-6 bg-slate-900/60 border-amber-500/30 text-center flex flex-col gap-4">
-            <Badge className="self-center bg-amber-500/10 text-amber-400 border-amber-500/20 px-3 py-1 font-bold text-xs">
-              {copy.pricingFreeTitle}
-            </Badge>
-            <h3 className="text-2xl font-black text-white">{isRtl ? "مجاني بالكامل" : "100% Free"}</h3>
-            <p className="text-xs text-slate-300">{copy.pricingFreeDesc}</p>
-            <Link
-              to="/register"
-              className="ds-button ds-button-primary bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold py-3 rounded-xl shadow-lg"
-            >
-              {copy.landingHeroPrimaryCta}
-            </Link>
-          </Card>
-        </section>
-
-        {/* Final CTA Banner */}
-        <section className="discovery-section pb-8">
-          <Card className="p-8 md:p-12 bg-gradient-to-r from-slate-900 via-teal-950/40 to-slate-900 border-teal-500/30 text-center flex flex-col items-center gap-4">
-            <h2 className="text-2xl sm:text-4xl font-black text-white">{copy.finalCtaHeading}</h2>
-            <p className="text-sm sm:text-base text-slate-300 max-w-xl">{copy.finalCtaSubheading}</p>
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <Link
-                className="ds-button ds-button-primary bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold px-8 py-3.5 rounded-xl shadow-lg"
-                to="/register"
-              >
-                <span>{copy.finalCtaPrimary}</span>
-              </Link>
-              <Link
-                className="ds-button ds-button-outline border-slate-700 text-slate-300 hover:bg-slate-800 px-6 py-3.5 rounded-xl font-bold"
-                to="/login"
-              >
-                <span>{copy.finalCtaSecondary}</span>
-              </Link>
-            </div>
-          </Card>
-        </section>
+        {/* 10. Final CTA Banner */}
+        <FinalCtaSection />
       </main>
 
       <PublicFooter />

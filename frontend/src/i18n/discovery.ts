@@ -42,6 +42,79 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
     howItWorksPrimaryCta: "Start your journey",
     howItWorksSecondaryCta: "Explore features",
 
+    // Core Areas & Features Section
+    featuresEyebrow: "CORE FEATURES",
+    featuresHeading: "Everything You Need for Smarter, Safer Training",
+    featuresSubheading:
+      "From personalized workouts to smart assessment and safe AI guidance, Rahafit unifies essential tools in one seamless experience.",
+    featureWorkoutBadge: "Core Feature",
+    featureWorkoutTitle: "Intelligent Workout Guidance",
+    featureWorkoutDesc:
+      "Deterministic workout programs adapting to your fitness level and equipment, with exercise substitutions and live safety alerts.",
+    featureWorkoutPoint1: "Customizable workout plan",
+    featureWorkoutPoint2: "Pain & rest timer tracking",
+    featureWorkoutPoint3: "Safe exercise substitutions",
+    featureWorkoutCta: "Explore Workout",
+
+    featureAssessmentBadge: "Safe Assessment",
+    featureAssessmentTitle: "Smart Assessment & Health Declaration",
+    featureAssessmentDesc:
+      "Capturing physical limitations and athletic history to build a safe health profile.",
+
+    featureAiCoachBadge: "Intelligent & Safe Guidance",
+    featureAiCoachTitle: "AI Coach & Safety Guidance",
+    featureAiCoachDesc:
+      "Real-time safety-bounded fitness guidance. Advice is athletic lifestyle support, not medical diagnosis.",
+    featureAiChip1: "Workouts",
+    featureAiChip2: "Nutrition",
+    featureAiChip3: "Recovery",
+    featureAiChip4: "Progress",
+    featureAiDisclaimer: "AI recommendations provide fitness guidance and do not replace professional medical advice.",
+
+    // Dashboard Preview Section
+    previewEyebrow: "PRODUCT PREVIEW",
+    previewHeading: "An Intelligent Dashboard Putting Core Metrics Front & Center",
+    previewSubheading:
+      "Real-time tracking for readiness, workouts, nutrition, and AI coaching insights in a single view.",
+    previewBadgeReadiness: "Readiness 88%",
+    previewBadgeWorkout: "Workout Ready",
+    previewBadgeNutrition: "Macro Targets",
+    previewInsightText: "Recovery signals optimal — proceed with today's planned upper body strength workout.",
+
+    // AI Coach Showcase Section
+    coachEyebrow: "AI COACH SHOWCASE",
+    coachHeading: "Safety-Bounded Athletic Consultation",
+    coachSubheading:
+      "Get personalized training guidance respecting your health declaration and readiness.",
+    coachSamplePrompt: "How should I train today if I feel slight fatigue?",
+    coachSampleReply:
+      "Based on your daily health check-in and readiness score (88%), workout intensity was adjusted with a 15% weight reduction to protect your muscles and ensure safe recovery.",
+
+    // Honest Quality Metrics Section
+    trustMetric1Title: "Deterministic Safety Rules Engine",
+    trustMetric1Desc: "Enforcing exercise substitutions and rest when pain is logged.",
+    trustMetric2Title: "Bilingual Arabic & English Support",
+    trustMetric2Desc: "Complete localized experience with native RTL/LTR layout.",
+    trustMetric3Title: "Owner-Scoped Encrypted Privacy",
+    trustMetric3Desc: "Strict authentication and zero data sharing across accounts.",
+    trustMetric4Title: "Verified Technical Foundation",
+    trustMetric4Desc: "Tested across 530+ backend pytest test cases & 130+ frontend tests.",
+
+    // Platform Scope Pillars
+    scopeEyebrow: "PLATFORM SCOPE",
+    scopeHeading: "Five Core Pillars for Your Athletic Lifestyle",
+    scopeSubheading: "Comprehensive coverage ensuring consistency and physical safety at every step.",
+    pillar1Title: "Intelligent Workouts",
+    pillar1Desc: "Deterministic workout plans tailored to your equipment and experience.",
+    pillar2Title: "Nutrition & Water",
+    pillar2Desc: "Daily macronutrient targets and hydration logging.",
+    pillar3Title: "Daily Readiness Check",
+    pillar3Desc: "Pre-workout readiness scoring measuring fatigue and soreness.",
+    pillar4Title: "Recovery & Sleep",
+    pillar4Desc: "Sleep quality indicators and rest day recommendations.",
+    pillar5Title: "Progress Tracking",
+    pillar5Desc: "Workout history, streak monitoring, and goal tracking.",
+
     // 4 Value Pillars Bottom
     valueItem1Title: "Secure & Trusted",
     valueItem1Desc: "Data encryption & privacy protection at every step",
@@ -52,35 +125,10 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
     valueItem4Title: "Continuous Support",
     valueItem4Desc: "Smart plan updates based on your daily performance",
 
-    // Product Areas (Core Features)
-    productAreasHeading: "Core Product Capabilities",
+    // Product Areas Legacy Fallbacks
+    productAreasHeading: "Everything You Need for Smarter, Safer Training",
     productAreasSubheading:
-      "Explore the genuinely built and active features powering your fitness progression.",
-
-    featureDashboardTitle: "Dashboard & Progress Overview",
-    featureDashboardDesc:
-      "Daily priority commands, streak monitoring, adherence indicators, and health readiness overview in one unified view.",
-    featureDashboardBadge: "Active & Usable",
-
-    featureWorkoutTitle: "Intelligent Workout Guidance",
-    featureWorkoutDesc:
-      "Custom workout program execution with set logging, exercise substitutions, rest timers, and active pain reporting.",
-    featureWorkoutBadge: "Active & Usable",
-
-    featureNutritionTitle: "Nutrition & Water Tracking",
-    featureNutritionDesc:
-      "Daily macronutrient target tracking, quick water logging, and dietary restriction management.",
-    featureNutritionBadge: "Active & Usable",
-
-    featureAiCoachTitle: "AI Coach & Safety Guidance",
-    featureAiCoachDesc:
-      "Safety-bounded guidance for fitness questions, workout recovery advice, and medical declaration checks.",
-    featureAiCoachBadge: "Read-only & Safe",
-
-    featureAssessmentTitle: "Smart Assessment & Health Declaration",
-    featureAssessmentDesc:
-      "Save & resume assessment flow capturing medical clearances, physical limitations, and fitness levels.",
-    featureAssessmentBadge: "Active & Usable",
+      "From personalized workouts to smart assessment and safe AI guidance, Rahafit unifies essential tools in one seamless experience.",
 
     // Safety & Personalization
     safetyHeading: "Safety & Intelligent Personalization",
@@ -102,11 +150,11 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
     pricingFreeDesc: "Full access to smart assessment, workout tracking, and daily readiness check-in.",
 
     // Final CTA
-    finalCtaHeading: "Ready to take your first step?",
+    finalCtaHeading: "Ready to Start Your Journey?",
     finalCtaSubheading:
-      "Join Rahafit today and experience intelligent, safe, and personalized coaching.",
-    finalCtaPrimary: "Get started now",
-    finalCtaSecondary: "I already have an account",
+      "Create your account today and experience intelligent, safe, and personalized coaching.",
+    finalCtaPrimary: "Create your account",
+    finalCtaSecondary: "Sign in",
 
     // Floating Cards Copy
     heroCardStreak: "12 day streak",
@@ -175,6 +223,79 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
     howItWorksPrimaryCta: "ابدأ رحلتك",
     howItWorksSecondaryCta: "اكتشف المميزات",
 
+    // Core Areas & Features Section
+    featuresEyebrow: "المميزات الأساسية",
+    featuresHeading: "كل ما تحتاجه لتدريب أذكى وأكثر أمانًا",
+    featuresSubheading:
+      "من التمرين المخصص إلى التقييم الذكي والتوجيه الآمن، تجمع Rahafit أهم الأدوات في تجربة واحدة.",
+    featureWorkoutBadge: "ميزة أساسية",
+    featureWorkoutTitle: "التمرين الذكي والتوجيه التدريبي",
+    featureWorkoutDesc:
+      "خطط تدريب حتمية متكيفة مع مستوى لياقتك وأدواتك المتاحة، مع إمكانية استبدال التمارين وتنبيهات الأمان المباشرة.",
+    featureWorkoutPoint1: "خطة تدريب قابلة للتخصيص",
+    featureWorkoutPoint2: "متابعة الألم والراحة",
+    featureWorkoutPoint3: "بدائل آمنة للتمارين",
+    featureWorkoutCta: "استكشف التمرين",
+
+    featureAssessmentBadge: "تقييم آمن",
+    featureAssessmentTitle: "التقييم الذكي والإقرار الصحي",
+    featureAssessmentDesc:
+      "حصر القيود الصحية ومستوى الرياضة لبناء ملف صحي متكامل يراعي سلامتك.",
+
+    featureAiCoachBadge: "توجيه ذكي وآمن",
+    featureAiCoachTitle: "المدرب الذكي والتوجيه الآمن",
+    featureAiCoachDesc:
+      "استفسارات فورية محكومة بقواعد الأمان. الإرشادات رياضية وليست تشخيصاً طبياً.",
+    featureAiChip1: "تمارين",
+    featureAiChip2: "تغذية",
+    featureAiChip3: "تعافٍ",
+    featureAiChip4: "تقدم",
+    featureAiDisclaimer: "توجيهات نموذج الذكاء الاصطناعي هي إرشادات لأسلوب الحياة ولا بديل عن الاستشارة الطبية.",
+
+    // Dashboard Preview Section
+    previewEyebrow: "معاينة الواجهة",
+    previewHeading: "لوحة تحكم ذكية تضع أهم بياناتك بين يديك",
+    previewSubheading:
+      "متابعة حية للجاهزية، التمرين، التغذية، وتوصيات المدرب الذكي في مكان واحد.",
+    previewBadgeReadiness: "الجاهزية 88%",
+    previewBadgeWorkout: "التمرين جاهز",
+    previewBadgeNutrition: "أهداف الماكروز",
+    previewInsightText: "مؤشرات التعافي ممتازة اليوم — يمكنك تنفيذ تمرين الجزء العلوي المخطط بثقة.",
+
+    // AI Coach Showcase Section
+    coachEyebrow: "المدرب الذكي",
+    coachHeading: "استشارات رياضية آمنة محكومة بقواعد السلامة",
+    coachSubheading:
+      "احصل على توجيهات رياضية مخصصة تراعي إقرارك الصحي وحالتك البدنية.",
+    coachSamplePrompt: "كيف أتمرن اليوم إذا كنت أشعر بإجهاد بسيط؟",
+    coachSampleReply:
+      "بناءً على إقرارك الصحي اليومي وجاهزيتك (88%)، تم تعديل كثافة التمرين وتقليل الأوزان 15% لحماية عضلاتك وضمان التعافي الآمن.",
+
+    // Honest Quality Metrics Section
+    trustMetric1Title: "نظام حتمي خاضع لقواعد الأمان",
+    trustMetric1Desc: "فرض استبدال التمارين والراحة عند الإبلاغ عن ألم.",
+    trustMetric2Title: "دعم كامل للعربية والإنجليزية",
+    trustMetric2Desc: "تجربة عربية كاملة مع دعم اتجاه RTL و LTR.",
+    trustMetric3Title: "خصوصية بيانات مشفرة لكل مستخدم",
+    trustMetric3Desc: "مصادقة صارمة وعدم مشاركة البيانات بين الحسابات.",
+    trustMetric4Title: "مفحوص ومثبت عبر 530+ اختبار",
+    trustMetric4Desc: "محرك مثبت عبر اختبارات الوحدة والتكامل.",
+
+    // Platform Scope Pillars
+    scopeEyebrow: "نطاق المنصة",
+    scopeHeading: "خمس ركائز أساسية لبناء لياقتك وأسلوب حياتك",
+    scopeSubheading: "تغطية شاملة تضمن استمراريتك وسلامتك البدنية في كل خطوة.",
+    pillar1Title: "التمرين الذكي",
+    pillar1Desc: "خطط تدريب حتمية متكيفة مع معداتك ومستواك البدني.",
+    pillar2Title: "التغذية والماء",
+    pillar2Desc: "متابعة السعرات والماكروز واستهلاك الماء اليومي.",
+    pillar3Title: "الفحص والجاهزية",
+    pillar3Desc: "فحص الاستعداد البدني قبل بدء التمرين.",
+    pillar4Title: "الاستشفاء والراحة",
+    pillar4Desc: "مؤشرات جودة النوم وساعات التعافي.",
+    pillar5Title: "متابعة التقدم",
+    pillar5Desc: "سجل الجلسات، الأهداف، والاستمرارية.",
+
     // 4 Value Pillars Bottom
     valueItem1Title: "أمان وخصوصية",
     valueItem1Desc: "تشفير البيانات وحماية خصوصيتك في كل خطوة",
@@ -185,34 +306,10 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
     valueItem4Title: "دعم مستمر",
     valueItem4Desc: "تحديثات ذكية لخطتك بناءً على أدائك اليومي",
 
-    // Product Areas (Core Features)
-    productAreasHeading: "المناطق والخصائص الأساسية",
-    productAreasSubheading: "استكشف المميزات الحقيقية والمتاحة فعلياً التي تدعم تقدمك الرياضي.",
-
-    featureDashboardTitle: "لوحة التحكم ومتابعة التقدم",
-    featureDashboardDesc:
-      "نظرة شاملة على أولويات اليوم، الاستمرارية، مؤشرات الأداء، واستعداد الجسم في واجهة واحدة.",
-    featureDashboardBadge: "متاح ومكتمل",
-
-    featureWorkoutTitle: "التمرين الذكي والتوجيه التدريبي",
-    featureWorkoutDesc:
-      "تنفيذ الخطة التدريبية، تسجيل المجموعات، استبدال التمارين، مؤقت الراحة، والإبلاغ المباشر عن الألم.",
-    featureWorkoutBadge: "متاح ومكتمل",
-
-    featureNutritionTitle: "التغذية وسجل الوجبات والماء",
-    featureNutritionDesc:
-      "متابعة السعرات والماكروز اليومية، تسجيل استهلاك الماء، وإدارة التفضيلات الغذائية.",
-    featureNutritionBadge: "متاح ومكتمل",
-
-    featureAiCoachTitle: "المدرب الذكي والتوجيه الآمن",
-    featureAiCoachDesc:
-      "توجيه ذكي خاضع لقواعد الأمان للإجابة عن أسئلة التدريب، نصائح الاستشفاء، والإقرار الصحي.",
-    featureAiCoachBadge: "قراءة ومراجعة آمنة",
-
-    featureAssessmentTitle: "التقييم الذكي والإقرار الصحي",
-    featureAssessmentDesc:
-      "نظام تقييم حتمي قابل للحفظ والاستئناف لحصر القيود الصحية وتحديد مستوى اللياقة.",
-    featureAssessmentBadge: "متاح ومكتمل",
+    // Product Areas Legacy Fallbacks
+    productAreasHeading: "كل ما تحتاجه لتدريب أذكى وأكثر أمانًا",
+    productAreasSubheading:
+      "من التمرين المخصص إلى التقييم الذكي والتوجيه الآمن، تجمع Rahafit أهم الأدوات في تجربة واحدة.",
 
     // Safety & Personalization
     safetyHeading: "الأمان والتخصيص الذكي",
@@ -234,10 +331,10 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
     pricingFreeDesc: "وصول كامل للتقييم الذكي، متابعة التمارين، وفحص الجاهزية اليومية.",
 
     // Final CTA
-    finalCtaHeading: "جاهز تبدأ خطوتك الأولى؟",
-    finalCtaSubheading: "انضم إلى Rahafit اليوم واستمتع بتدريب ذكي، آمن، ومخصص لك.",
-    finalCtaPrimary: "ابدأ الآن",
-    finalCtaSecondary: "لدي حساب بالفعل",
+    finalCtaHeading: "جاهز تبدأ رحلتك؟",
+    finalCtaSubheading: "أنشئ حسابك وابدأ تجربة Rahafit المخصصة اليوم.",
+    finalCtaPrimary: "أنشئ حسابك",
+    finalCtaSecondary: "تسجيل الدخول",
 
     // Floating Cards Copy
     heroCardStreak: "12 يوم متتالي",

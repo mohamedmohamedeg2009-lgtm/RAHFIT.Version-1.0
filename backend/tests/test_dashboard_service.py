@@ -285,6 +285,7 @@ def test_dashboard_route_returns_stable_owner_scoped_schema() -> None:
         "assessment",
         "workout",
         "nutrition",
+        "daily_check_in",
         "daily_priority",
         "features",
         "safety_notice",

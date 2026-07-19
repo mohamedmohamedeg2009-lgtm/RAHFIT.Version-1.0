@@ -4,6 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from app.database.mongodb import DatabaseConnectionError
+
 from app.config import Settings, get_settings
 from app.models.user import User
 from app.repositories.users import UserRepository
@@ -32,8 +34,17 @@ _bearer_scheme = HTTPBearer(auto_error=False)
 def get_auth_service(
     request: Request, settings: Annotated[Settings, Depends(get_settings)]
 ) -> AuthService:
-    database = cast(AsyncIOMotorDatabase[dict[str, Any]], request.app.state.database.database)
-    return AuthService(UserRepository(database["users"]), settings)
+    database = getattr(request.app.state, "database", None)
+    if database is None or not getattr(database, "client", None):
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "code": "database_unavailable",
+                "message": "Database is unavailable. Please try again shortly.",
+            },
+        )
+    mongo_database = cast(AsyncIOMotorDatabase[dict[str, Any]], database.database)
+    return AuthService(UserRepository(mongo_database["users"]), settings)
 
 
 def _authentication_exception() -> HTTPException:
@@ -92,6 +103,11 @@ async def register(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="An account already exists for this email."
         ) from exc
+    except DatabaseConnectionError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"code": "database_unavailable", "message": str(exc)},
+        ) from exc
     return _token_response(result, settings)
 
 
@@ -113,6 +129,11 @@ async def login(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="The sign-in details are not valid.",
             headers={"WWW-Authenticate": "Bearer"},
+        ) from exc
+    except DatabaseConnectionError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"code": "database_unavailable", "message": str(exc)},
         ) from exc
     return _token_response(result, settings)
 
