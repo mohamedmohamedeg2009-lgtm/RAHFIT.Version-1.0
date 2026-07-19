@@ -26,3 +26,4 @@ export { LinearProgress, StepProgress } from "./Progress";
 export { CircularProgress } from "./CircularProgress";
 export { TrendIndicator } from "./TrendIndicator";
 export { FullPageLoader, Skeleton, Spinner } from "./Loading";
+export { FormErrorSummary } from "./FormErrorSummary";

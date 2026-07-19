@@ -29,6 +29,7 @@ import type {
 } from "../../types/intelligentWorkout";
 import { useLocale } from "../../contexts/LocaleContext";
 import { workoutEnumLabel, workoutText } from "../../i18n/intelligentWorkout";
+import { validateNumber } from "../../utils/formValidation";
 
 export default function IntelligentWorkoutSessionPage() {
   const { locale } = useLocale();
@@ -44,6 +45,7 @@ export default function IntelligentWorkoutSessionPage() {
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [draftVersion, setDraftVersion] = useState(0);
+  const [formError, setFormError] = useState<string | null>(null);
   const draftVersionRef = useRef(0);
   const [error, setError] = useState<WorkoutClientError | null>(null);
   const [adaptation, setAdaptation] = useState<WorkoutAdaptationResponse | null>(null);
@@ -124,9 +126,19 @@ export default function IntelligentWorkoutSessionPage() {
 
   const save = async (status: SessionStatus = "in_progress") => {
     if (!session) return;
+    const durationError = duration ? validateNumber(duration, t("actualDuration"), 1, 300) : undefined;
+    if (durationError) {
+      setFormError(durationError);
+      return;
+    }
+    if (notes.trim().length > 1000) {
+      setFormError("Session notes must be 1,000 characters or fewer.");
+      return;
+    }
     const savedDraftVersion = draftVersion;
     setSaving(true);
     setError(null);
+    setFormError(null);
     try {
       const updated = await intelligentWorkoutService.updateSession(session.session_id, {
         status,
@@ -418,6 +430,7 @@ export default function IntelligentWorkoutSessionPage() {
             })}
           </div>
           <Card className="iw-session-notes">
+            {formError ? <Alert variant="danger" title={t("sessionNotes")}><p>{formError}</p></Alert> : null}
             <Input
               label={t("actualDuration")}
               type="number"
@@ -426,6 +439,7 @@ export default function IntelligentWorkoutSessionPage() {
               disabled={session.status !== "in_progress"}
               value={duration}
               onChange={(event) => {
+                setFormError(null);
                 setDirty(true);
                 draftVersionRef.current += 1;
                 setDraftVersion(draftVersionRef.current);
@@ -438,6 +452,7 @@ export default function IntelligentWorkoutSessionPage() {
               disabled={session.status !== "in_progress"}
               value={notes}
               onChange={(event) => {
+                setFormError(null);
                 setDirty(true);
                 draftVersionRef.current += 1;
                 setDraftVersion(draftVersionRef.current);

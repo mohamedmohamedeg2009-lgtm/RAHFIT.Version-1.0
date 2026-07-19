@@ -33,6 +33,7 @@ export default function AICoachPage() {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [composerError, setComposerError] = useState<string | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -137,9 +138,17 @@ export default function AICoachPage() {
   // 7. Send user message
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || input).trim();
-    if (!text || !selectedId || submitting) return;
+    if (!text || !selectedId || submitting) {
+      if (!text) setComposerError(locale === "ar" ? "اكتب رسالة قبل الإرسال." : "Write a message before sending.");
+      return;
+    }
+    if (text.length > 2000) {
+      setComposerError(locale === "ar" ? "يجب ألا تتجاوز الرسالة 2000 حرف." : "Messages must be 2,000 characters or fewer.");
+      return;
+    }
 
     setError(null);
+    setComposerError(null);
     setSubmitting(true);
     if (!textToSend) setInput("");
 
@@ -427,21 +436,28 @@ export default function AICoachPage() {
                   }}
                 >
                   <div className="coach-input-wrapper">
+                    <label className="sr-only" htmlFor="coach-message">
+                      {copy.inputPlaceholder}
+                    </label>
                     <input
+                      id="coach-message"
                       type="text"
                       className="coach-input"
                       placeholder={copy.inputPlaceholder}
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
+                      maxLength={2000}
                       disabled={submitting || !messageSendingEnabled}
-                      required
+                      aria-invalid={Boolean(composerError)}
+                      aria-describedby={composerError ? "coach-message-error" : undefined}
                     />
+                    {composerError ? <p id="coach-message-error" className="field-error">{composerError}</p> : null}
                   </div>
                   <Button
                     type="submit"
                     className="ds-button ds-button-primary"
                     aria-label={copy.sendButton}
-                    disabled={submitting || !input.trim() || !messageSendingEnabled}
+                    disabled={submitting || !messageSendingEnabled}
                     style={{ height: "48px", width: "48px", borderRadius: "12px", padding: 0 }}
                   >
                     <Send

@@ -28,6 +28,7 @@ import { mapWorkoutError, type WorkoutClientError } from "../../services/workout
 import type { HealthProfileRequest, HealthSeverity } from "../../types/intelligentWorkout";
 import { useLocale } from "../../contexts/LocaleContext";
 import { workoutEnumLabel, workoutText } from "../../i18n/intelligentWorkout";
+import { isValidPastOrTodayDate, validateNumber, validateRequiredText } from "../../utils/formValidation";
 
 const empty: HealthProfileRequest = {
   injuries: [],
@@ -53,6 +54,7 @@ export default function WorkoutHealthSetupPage() {
   const [confirmed, setConfirmed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<WorkoutClientError | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const setData: Dispatch<SetStateAction<HealthProfileRequest>> = (action) => {
     dirty.current = true;
     setDataState(action);
@@ -80,9 +82,14 @@ export default function WorkoutHealthSetupPage() {
   }, [locale]);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!confirmed) return;
+    const validationMessage = validateHealth(data, confirmed);
+    if (validationMessage) {
+      setValidationError(validationMessage);
+      return;
+    }
     setSaving(true);
     setError(null);
+    setValidationError(null);
     try {
       await intelligentWorkoutService.updateHealthProfile(data);
       await intelligentWorkoutService.getHealthProfile();
@@ -104,6 +111,7 @@ export default function WorkoutHealthSetupPage() {
         <p>{t("healthPrivacyDescription")}</p>
       </Alert>
       {error ? <WorkoutErrorAlert error={error} /> : null}
+      {validationError ? <Alert variant="danger" title={t("healthTitle")}><p>{validationError}</p></Alert> : null}
       {loading ? (
         <Card aria-live="polite" aria-busy="true">
           <span className="sr-only">{t("loadingSavedHealth")}</span>
@@ -441,7 +449,7 @@ export default function WorkoutHealthSetupPage() {
               />
             </Card>
             <div className="iw-form-footer">
-              <Button size="lg" type="submit" disabled={!confirmed} loading={saving}>
+              <Button size="lg" type="submit" loading={saving}>
                 {t("saveHealth")}
               </Button>
             </div>
@@ -461,6 +469,32 @@ export default function WorkoutHealthSetupPage() {
       [key]: current[key].map((item, itemIndex) => (itemIndex === index ? value : item)),
     }));
   }
+}
+
+function validateHealth(data: HealthProfileRequest, confirmed: boolean): string | undefined {
+  if (!confirmed) return "Confirm that the health information is accurate before continuing.";
+  for (const item of data.injuries) {
+    const error = validateRequiredText(item.area, "Injury area", { max: 80 }) ?? validateRequiredText(item.description, "Injury description", { max: 300 });
+    if (error) return error;
+  }
+  for (const item of data.chronic_conditions) {
+    const error = validateRequiredText(item.name, "Condition name", { max: 120 });
+    if (error) return error;
+  }
+  for (const item of data.pain_areas) {
+    const error = validateRequiredText(item.area, "Pain area", { max: 80 }) ?? validateNumber(item.intensity, "Pain intensity", 0, 10);
+    if (error) return error;
+  }
+  for (const item of data.mobility_limitations) {
+    const error = validateRequiredText(item.area, "Mobility area", { max: 80 }) ?? validateRequiredText(item.description, "Mobility description", { max: 300 });
+    if (error) return error;
+  }
+  for (const item of data.surgery_history) {
+    const error = validateRequiredText(item.procedure, "Surgery procedure", { max: 120 });
+    if (error) return error;
+    if (!isValidPastOrTodayDate(item.surgery_date)) return "Enter a valid surgery date that is not in the future.";
+  }
+  return undefined;
 }
 
 function HealthGroup({

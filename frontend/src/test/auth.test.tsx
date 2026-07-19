@@ -89,8 +89,39 @@ describe("authentication pages", () => {
     );
 
     await userActions.click(screen.getByRole("button", { name: "Sign in" }));
-    expect(screen.getByRole("alert")).toHaveTextContent("valid email address");
+    expect(screen.getByRole("alert")).toHaveTextContent("Enter your email address");
     expect(login).not.toHaveBeenCalled();
+  });
+
+  it("rejects malformed email and an empty password before login", async () => {
+    const login = vi.fn();
+    const userActions = userEvent.setup();
+    render(
+      <AuthContext.Provider value={context({ login })}>
+        <MemoryRouter><LoginPage /></MemoryRouter>
+      </AuthContext.Provider>,
+    );
+
+    await userActions.type(screen.getByLabelText("Email address"), "not-an-email");
+    await userActions.click(screen.getByRole("button", { name: "Sign in" }));
+
+    expect(screen.getAllByText("Enter a valid email address.")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("Enter your password.")[0]).toBeInTheDocument();
+    expect(login).not.toHaveBeenCalled();
+  });
+
+  it("keeps the password visibility control accessible", async () => {
+    const userActions = userEvent.setup();
+    render(
+      <AuthContext.Provider value={context()}>
+        <MemoryRouter><LoginPage /></MemoryRouter>
+      </AuthContext.Provider>,
+    );
+
+    const password = screen.getByLabelText("Password");
+    expect(password).toHaveAttribute("type", "password");
+    await userActions.click(screen.getByRole("button", { name: "Show password" }));
+    expect(password).toHaveAttribute("type", "text");
   });
 
   it("prevents duplicate login submissions while a request is pending", async () => {
@@ -138,6 +169,25 @@ describe("authentication pages", () => {
     await userActions.type(screen.getByLabelText("Confirm password"), "different-password");
     await userActions.click(screen.getByRole("button", { name: "Create account" }));
     expect(screen.getByRole("alert")).toHaveTextContent("Passwords do not match");
+    expect(register).not.toHaveBeenCalled();
+  });
+
+  it("rejects malformed registration fields without making a request", async () => {
+    const register = vi.fn();
+    const userActions = userEvent.setup();
+    render(
+      <AuthContext.Provider value={context({ register })}>
+        <MemoryRouter><RegisterPage /></MemoryRouter>
+      </AuthContext.Provider>,
+    );
+
+    await userActions.type(screen.getByLabelText("Email address"), "wrong");
+    await userActions.type(screen.getByLabelText("Password"), "short");
+    await userActions.click(screen.getByRole("button", { name: "Create account" }));
+
+    expect(screen.getAllByText("Enter a valid email address.")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("Use 12 to 128 characters.")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("Confirm your password.")[0]).toBeInTheDocument();
     expect(register).not.toHaveBeenCalled();
   });
 });

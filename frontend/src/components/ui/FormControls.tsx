@@ -16,7 +16,7 @@ type InputProps = FieldProps & InputHTMLAttributes<HTMLInputElement>;
 
 function FieldMessage({ id, hint, error }: Pick<FieldProps, "id" | "hint" | "error">) {
   return error ? (
-    <p className="ds-field-error" id={`${id}-error`} role="alert">
+    <p className="ds-field-error" id={`${id}-error`}>
       {error}
     </p>
   ) : hint ? (
@@ -84,6 +84,7 @@ export function PasswordInput(props: Omit<InputProps, "type">) {
         className="ds-password-toggle"
         onClick={() => setVisible((current) => !current)}
         aria-pressed={visible}
+        aria-label={visible ? "Hide password" : "Show password"}
       >
         {visible ? "Hide" : "Show"}
       </button>
@@ -141,14 +142,17 @@ export function Checkbox({
   error,
   ...props
 }: ChoiceProps & Omit<InputHTMLAttributes<HTMLInputElement>, "type">) {
+  const generatedId = useId();
+  const id = props.id ?? generatedId;
+  const errorId = `${id}-error`;
   return (
-    <label className="ds-choice">
-      <input type="checkbox" {...props} />
+    <label className="ds-choice" htmlFor={id}>
+      <input id={id} type="checkbox" aria-invalid={Boolean(error)} aria-describedby={error ? errorId : undefined} {...props} />
       <span>
         <strong>{label}</strong>
         {description ? <small>{description}</small> : null}
       </span>
-      {error ? <em role="alert">{error}</em> : null}
+      {error ? <em id={errorId}>{error}</em> : null}
     </label>
   );
 }
@@ -158,14 +162,17 @@ export function Radio({
   error,
   ...props
 }: ChoiceProps & Omit<InputHTMLAttributes<HTMLInputElement>, "type">) {
+  const generatedId = useId();
+  const id = props.id ?? generatedId;
+  const errorId = `${id}-error`;
   return (
-    <label className="ds-choice">
-      <input type="radio" {...props} />
+    <label className="ds-choice" htmlFor={id}>
+      <input id={id} type="radio" aria-invalid={Boolean(error)} aria-describedby={error ? errorId : undefined} {...props} />
       <span>
         <strong>{label}</strong>
         {description ? <small>{description}</small> : null}
       </span>
-      {error ? <em role="alert">{error}</em> : null}
+      {error ? <em id={errorId}>{error}</em> : null}
     </label>
   );
 }

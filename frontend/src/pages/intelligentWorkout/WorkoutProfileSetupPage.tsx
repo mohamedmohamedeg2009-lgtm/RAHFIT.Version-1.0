@@ -12,6 +12,7 @@ import { mapWorkoutError, type WorkoutClientError } from "../../services/workout
 import type { Equipment, TrainingGoal, UserProfileRequest } from "../../types/intelligentWorkout";
 import { useLocale } from "../../contexts/LocaleContext";
 import { workoutEnumLabel, workoutText } from "../../i18n/intelligentWorkout";
+import { isAllowedValue, validateNumber, validateRequiredText } from "../../utils/formValidation";
 
 const goals: TrainingGoal[] = [
   "fat_loss",
@@ -83,6 +84,7 @@ export default function WorkoutProfileSetupPage() {
   const [hasExisting, setHasExisting] = useState<boolean | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<WorkoutClientError | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const [form, setForm] = useState<ProfileForm>(defaultForm);
   useEffect(() => {
     let active = true;
@@ -114,8 +116,14 @@ export default function WorkoutProfileSetupPage() {
     items.includes(item) ? items.filter((value) => value !== item) : [...items, item];
   const submit = async (event: FormEvent) => {
     event.preventDefault();
+    const validationMessage = validateProfile(form);
+    if (validationMessage) {
+      setValidationError(validationMessage);
+      return;
+    }
     setSaving(true);
     setError(null);
+    setValidationError(null);
     const payload: UserProfileRequest = {
       identity: {
         full_name: form.fullName.trim(),
@@ -169,6 +177,7 @@ export default function WorkoutProfileSetupPage() {
   return (
     <IntelligentWorkoutShell title={t("profileTitle")} description={t("profileDescription")}>
       {error ? <WorkoutErrorAlert error={error} /> : null}
+      {validationError ? <Alert variant="danger" title={t("profileTitle")}><p>{validationError}</p></Alert> : null}
       {loading ? (
         <Card aria-live="polite" aria-busy="true">
           <span className="sr-only">{t("loadingSavedProfile")}</span>
@@ -430,6 +439,30 @@ export default function WorkoutProfileSetupPage() {
       )}
     </IntelligentWorkoutShell>
   );
+}
+
+function validateProfile(form: ProfileForm): string | undefined {
+  const requiredText = [
+    validateRequiredText(form.fullName, "Full name", { min: 2, max: 120 }),
+    validateRequiredText(form.country, "Country code", { min: 2, max: 2 }),
+  ].find(Boolean);
+  if (requiredText) return requiredText;
+  const numberErrors = [
+    validateNumber(form.age, "Age", 13, 100),
+    validateNumber(form.height, "Height", 100, 250),
+    validateNumber(form.weight, "Weight", 30, 350),
+    validateNumber(form.availableDays, "Available days", 1, 7),
+    validateNumber(form.sessionDuration, "Session duration", 15, 180),
+    validateNumber(form.sleep, "Sleep", 0, 24),
+    validateNumber(form.stress, "Stress", 1, 10),
+    validateNumber(form.water, "Daily water", 0, 10000),
+  ].find(Boolean);
+  if (numberErrors) return numberErrors;
+  if (form.bodyFat && validateNumber(form.bodyFat, "Body fat", 2, 70)) return validateNumber(form.bodyFat, "Body fat", 2, 70);
+  if (form.targetWeight && validateNumber(form.targetWeight, "Target weight", 30, 350)) return validateNumber(form.targetWeight, "Target weight", 30, 350);
+  if (!isAllowedValue(form.primaryGoal, goals) || !isAllowedValue(form.experience, ["beginner", "intermediate", "advanced"] as const)) return "Choose a valid training preference.";
+  if (!form.equipment.length || form.equipment.some((item) => !isAllowedValue(item, equipment))) return "Select at least one available equipment option.";
+  return undefined;
 }
 
 function profileToForm(profile: UserProfileRequest): ProfileForm {

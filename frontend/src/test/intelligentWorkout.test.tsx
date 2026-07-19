@@ -459,13 +459,19 @@ describe("intelligent workout screens", () => {
       .spyOn(intelligentWorkoutService, "updateHealthProfile")
       .mockResolvedValue(undefined);
     renderRoute(<WorkoutHealthSetupPage />, "/intelligent-workouts/setup/health");
-    expect(await screen.findByRole("button", { name: "Save health declaration" })).toBeDisabled();
+    const submit = await screen.findByRole("button", { name: "Save health declaration" });
+    expect(submit).toBeEnabled();
+    await userEvent.click(submit);
+    expect(
+      await screen.findByText("Confirm that the health information is accurate before continuing."),
+    ).toBeInTheDocument();
+    expect(update).not.toHaveBeenCalled();
     await userEvent.click(
       screen.getByRole("checkbox", {
         name: /I confirm this declaration is accurate and complete/,
       }),
     );
-    await userEvent.click(screen.getByRole("button", { name: "Save health declaration" }));
+    await userEvent.click(submit);
     await waitFor(() =>
       expect(update).toHaveBeenCalledWith({
         injuries: [],

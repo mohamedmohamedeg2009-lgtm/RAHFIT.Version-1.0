@@ -1,6 +1,7 @@
 import { useId, useState } from "react";
 
 interface PasswordFieldProps {
+  id?: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
@@ -8,9 +9,10 @@ interface PasswordFieldProps {
   error?: string;
 }
 
-export function PasswordField({ label, value, onChange, autoComplete, error }: PasswordFieldProps) {
+export function PasswordField({ id: providedId, label, value, onChange, autoComplete, error }: PasswordFieldProps) {
   const [visible, setVisible] = useState(false);
-  const id = useId();
+  const generatedId = useId();
+  const id = providedId ?? generatedId;
   const errorId = `${id}-error`;
 
   return (

@@ -7,6 +7,12 @@ import { useAuth } from "../../hooks/useAuth";
 import { GoogleSignInButton } from "../../components/auth/GoogleSignInButton";
 import { useLocale } from "../../contexts/LocaleContext";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
+import { FormErrorSummary } from "../../components/ui";
+import {
+  normalizeEmail,
+  validateEmail,
+  validatePasswordForRegistration,
+} from "../../utils/formValidation";
 
 const passwordHint = "Use 12–128 characters. A longer, memorable phrase is best.";
 
@@ -18,29 +24,33 @@ export function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
-  const [fieldError, setFieldError] = useState<string | null>(null);
+  const [fieldError, setFieldError] = useState<{
+    email?: string;
+    password?: string;
+    confirmation?: string;
+  } | null>(null);
   const [pending, setPending] = useState(false);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     clearError();
-    const normalizedEmail = email.trim().toLowerCase();
-    if (!normalizedEmail || !normalizedEmail.includes("@")) {
-      setFieldError("Enter a valid email address.");
-      return;
-    }
-    if (password.length < 12) {
-      setFieldError("Your password must be at least 12 characters.");
-      return;
-    }
-    if (password !== confirmation) {
-      setFieldError("Passwords do not match.");
+    const nextErrors = {
+      email: validateEmail(email),
+      password: validatePasswordForRegistration(password),
+      confirmation: confirmation
+        ? password === confirmation
+          ? undefined
+          : "Passwords do not match."
+        : "Confirm your password.",
+    };
+    if (nextErrors.email || nextErrors.password || nextErrors.confirmation) {
+      setFieldError(nextErrors);
       return;
     }
     setFieldError(null);
     setPending(true);
     try {
-      await register({ email: normalizedEmail, password });
+      await register({ email: normalizeEmail(email), password });
       navigate("/app", { replace: true });
     } catch {
       // AuthContext provides a safe user-facing error without exposing server details.
@@ -63,8 +73,12 @@ export function RegisterPage() {
         </div>
       ) : null}
       <FormAlert message={error} />
-      {fieldError ? <FormAlert message={fieldError} /> : null}
       <form onSubmit={(event) => void submit(event)} noValidate>
+        <FormErrorSummary
+          errors={Object.entries(fieldError ?? {}).flatMap(([field, message]) =>
+            message ? [{ field: `register-${field === "confirmation" ? "confirmation" : field}`, message }] : [],
+          )}
+        />
         <div className="field-group">
           <label htmlFor="register-email">Email address</label>
           <input
@@ -72,23 +86,45 @@ export function RegisterPage() {
             type="email"
             value={email}
             autoComplete="email"
-            onChange={(event) => setEmail(event.target.value)}
-            aria-invalid={Boolean(fieldError && (!email || !email.includes("@")))}
+            onChange={(event) => {
+              setEmail(event.target.value);
+              setFieldError((current) => (current ? { ...current, email: undefined } : current));
+            }}
+            aria-invalid={Boolean(fieldError?.email)}
+            aria-describedby={fieldError?.email ? "register-email-error" : undefined}
           />
+          {fieldError?.email ? <p id="register-email-error" className="field-error">{fieldError.email}</p> : null}
         </div>
         <PasswordField
+          id="register-password"
           label="Password"
           value={password}
-          onChange={setPassword}
+          onChange={(value) => {
+            setPassword(value);
+            setFieldError((current) => ({
+              ...current,
+              password: undefined,
+              confirmation:
+                confirmation && value !== confirmation ? "Passwords do not match." : undefined,
+            }));
+          }}
           autoComplete="new-password"
           error={password ? undefined : undefined}
         />
         <p className="field-hint">{passwordHint}</p>
         <PasswordField
+          id="register-confirmation"
           label="Confirm password"
           value={confirmation}
-          onChange={setConfirmation}
+          onChange={(value) => {
+            setConfirmation(value);
+            setFieldError((current) => ({
+              ...current,
+              confirmation: value && value === password ? undefined : current?.confirmation,
+            }));
+          }}
           autoComplete="new-password"
+          error={fieldError?.confirmation}
         />
         <button
           className="button button-primary button-full"

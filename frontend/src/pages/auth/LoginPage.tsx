@@ -6,6 +6,8 @@ import { PasswordField } from "../../components/auth/PasswordField";
 import { useAuth } from "../../hooks/useAuth";
 import { GoogleSignInButton } from "../../components/auth/GoogleSignInButton";
 import { useLocale } from "../../contexts/LocaleContext";
+import { FormErrorSummary } from "../../components/ui";
+import { normalizeEmail, validateEmail, validatePasswordForLogin } from "../../utils/formValidation";
 
 export function LoginPage() {
   const { login, error, clearError, isLoading } = useAuth();
@@ -22,20 +24,19 @@ export function LoginPage() {
     event.preventDefault();
     if (pending || isLoading || submittingRef.current) return;
     clearError();
-    const normalizedEmail = email.trim().toLowerCase();
-    if (!normalizedEmail || !normalizedEmail.includes("@")) {
-      setFieldError({ email: "Enter a valid email address." });
-      return;
-    }
-    if (!password) {
-      setFieldError({ password: "Enter your password." });
+    const nextErrors = {
+      email: validateEmail(email),
+      password: validatePasswordForLogin(password),
+    };
+    if (nextErrors.email || nextErrors.password) {
+      setFieldError(nextErrors);
       return;
     }
     setFieldError(null);
     submittingRef.current = true;
     setPending(true);
     try {
-      await login({ email: normalizedEmail, password });
+      await login({ email: normalizeEmail(email), password });
       const destination =
         typeof location.state === "object" && location.state && "from" in location.state
           ? String(location.state.from)
@@ -63,8 +64,12 @@ export function LoginPage() {
         </div>
       ) : null}
       <FormAlert message={error} />
-      {fieldError ? <FormAlert message={fieldError.email ?? fieldError.password ?? null} /> : null}
       <form onSubmit={(event) => void submit(event)} noValidate>
+        <FormErrorSummary
+          errors={Object.entries(fieldError ?? {}).flatMap(([field, message]) =>
+            message ? [{ field: `login-${field}`, message }] : [],
+          )}
+        />
         <div className="field-group">
           <label htmlFor="login-email">Email address</label>
           <input
@@ -74,7 +79,7 @@ export function LoginPage() {
             autoComplete="email"
             onChange={(event) => {
               setEmail(event.target.value);
-              setFieldError((current) => (current?.email ? null : current));
+              setFieldError((current) => (current ? { ...current, email: undefined } : current));
             }}
             aria-invalid={Boolean(fieldError?.email)}
             aria-describedby={fieldError?.email ? "login-email-error" : undefined}
@@ -86,9 +91,13 @@ export function LoginPage() {
           ) : null}
         </div>
         <PasswordField
+          id="login-password"
           label="Password"
           value={password}
-          onChange={setPassword}
+          onChange={(value) => {
+            setPassword(value);
+            setFieldError((current) => (current ? { ...current, password: undefined } : current));
+          }}
           autoComplete="current-password"
           error={fieldError?.password}
         />
