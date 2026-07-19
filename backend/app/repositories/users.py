@@ -114,21 +114,6 @@ class UserRepository:
         )
         return result.modified_count == 1
 
-    async def update_password_and_revoke_tokens(self, user_id: str, password_hash: str) -> bool:
-        if not ObjectId.is_valid(user_id):
-            return False
-        result = await self.collection.update_one(
-            {"_id": ObjectId(user_id)},
-            {
-                "$set": {
-                    "password_hash": password_hash,
-                    "updated_at": datetime.now(UTC),
-                },
-                "$inc": {"token_version": 1},
-            },
-        )
-        return result.modified_count == 1
-
     async def set_role(self, user_id: str, role: str) -> User | None:
         if not ObjectId.is_valid(user_id):
             return None

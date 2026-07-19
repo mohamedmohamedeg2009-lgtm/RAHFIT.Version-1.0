@@ -144,21 +144,21 @@ def test_invalid_ai_feature_flag_is_rejected_clearly(monkeypatch: pytest.MonkeyP
         Settings(_env_file=None)
 
 
-def test_production_rejects_development_secrets_and_email_settings(
+def test_production_rejects_development_secrets(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     required_environment(monkeypatch)
     monkeypatch.setenv("APP_ENV", "production")
     monkeypatch.setenv("JWT_SECRET_KEY", "replace-with-a-long-random-secret-at-least-32-characters")
     monkeypatch.setenv("ALLOWED_ORIGINS", "https://app.example.com")
-    monkeypatch.setenv("EMAIL_PROVIDER", "smtp")
-    monkeypatch.setenv("PASSWORD_RESET_URL", "https://app.example.com/reset-password")
 
     with pytest.raises(ValidationError, match="JWT_SECRET_KEY"):
         Settings(_env_file=None)
 
 
-def test_production_requires_smtp_and_secure_reset_url(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_production_settings_load_without_email_configuration(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     required_environment(monkeypatch)
     monkeypatch.setenv("APP_ENV", "production")
     monkeypatch.setenv(
@@ -166,8 +166,9 @@ def test_production_requires_smtp_and_secure_reset_url(monkeypatch: pytest.Monke
     )
     monkeypatch.setenv("ALLOWED_ORIGINS", "https://app.example.com")
 
-    with pytest.raises(ValidationError, match="EMAIL_PROVIDER"):
-        Settings(_env_file=None)
+    settings = Settings(_env_file=None)
+
+    assert settings.app_env == "production"
 
 
 @pytest.mark.asyncio

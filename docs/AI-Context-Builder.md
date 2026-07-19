@@ -45,7 +45,7 @@ The builder does not query MongoDB directly and does not recalculate any safety,
 
 ## Forbidden data
 
-Serialized context excludes password hashes, passwords, email addresses, access and refresh tokens, reset or verification tokens, provider/API credentials, authorization headers, audit data, complete database documents, MongoDB metadata, generation keys, assessment/session/plan IDs when not required, hidden instructions, prompts, provider requests/responses, deleted data, administrator metadata, and unsupported medical inferences.
+Serialized context excludes password hashes, passwords, email addresses, access and refresh tokens, verification tokens, provider/API credentials, authorization headers, audit data, complete database documents, MongoDB metadata, generation keys, assessment/session/plan IDs when not required, hidden instructions, prompts, provider requests/responses, deleted data, administrator metadata, and unsupported medical inferences.
 
 The internal owner reference is included solely to preserve the trusted build identity. Request models forbid extra fields and never accept an owner ID, arbitrary field list, raw source query, override data, or system instruction.
 

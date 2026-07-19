@@ -156,8 +156,6 @@ def test_fake_provider_cannot_be_selected_from_production_configuration() -> Non
             app_env="production",
             jwt_secret_key="prod-test-secret-A7!x9#q2$Lm4%Rv6^Tw8&Yz0*Bc3+De5=Fg7_Hj9-Kn1",
             allowed_origins=["https://app.example.com"],
-            EMAIL_PROVIDER="smtp",
-            PASSWORD_RESET_URL="https://app.example.com/reset-password",
             AI_FEATURE_ENABLED=True,
             AI_PROVIDER="fake",
             AI_API_KEY="not-used",

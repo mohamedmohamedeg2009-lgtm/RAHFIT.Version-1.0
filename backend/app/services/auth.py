@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Protocol
 
 from app.config import Settings
 from app.models.user import User
@@ -33,8 +33,6 @@ class UserStore(Protocol):
     async def create_google_user(
         self, email: str, display_name: str | None, provider_subject: str
     ) -> User: ...
-
-    async def update_password_and_revoke_tokens(self, user_id: str, password_hash: str) -> bool: ...
 
     async def increment_token_version(self, user_id: str, expected_version: int) -> User | None: ...
 
@@ -116,55 +114,6 @@ class AuthService:
         except UserAlreadyExistsError as exc:
             raise AuthenticationError("A user with this email already exists.") from exc
         return self._issue_tokens(user)
-
-    async def forgot_password(self, email: str, resets_repo: Any, email_service: Any) -> None:
-        user = await self.users.find_by_email(email)
-        if not user or not user.is_active:
-            # Silently return to prevent user enumeration
-            return
-
-        import hashlib
-        import secrets
-        from datetime import UTC, datetime, timedelta
-
-        # Cryptographically secure random token
-        token = secrets.token_urlsafe(32)
-        token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
-
-        ttl = self.settings.password_reset_token_ttl_minutes
-        expires_at = datetime.now(UTC) + timedelta(minutes=ttl)
-
-        # Invalidate old and save new token
-        await resets_repo.create_token(user.id, token_hash, expires_at)
-
-        # Send email
-        await email_service.send_password_reset_email(user.email, token)
-
-    async def reset_password(self, token: str, new_password: str, resets_repo: Any) -> None:
-        if len(new_password) < 12:
-            raise AuthenticationError("Password must be at least 12 characters.")
-
-        import hashlib
-
-        token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
-
-        # Find active token
-        token_doc = await resets_repo.find_active_token_hash(token_hash)
-        if not token_doc:
-            raise AuthenticationError("Invalid or expired password reset token.")
-
-        # Atomic consume
-        success = await resets_repo.mark_token_used(token_hash)
-        if not success:
-            raise AuthenticationError("Invalid or expired password reset token.")
-
-        user_id = token_doc["user_id"]
-        # Update user password and revoke current active sessions
-        updated = await self.users.update_password_and_revoke_tokens(
-            user_id, hash_password(new_password)
-        )
-        if not updated:
-            raise AuthenticationError("Failed to update user password.")
 
     async def _validated_user(self, payload: TokenPayload) -> User:
         user = await self.users.find_by_id(payload.subject)

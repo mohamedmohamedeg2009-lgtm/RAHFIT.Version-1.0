@@ -52,23 +52,6 @@ class Settings(BaseSettings):
     rate_limit_requests: int = Field(default=100, gt=0)
     rate_limit_window_seconds: int = Field(default=60, gt=0)
     google_client_id: str | None = Field(default=None, validation_alias="GOOGLE_CLIENT_ID")
-    email_provider: Literal["development", "smtp"] = Field(
-        default="development", validation_alias="EMAIL_PROVIDER"
-    )
-    smtp_host: str = Field(default="localhost", validation_alias="SMTP_HOST")
-    smtp_port: int = Field(default=587, validation_alias="SMTP_PORT")
-    smtp_username: str | None = Field(default=None, validation_alias="SMTP_USERNAME")
-    smtp_password: SecretStr | None = Field(default=None, validation_alias="SMTP_PASSWORD")
-    smtp_from_email: str = Field(default="noreply@rafhit.ai", validation_alias="SMTP_FROM_EMAIL")
-    smtp_from_name: str = Field(default="RAHFIT AI", validation_alias="SMTP_FROM_NAME")
-    smtp_use_tls: bool = Field(default=True, validation_alias="SMTP_USE_TLS")
-    password_reset_url: str = Field(
-        default="http://localhost:5173/reset-password", validation_alias="PASSWORD_RESET_URL"
-    )
-    password_reset_token_ttl_minutes: int = Field(
-        default=15, validation_alias="PASSWORD_RESET_TOKEN_TTL_MINUTES"
-    )
-
     ai_feature_enabled: bool = Field(default=False, validation_alias="AI_FEATURE_ENABLED")
     ai_provider: str = Field(default="gemini", validation_alias="AI_PROVIDER")
     gemini_api_key: SecretStr | None = Field(default=None, validation_alias="GEMINI_API_KEY")
@@ -107,15 +90,6 @@ class Settings(BaseSettings):
             for origin in self.allowed_origins
         ):
             raise ValueError("ALLOWED_ORIGINS must not contain localhost origins in production.")
-        if self.email_provider == "development":
-            raise ValueError(
-                "EMAIL_PROVIDER must be smtp in production when password reset is enabled."
-            )
-        if (
-            not self.password_reset_url.startswith("https://")
-            or "localhost" in self.password_reset_url
-        ):
-            raise ValueError("PASSWORD_RESET_URL must be an HTTPS non-localhost URL in production.")
         return self
 
     @field_validator("allowed_origins", mode="before")

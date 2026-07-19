@@ -110,7 +110,7 @@ Every sprint adds tests before declaring completion: unit tests for new domain r
 | Sprint area | Minimum test focus |
 | --- | --- |
 | Foundation | Formatting, linting, typing, baseline tests, configuration failure modes. |
-| Identity | Authentication/session/verification, password/reset limits, owner/role denial, consent, audit. |
+| Identity | Authentication/session/verification, sign-in limits, owner/role denial, consent, audit. |
 | Assessment | Branches, requiredness, plausibility, save/resume/edit, versioning, every safety status. |
 | Dashboard | Aggregate truth, empty/partial/stale/safety states, preference/timezone display. |
 | Workout/Nutrition | Eligibility, restriction/equipment constraints, state transitions, duplicate commands, pain/allergy paths. |

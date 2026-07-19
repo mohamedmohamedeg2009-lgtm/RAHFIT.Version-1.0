@@ -48,8 +48,6 @@ All authentication responses avoid account-enumeration disclosures. Password and
 | POST `/auth/logout` | Revoke current session; authenticated user. | Optional current-session confirmation; returns no content. | Ownership of session; safe repeat is no-content; must build. |
 | POST `/auth/refresh` | Rotate/refresh authenticated session; valid refresh context. | Refresh credential carried by secure policy; returns renewed session state. | Rotation, replay detection, device/session validation; strict per-session/IP limit; must build. |
 | GET `/auth/session` | Get current session/account state; authenticated user. | No body; returns user/session reference, expiry, verification, relevant role scopes. | Current-session validation; must build. |
-| POST `/auth/password-reset-requests` | Request reset delivery; guest. | Contact identifier; returns generic acceptance. | Enumeration-safe, strict per-IP/contact throttling; idempotent acceptance; must build. |
-| POST `/auth/password-resets` | Complete verified reset; guest with reset proof. | Reset proof, new password; returns generic completion/session policy. | One-time proof, password policy, revoke other sessions; strict rate limit; must build. |
 | POST `/auth/email-verifications` | Verify contact using verified proof; guest/pending user. | Verification proof; returns verified state. | One-time/expiry/replay protections; idempotent if already verified; must build. |
 | POST `/auth/email-verification-resends` | Resend verification; guest/pending user. | Contact identifier or authenticated context; returns generic acceptance. | Enumeration-safe throttle; must build. |
 | POST `/auth/password-changes` | Change password from active session; authenticated user. | Current password, new password; returns completion. | Recent-auth/session checks, password policy, audit, rate limit; must build. |
@@ -240,7 +238,7 @@ Clients never set filenames, MIME trust, storage location, visibility, or retent
 
 | Role | Permitted modules/actions | Ownership rule |
 | --- | --- | --- |
-| Guest | Registration, login, verification, password-reset initiation/completion, public safe availability content. | No private-resource access. |
+| Guest | Registration, login, verification, and public safe availability content. | No private-resource access. |
 | User | Own profile, consent, assessment, AI, plans, logs, progress, reports, notifications, deletion/export requests. | Must match authenticated user; cannot select another user ID. |
 | Trainer | Post-competition: explicitly granted client summaries/plans within organisation/client scope. | Grant is scoped, time-bound/audited; no implied access to all client health data. |
 | Admin | Limited operations, user status, audit/health/aggregate AI usage, feature governance by privilege. | Default excludes private health/AI content; every sensitive action is audited. |
@@ -288,7 +286,7 @@ Limits are enforced per IP and per authenticated user where applicable, with sho
 
 | Category | Policy |
 | --- | --- |
-| Registration / login / password reset | Strict per-IP and per-contact limits, low burst allowance, escalating cool-downs, enumeration-safe responses. |
+| Registration / login | Strict per-IP and per-contact limits, low burst allowance, escalating cool-downs, enumeration-safe responses. |
 | Assessment saves | Generous authenticated per-user limit with modest burst protection so autosave/resume remains usable; malformed/abusive traffic is limited. |
 | AI Coach messages | Per-user and per-IP burst/window limits plus daily task/cost quota; lower limits for unverified/risk states. |
 | Plan generation | Low per-user window and idempotency requirement; regeneration requires reason/state check. |

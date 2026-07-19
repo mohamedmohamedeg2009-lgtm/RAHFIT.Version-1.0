@@ -170,7 +170,7 @@ npm run build
 
 ## Security and AI Safety Highlights
 
-- Validated environment settings, secret-aware fields, JWT expiry/type/version checks, password hashing, reset-token hashing, and token-version revocation.
+- Validated environment settings, secret-aware fields, JWT expiry/type/version checks, password hashing, and token-version revocation.
 - Owner-scoped repository queries, validated request schemas, NoSQL operator rejection, CORS allowlisting, security headers, and baseline rate limiting.
 - AI requests are constrained by deterministic capability classification, policy allowlists, safety evaluation, readiness/context checks, provider availability checks, and minimal context projection. AI does not diagnose, prescribe medication, override safety rules, expose secrets, or bypass deterministic workout/nutrition engines.
 

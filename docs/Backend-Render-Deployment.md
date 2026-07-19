@@ -29,7 +29,7 @@ Uvicorn to Render's dynamic `PORT`, and checks `/health` before routing traffic.
 | `LOG_LEVEL` | `INFO` |
 
 Add optional existing variables only when their features are enabled, such as
-`GOOGLE_CLIENT_ID`, SMTP settings, and AI provider keys. Do not set any
+`GOOGLE_CLIENT_ID` and AI provider keys. Do not set any
 `VITE_*` variable on the backend, and never expose `MONGODB_URI` to Vercel or
 browser code.
 

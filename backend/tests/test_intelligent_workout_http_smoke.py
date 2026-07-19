@@ -83,15 +83,6 @@ class InMemoryUserStore:
         self.users[user.id] = user
         return user
 
-    async def update_password_and_revoke_tokens(self, user_id: str, password_hash: str) -> bool:
-        user = self.users.get(user_id)
-        if user is None:
-            return False
-        self.users[user_id] = user.model_copy(
-            update={"password_hash": password_hash, "token_version": user.token_version + 1}
-        )
-        return True
-
     async def increment_token_version(self, user_id: str, expected_version: int) -> User | None:
         user = self.users.get(user_id)
         if user is None or user.token_version != expected_version:

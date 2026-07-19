@@ -239,7 +239,9 @@ describe("api refresh boundary", () => {
       .spyOn(window, "fetch")
       .mockResolvedValue(new Response(JSON.stringify({ message: "expired" }), { status: 401 }));
 
-    await expect(apiRequest("/auth/me", { skipRefresh: true })).rejects.toMatchObject({ status: 401 });
+    await expect(apiRequest("/auth/me", { skipRefresh: true })).rejects.toMatchObject({
+      status: 401,
+    });
     expect(refresh).not.toHaveBeenCalled();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
@@ -307,7 +309,9 @@ describe("authentication integration boundary", () => {
           { status: 200 },
         ),
       )
-      .mockResolvedValueOnce(new Response(JSON.stringify({ message: "unavailable" }), { status: 503 }));
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ message: "unavailable" }), { status: 503 }),
+      );
 
     await authService.login({ email: "user@example.com", password: "secure-password-123" });
     expect(tokenStore.get()).toBe("refresh");
@@ -408,8 +412,9 @@ describe("authentication integration boundary", () => {
     expect(buildApiRequestUrl("https://api.example.com/api/v1", "/auth/register")).toBe(
       "https://api.example.com/api/v1/auth/register",
     );
-    expect(() => buildApiRequestUrl("https://api.example.com/api/v1", "/api/v1/auth/register"))
-      .toThrow("must not repeat");
+    expect(() =>
+      buildApiRequestUrl("https://api.example.com/api/v1", "/api/v1/auth/register"),
+    ).toThrow("must not repeat");
   });
 
   it("completes registration and loads the created current user", async () => {

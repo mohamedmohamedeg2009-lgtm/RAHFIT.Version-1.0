@@ -47,9 +47,7 @@ export function normalizeApiBaseUrl(
     throw new ApiConfigurationError("VITE_API_BASE_URL must use HTTPS in production.");
   }
   if (mode === "production" && ["localhost", "127.0.0.1"].includes(parsed.hostname)) {
-    throw new ApiConfigurationError(
-      "VITE_API_BASE_URL must not point to localhost in production.",
-    );
+    throw new ApiConfigurationError("VITE_API_BASE_URL must not point to localhost in production.");
   }
   const normalizedPath = parsed.pathname.replace(/\/+$/, "");
   if (!normalizedPath.endsWith("/api/v1")) {

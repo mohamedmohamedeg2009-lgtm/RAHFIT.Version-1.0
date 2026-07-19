@@ -79,9 +79,6 @@ REQUIRED_INDEXES: dict[str, frozenset[str]] = {
     "nutrition_daily_logs": frozenset({"nutrition_logs_user_date_unique"}),
     "workout_plans": frozenset({"workout_plans_one_active_per_user", "workout_plans_user_history"}),
     "workout_sessions": frozenset({WORKOUT_SESSION_INDEX, "workout_sessions_user_history"}),
-    "password_reset_tokens": frozenset(
-        {"password_reset_tokens_hash_unique", "password_reset_tokens_ttl"}
-    ),
     "ai_decisions": frozenset(
         {
             "ai_decisions_one_active_per_user_date",
@@ -270,16 +267,6 @@ async def initialize_indexes(database: AsyncIOMotorDatabase[dict[str, Any]]) -> 
             "provider_subject": {"$type": "string"},
         },
         name="users_provider_subject_unique",
-    )
-    await database["password_reset_tokens"].create_index(
-        "token_hash",
-        unique=True,
-        name="password_reset_tokens_hash_unique",
-    )
-    await database["password_reset_tokens"].create_index(
-        "expires_at",
-        expireAfterSeconds=0,
-        name="password_reset_tokens_ttl",
     )
     await ensure_ai_decision_indexes(database)
 

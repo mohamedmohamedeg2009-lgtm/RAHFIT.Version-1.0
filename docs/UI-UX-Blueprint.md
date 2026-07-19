@@ -35,7 +35,7 @@ On mobile, the primary navigation prioritises **Today**, **Plan**, **Progress**,
 | Area/page | Purpose and primary content | Relationships |
 | --- | --- | --- |
 | Landing | Explain value, trust, audience, pricing direction, and clear start action. | Leads to registration; references safety/privacy without overload. |
-| Authentication | Registration, sign-in, verification, password recovery, and session state. | Returns user to intended destination; does not mix product onboarding with credential recovery. |
+| Authentication | Registration, sign-in, verification, and session state. | Returns user to intended destination; does not mix product onboarding with account recovery. |
 | Onboarding / Assessment | Build a safe, adaptive profile with save/resume and transparent data use. | Produces readiness/safety state for Today, Plan, Coach, and Settings. |
 | Today / Dashboard | Daily command centre: current priority, safe next action, summary, and notices. | Aggregates workout, nutrition, water, progress, coach, and notifications. |
 | Plan | Current workout/nutrition/recovery plan and future schedule; change/review entry. | Opens sessions, meal actions, plan rationale, and reassessment when needed. |
