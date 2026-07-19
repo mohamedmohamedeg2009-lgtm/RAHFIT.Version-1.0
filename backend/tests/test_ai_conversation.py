@@ -453,7 +453,9 @@ async def test_public_message_endpoints_remain_unregistered() -> None:
             await client.get("/api/v1/ai-coach/messages"),
             await client.post("/api/v1/ai-coach/messages", json={"content": "hello"}),
         ]
-        get_on_messages = await client.get(f"/api/v1/ai-coach/conversations/{conversation_id}/messages")
+        get_on_messages = await client.get(
+            f"/api/v1/ai-coach/conversations/{conversation_id}/messages"
+        )
 
     assert all(response.status_code == 404 for response in unregistered)
     assert get_on_messages.status_code == 405

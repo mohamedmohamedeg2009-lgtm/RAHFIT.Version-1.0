@@ -110,10 +110,7 @@ class DailyCheckInEngine:
             action = CheckInRecommendedAction.RECOVERY_SESSION
         elif CheckInWarningCode.SEVERE_SORENESS in warnings or inputs.energy_level == 1:
             readiness_score = min(readiness_score, 65)
-            if readiness_score >= 60:
-                level = ReadinessLevel.MODERATE
-            else:
-                level = ReadinessLevel.LOW
+            level = ReadinessLevel.MODERATE if readiness_score >= 60 else ReadinessLevel.LOW
             action = CheckInRecommendedAction.REDUCED_INTENSITY
         else:
             # Standard score-based classification

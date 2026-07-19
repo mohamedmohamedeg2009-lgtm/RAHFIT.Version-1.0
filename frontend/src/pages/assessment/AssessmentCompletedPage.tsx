@@ -70,7 +70,6 @@ export default function AssessmentCompletedPage() {
       <Card className="assessment-result-summary">
         <div className="assessment-section-heading">
           <div>
-            <span>R</span>
             <h2>{copy.summary}</h2>
           </div>
           <Badge>{localizeSummaryText(result.summary.trainingReadiness, locale)}</Badge>

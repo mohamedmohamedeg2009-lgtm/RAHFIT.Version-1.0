@@ -2,7 +2,6 @@ from datetime import date
 from typing import Any
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
-from pymongo import ReplaceOne
 
 from app.models.daily_check_in import DailyCheckIn
 
@@ -39,12 +38,7 @@ class MongoDailyCheckInRepository:
         query = {"user_id": user_id}
         total = await self.collection.count_documents(query)
 
-        cursor = (
-            self.collection.find(query)
-            .sort("date", -1)
-            .skip(offset)
-            .limit(limit)
-        )
+        cursor = self.collection.find(query).sort("date", -1).skip(offset).limit(limit)
         items: list[DailyCheckIn] = []
         async for doc in cursor:
             doc.pop("_id", None)

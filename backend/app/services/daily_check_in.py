@@ -18,9 +18,7 @@ class DailyCheckInService:
         self.repository = repository
         self.engine = engine or DailyCheckInEngine()
 
-    async def submit_check_in(
-        self, user_id: str, payload: DailyCheckInCreate
-    ) -> DailyCheckIn:
+    async def submit_check_in(self, user_id: str, payload: DailyCheckInCreate) -> DailyCheckIn:
         check_in_date = payload.check_in_date or datetime.now(UTC).date()
         inputs = payload.to_inputs()
         readiness_result = self.engine.calculate(inputs)

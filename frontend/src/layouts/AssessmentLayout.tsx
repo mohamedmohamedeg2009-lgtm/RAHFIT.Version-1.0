@@ -4,6 +4,7 @@ import { Button } from "../components/ui";
 import { useLocale } from "../contexts/LocaleContext";
 import { useAuth } from "../hooks/useAuth";
 import { assessmentCopy } from "../i18n/assessment";
+import { BrandLogo } from "../components/common/BrandLogo";
 
 export function AssessmentLayout() {
   const { locale, toggleLocale } = useLocale();
@@ -18,11 +19,8 @@ export function AssessmentLayout() {
           to="/assessment"
           aria-label={`${copy.brand} ${copy.assessment}`}
         >
-          <span className="assessment-brand-mark" aria-hidden="true">
-            R
-          </span>
           <span>
-            <strong>{copy.brand}</strong>
+            <BrandLogo />
             <small>{copy.assessment}</small>
           </span>
         </Link>

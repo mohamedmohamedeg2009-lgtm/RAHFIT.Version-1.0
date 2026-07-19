@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { BrandLogo } from "../../components/common/BrandLogo";
 import { Button, Card, FullPageLoader } from "../../components/ui";
 import { useAssessment } from "../../contexts/AssessmentContext";
 import { useLocale } from "../../contexts/LocaleContext";
@@ -61,7 +62,7 @@ export default function AssessmentWelcomePage() {
           </div>
         </div>
         <div className="assessment-orbit" aria-hidden="true">
-          <span className="assessment-orbit-core">R</span>
+          <BrandLogo className="assessment-orbit-wordmark" />
           <span className="assessment-orbit-ring ring-one" />
           <span className="assessment-orbit-ring ring-two" />
           <span className="assessment-orbit-dot dot-one" />

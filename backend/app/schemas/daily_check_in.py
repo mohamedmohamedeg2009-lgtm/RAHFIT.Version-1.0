@@ -1,6 +1,6 @@
 import html
 import re
-from datetime import UTC, date, datetime
+from datetime import date
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 

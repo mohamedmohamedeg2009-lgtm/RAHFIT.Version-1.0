@@ -36,4 +36,3 @@ def build_ai_coach_system_instructions(
         instructions = instructions[:MAX_SYSTEM_INSTRUCTION_LENGTH]
 
     return instructions
-

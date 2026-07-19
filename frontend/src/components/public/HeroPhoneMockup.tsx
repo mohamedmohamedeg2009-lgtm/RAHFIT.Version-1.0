@@ -21,6 +21,7 @@ export const HeroPhoneMockup: React.FC = () => {
   const { locale } = useLocale();
   const copy = discoveryCopy[locale];
   const isRtl = locale === "ar";
+  const mockupTitle = isRtl ? "ملخص اليوم" : "TODAY'S PLAN";
 
   return (
     <div
@@ -63,14 +64,14 @@ export const HeroPhoneMockup: React.FC = () => {
 
         {/* Screen inner UI */}
         <div
-          className="hero-phone-screen bg-slate-900 rounded-[32px] p-3 text-slate-100 flex flex-col gap-2.5 border border-slate-800/60 overflow-hidden"
+          className="hero-phone-screen bg-slate-900 rounded-[32px] p-3 text-slate-100 flex flex-col gap-2.5 border border-slate-800/60"
           dir={isRtl ? "rtl" : "ltr"}
         >
-          <div className="mockup-header flex items-center justify-between border-b border-slate-800/80 pb-2">
-            <div className="text-[10px] font-extrabold text-slate-200">
-              {isRtl ? "Ù…Ù„Ø®Øµ Ø§Ù„ÙŠÙˆÙ…" : "TODAY'S PLAN"}
+          <div className="mockup-header flex min-w-0 items-center justify-between gap-2 border-b border-slate-800/80 pb-2">
+            <div className="min-w-0 flex-1 text-[10px] font-extrabold text-slate-200">
+              {mockupTitle}
             </div>
-            <div className="mockup-badge-live flex items-center gap-1 bg-teal-500/10 text-teal-400 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-teal-500/20">
+            <div className="mockup-badge-live shrink-0 flex items-center gap-1 bg-teal-500/10 text-teal-400 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-teal-500/20">
               <Sparkles size={10} color="#14b8a6" />
               <span>LIVE DEMO</span>
             </div>

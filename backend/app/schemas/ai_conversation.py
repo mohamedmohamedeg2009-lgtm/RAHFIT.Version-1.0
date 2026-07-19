@@ -70,4 +70,3 @@ class AICoachMessageResponse(BaseModel):
     safe_reason_code: str | None = None
     provider_used: str | None = None
     created_at: datetime
-

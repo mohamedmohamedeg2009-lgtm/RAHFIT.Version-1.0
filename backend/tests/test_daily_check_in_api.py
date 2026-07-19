@@ -9,13 +9,9 @@ from fastapi import FastAPI, status
 from app.controllers.auth import get_current_user
 from app.controllers.daily_check_in import get_daily_check_in_service, router
 from app.database.indexes import REQUIRED_INDEXES
-from app.models.ai_context import AIContextPurpose, AIContextRequest
-from app.models.daily_check_in import DailyCheckInInputs, HydrationStatus
 from app.models.user import User
-from app.repositories.daily_check_in import MongoDailyCheckInRepository
 from app.services.daily_check_in import DailyCheckInService
 from app.services.daily_check_in_engine import DailyCheckInEngine
-from tests.test_ai_conversation import InMemoryAIConversationStore
 
 
 class InMemoryDailyCheckInRepository:
@@ -32,11 +28,7 @@ class InMemoryDailyCheckInRepository:
         return self.store.get(key)
 
     async def list_history(self, user_id: str, limit: int = 20, offset: int = 0):
-        matching = [
-            item
-            for item in self.store.values()
-            if item.user_id == user_id
-        ]
+        matching = [item for item in self.store.values() if item.user_id == user_id]
         matching.sort(key=lambda x: x.date, reverse=True)
         return matching[offset : offset + limit], len(matching)
 
@@ -84,7 +76,9 @@ def app(test_user: User, check_in_service: DailyCheckInService) -> FastAPI:
 
 @pytest.mark.asyncio
 async def test_1_creates_first_check_in_for_today(app: FastAPI) -> None:
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://testserver") as client:
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://testserver"
+    ) as client:
         res = await client.post(
             "/api/v1/check-ins/daily",
             json={
@@ -108,7 +102,9 @@ async def test_1_creates_first_check_in_for_today(app: FastAPI) -> None:
 
 @pytest.mark.asyncio
 async def test_2_updates_same_day_rather_than_duplicating(app: FastAPI) -> None:
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://testserver") as client:
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://testserver"
+    ) as client:
         # First submission
         res1 = await client.post(
             "/api/v1/check-ins/daily",
@@ -152,10 +148,10 @@ async def test_2_updates_same_day_rather_than_duplicating(app: FastAPI) -> None:
 
 
 @pytest.mark.asyncio
-async def test_3_another_user_cannot_access_owner_check_in(
-    app: FastAPI, other_user: User
-) -> None:
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://testserver") as client:
+async def test_3_another_user_cannot_access_owner_check_in(app: FastAPI, other_user: User) -> None:
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://testserver"
+    ) as client:
         await client.post(
             "/api/v1/check-ins/daily",
             json={
@@ -172,14 +168,18 @@ async def test_3_another_user_cannot_access_owner_check_in(
 
     # Switch to other_user
     app.dependency_overrides[get_current_user] = lambda: other_user
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://testserver") as client:
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://testserver"
+    ) as client:
         res_today = await client.get("/api/v1/check-ins/daily/today")
         assert res_today.status_code == status.HTTP_404_NOT_FOUND
 
 
 @pytest.mark.asyncio
 async def test_4_history_is_owner_scoped_and_newest_first(app: FastAPI) -> None:
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://testserver") as client:
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://testserver"
+    ) as client:
         await client.post(
             "/api/v1/check-ins/daily",
             json={
@@ -202,7 +202,9 @@ async def test_4_history_is_owner_scoped_and_newest_first(app: FastAPI) -> None:
 
 @pytest.mark.asyncio
 async def test_5_invalid_ranges_are_rejected(app: FastAPI) -> None:
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://testserver") as client:
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://testserver"
+    ) as client:
         res = await client.post(
             "/api/v1/check-ins/daily",
             json={
@@ -221,7 +223,9 @@ async def test_5_invalid_ranges_are_rejected(app: FastAPI) -> None:
 
 @pytest.mark.asyncio
 async def test_6_unsafe_html_note_is_rejected(app: FastAPI) -> None:
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://testserver") as client:
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://testserver"
+    ) as client:
         res = await client.post(
             "/api/v1/check-ins/daily",
             json={

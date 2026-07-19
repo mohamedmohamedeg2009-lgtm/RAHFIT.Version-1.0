@@ -1,6 +1,7 @@
 """Unit test suite for the deterministic Daily AI Check-in readiness scoring engine."""
 
 import pytest
+from pydantic import ValidationError
 
 from app.models.daily_check_in import (
     CheckInRecommendedAction,
@@ -9,7 +10,7 @@ from app.models.daily_check_in import (
     HydrationStatus,
     ReadinessLevel,
 )
-from app.services.daily_check_in_engine import DailyCheckInEngine, DailyCheckInEngineError
+from app.services.daily_check_in_engine import DailyCheckInEngine
 
 
 @pytest.fixture
@@ -133,9 +134,6 @@ def test_soreness_alone_is_not_treated_as_medical_pain(engine: DailyCheckInEngin
     assert result.pain_flag is False
     assert CheckInWarningCode.SEVERE_SORENESS in result.warning_codes
     assert result.recommended_action == CheckInRecommendedAction.REDUCED_INTENSITY
-
-
-from pydantic import ValidationError
 
 
 def test_sleep_deprivation_warning(engine: DailyCheckInEngine) -> None:

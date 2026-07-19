@@ -479,4 +479,3 @@ async def send_ai_conversation_message(
         provider_used=ai_response.provider,
         created_at=asst_msg.created_at,
     )
-

@@ -134,6 +134,7 @@ class AIService:
         daily_check_in = None
         if self.daily_check_in_repository is not None:
             from datetime import UTC, datetime
+
             daily_check_in = await self.daily_check_in_repository.get_by_date(
                 authenticated_user.id, datetime.now(UTC).date()
             )

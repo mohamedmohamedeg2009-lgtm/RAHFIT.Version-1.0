@@ -4,9 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
-from app.database.mongodb import DatabaseConnectionError
-
 from app.config import Settings, get_settings
+from app.database.mongodb import DatabaseConnectionError
 from app.models.user import User
 from app.repositories.users import UserRepository
 from app.schemas.auth import (
