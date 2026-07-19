@@ -25,7 +25,7 @@ export function AuthLayout() {
     <main className="auth-shell">
       <div className="auth-brand-panel">
         <div className="mb-6">
-          <RahafitLogo size="lg" themeMode="dark" />
+          <RahafitLogo size="lg" />
         </div>
         <h1>Small steps. Stronger you.</h1>
         <p>

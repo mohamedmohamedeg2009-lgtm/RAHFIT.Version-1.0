@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
 
-export type ThemeMode = "light" | "dark";
+export type ThemeMode = "dark";
 
 interface ThemeContextValue {
   theme: ThemeMode;
@@ -9,33 +9,22 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
-const storageKey = "rahfit.theme";
-
-function initialTheme(): ThemeMode {
-  if (typeof window === "undefined") return "light";
-  const stored = window.localStorage.getItem(storageKey);
-  if (stored === "light" || stored === "dark") return stored;
-  return window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ? "dark" : "light";
-}
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeMode>(initialTheme);
-  const setTheme = (nextTheme: ThemeMode) => setThemeState(nextTheme);
-
   useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    document.documentElement.style.colorScheme = theme;
-    window.localStorage.setItem(storageKey, theme);
-  }, [theme]);
+    document.documentElement.dataset.theme = "dark";
+    document.documentElement.style.colorScheme = "dark";
+  }, []);
 
-  const value = useMemo(
+  const value = useMemo<ThemeContextValue>(
     () => ({
-      theme,
-      setTheme,
-      toggleTheme: () => setThemeState((current) => (current === "light" ? "dark" : "light")),
+      theme: "dark",
+      setTheme: () => undefined,
+      toggleTheme: () => undefined,
     }),
-    [theme],
+    [],
   );
+
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 

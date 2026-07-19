@@ -4,12 +4,7 @@ import "@testing-library/jest-dom/vitest";
 
 import { Button } from "../components/ui/Button";
 import { LinearProgress } from "../components/ui/Progress";
-import { ThemeProvider, useTheme } from "../theme";
-
-function ThemeProbe() {
-  const { theme, toggleTheme } = useTheme();
-  return <button onClick={toggleTheme}>{theme}</button>;
-}
+import { ThemeProvider } from "../theme";
 
 describe("design system primitives", () => {
   it("renders an accessible loading button", () => {
@@ -26,17 +21,14 @@ describe("design system primitives", () => {
     );
   });
 
-  it("provides controlled theme switching", async () => {
-    const { userEvent } = await import("@testing-library/user-event");
-    const user = userEvent.setup();
+  it("renders the app in permanent dark mode", () => {
     render(
       <ThemeProvider>
-        <ThemeProbe />
+        <button type="button">Theme Probe</button>
       </ThemeProvider>,
     );
-    const toggle = screen.getByRole("button");
-    expect(toggle).toHaveTextContent(/light|dark/);
-    await user.click(toggle);
-    expect(toggle).not.toHaveTextContent("light");
+
+    expect(document.documentElement).toHaveAttribute("data-theme", "dark");
+    expect(document.documentElement).toHaveStyle({ colorScheme: "dark" });
   });
 });

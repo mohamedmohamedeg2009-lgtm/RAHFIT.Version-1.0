@@ -4,11 +4,9 @@ import { Button } from "../components/ui";
 import { useLocale } from "../contexts/LocaleContext";
 import { useAuth } from "../hooks/useAuth";
 import { assessmentCopy } from "../i18n/assessment";
-import { useTheme } from "../theme";
 
 export function AssessmentLayout() {
   const { locale, toggleLocale } = useLocale();
-  const { theme, toggleTheme } = useTheme();
   const { logout } = useAuth();
   const copy = assessmentCopy[locale];
 
@@ -31,15 +29,6 @@ export function AssessmentLayout() {
         <nav className="assessment-actions" aria-label="Assessment controls">
           <Button variant="ghost" size="sm" type="button" onClick={toggleLocale}>
             {copy.language}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            type="button"
-            onClick={toggleTheme}
-            aria-label={copy.theme}
-          >
-            <span aria-hidden="true">{theme === "light" ? "◐" : "☀"}</span>
           </Button>
           <Button variant="ghost" size="sm" type="button" onClick={() => void logout()}>
             {copy.signOut}

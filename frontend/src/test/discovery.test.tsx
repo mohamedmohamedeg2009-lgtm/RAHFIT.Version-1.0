@@ -61,9 +61,12 @@ describe("Public Discovery & Landing Page Journey", () => {
     expect(screen.getByText("حدّد أهدافك وحالتك")).toBeInTheDocument();
     expect(screen.getByText("احصل على تجربة مخصصة")).toBeInTheDocument();
     expect(screen.getByText("تابع تقدمك يوميًا")).toBeInTheDocument();
-    expect(screen.getByText("المناطق والخصائص الأساسية")).toBeInTheDocument();
+    expect(screen.getByText("كل ما تحتاجه لتدريب أذكى وأكثر أمانًا")).toBeInTheDocument();
+    expect(screen.getByText("التمرين الذكي والتوجيه التدريبي")).toBeInTheDocument();
+    expect(screen.getAllByText("التقييم الذكي والإقرار الصحي")[0]).toBeInTheDocument();
+    expect(screen.getByText("المدرب الذكي والتوجيه الآمن")).toBeInTheDocument();
     expect(screen.getByText("الأمان والتخصيص الذكي")).toBeInTheDocument();
-    expect(screen.getByText("جاهز تبدأ خطوتك الأولى؟")).toBeInTheDocument();
+    expect(screen.getByText("جاهز تبدأ رحلتك؟")).toBeInTheDocument();
   });
 
   it("renders redesigned Landing Page hero headline, copy, CTAs, and smartphone mockup without authentication", async () => {
@@ -215,5 +218,24 @@ describe("Public Discovery & Landing Page Journey", () => {
     expect(screen.getByText("معلومات التواصل قريباً.")).toBeInTheDocument();
     expect(screen.queryByText("support@rahafit.ai")).not.toBeInTheDocument();
     expect(screen.queryByText("+966 800 123 4567")).not.toBeInTheDocument();
+  });
+
+  it("renders the landing page in permanent dark mode", async () => {
+    render(
+      <TestProviders>
+        <AuthContext.Provider value={mockAuthContext()}>
+          <MemoryRouter initialEntries={["/"]}>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+            </Routes>
+          </MemoryRouter>
+        </AuthContext.Provider>
+      </TestProviders>,
+    );
+
+    expect(document.documentElement).toHaveAttribute("data-theme", "dark");
+    expect(screen.queryByRole("button", { name: /theme|thème|ثيم/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "ابدأ رحلتك مع Rahafit" })).toBeInTheDocument();
+    expect(screen.getByText("تدريب رياضي آمن، ذكي، وبناءً على خصوصيتك")).toBeInTheDocument();
   });
 });

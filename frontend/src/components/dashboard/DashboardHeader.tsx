@@ -1,11 +1,10 @@
 import { Link } from "react-router-dom";
-import { Sun, Moon, Globe, LogOut } from "lucide-react";
+import { Globe, LogOut } from "lucide-react";
 
 import { Button } from "../ui";
 import { useLocale } from "../../contexts/LocaleContext";
 import { useAuth } from "../../hooks/useAuth";
 import { dashboardCopy } from "../../i18n/dashboard";
-import { useTheme } from "../../theme";
 import { RahafitLogo } from "../common/RahafitLogo";
 
 interface DashboardHeaderProps {
@@ -15,7 +14,6 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ displayName, email }: DashboardHeaderProps) {
   const { locale, toggleLocale } = useLocale();
-  const { theme, toggleTheme } = useTheme();
   const { logout } = useAuth();
   const copy = dashboardCopy[locale];
 
@@ -51,15 +49,6 @@ export function DashboardHeader({ displayName, email }: DashboardHeaderProps) {
         >
           <Globe size={18} />
           <span style={{ fontSize: "14px", fontWeight: 700 }}>{copy.language}</span>
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={toggleTheme}
-          aria-label={copy.theme}
-          aria-pressed={theme === "dark"}
-        >
-          {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
         </Button>
         <Button
           variant="ghost"
