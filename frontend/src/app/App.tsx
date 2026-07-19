@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import { ProtectedRoute } from "../components/ProtectedRoute";
 import { FullPageLoader } from "../components/ui";
@@ -9,7 +9,6 @@ import { LoginPage } from "../pages/auth/LoginPage";
 import { RegisterPage } from "../pages/auth/RegisterPage";
 import { AuthLayout } from "../layouts/AuthLayout";
 import { AssessmentLayout } from "../layouts/AssessmentLayout";
-import { useAuth } from "../hooks/useAuth";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { useLocale } from "../contexts/LocaleContext";
 
@@ -53,6 +52,8 @@ const WorkoutSessionHistoryPage = lazy(
   () => import("../pages/intelligentWorkout/WorkoutSessionHistoryPage"),
 );
 const AICoachPage = lazy(() => import("../pages/aiCoach/AICoachPage"));
+const DiscoveryPage = lazy(() => import("../pages/discovery/DiscoveryPage"));
+const LandingPage = lazy(() => import("../pages/public/LandingPage"));
 
 /** Sets document.title while a route is active. */
 function RouteTitle({ en, ar }: { en: string; ar: string }) {
@@ -67,21 +68,6 @@ function AssessmentExperience() {
       <AssessmentLayout />
     </AssessmentProvider>
   );
-}
-
-function AuthOnlyRedirect() {
-  const { user, isLoading } = useAuth();
-  if (isLoading) {
-    return (
-      <main className="auth-shell" aria-busy="true" aria-live="polite">
-        <div className="loading-card">
-          <span className="spinner" aria-hidden="true" />
-          <p>Restoring your session…</p>
-        </div>
-      </main>
-    );
-  }
-  return user ? <Navigate to="/app" replace /> : <Navigate to="/login" replace />;
 }
 
 function NotFoundPage() {
@@ -259,7 +245,8 @@ export function App() {
                 />
               </Route>
             </Route>
-            <Route path="/" element={<AuthOnlyRedirect />} />
+            <Route path="/discover" element={<DiscoveryPage />} />
+            <Route path="/" element={<LandingPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>

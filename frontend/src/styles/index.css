@@ -3906,3 +3906,427 @@ button:focus-visible {
     gap: var(--space-8);
   }
 }
+
+/* ── Public Shell & Header ───────────────────────────────────── */
+.public-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  scroll-behavior: smooth;
+}
+
+.public-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: color-mix(in srgb, var(--color-surface) 85%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border-subtle);
+  padding: var(--space-12) var(--space-24);
+}
+
+.public-topbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-16);
+}
+
+.public-nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-24);
+}
+
+.public-nav-link {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: var(--font-body-sm);
+  transition: color var(--motion-normal) var(--motion-easing);
+}
+
+.public-nav-link:hover {
+  color: var(--color-primary);
+}
+
+.public-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+.public-main-content {
+  flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-32) var(--space-24) var(--space-64);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-64);
+}
+
+/* ── Discovery & Landing Hero ──────────────────────────────── */
+.discovery-hero,
+.landing-hero {
+  text-align: center;
+  padding: var(--space-48) var(--space-16) var(--space-32);
+  background: var(--gradient-hero);
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--color-border-subtle);
+  box-shadow: var(--shadow-soft);
+  margin-top: var(--space-16);
+}
+
+.discovery-hero-content,
+.landing-hero-content {
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-20);
+}
+
+.discovery-trust-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-8) var(--space-16);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-body-sm);
+  font-weight: 700;
+}
+
+.discovery-hero-title,
+.landing-hero-title {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+}
+
+.discovery-hero-subtitle,
+.landing-hero-subtitle {
+  font-size: var(--font-body-lg);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.discovery-hero-actions,
+.landing-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-16);
+  margin-top: var(--space-12);
+}
+
+.discovery-hero-skip {
+  margin-top: var(--space-8);
+}
+
+.discovery-skip-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-size: var(--font-body-sm);
+  font-weight: 600;
+  transition: color var(--motion-normal) var(--motion-easing);
+}
+
+.discovery-skip-link:hover {
+  color: var(--color-primary);
+}
+
+/* ── Discovery Sections General ────────────────────────────── */
+.discovery-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-32);
+}
+
+.discovery-section-header {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.discovery-section-title {
+  font-size: var(--font-heading-l);
+  font-weight: 800;
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.discovery-section-subtitle {
+  font-size: var(--font-body);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+/* ── Section 2: How It Works Grid ──────────────────────────── */
+.discovery-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-20);
+}
+
+.discovery-step-card {
+  padding: var(--space-24);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  transition:
+    transform var(--motion-normal) var(--motion-easing),
+    box-shadow var(--motion-normal) var(--motion-easing);
+}
+
+.discovery-step-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.discovery-step-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.discovery-step-number {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  opacity: 0.8;
+}
+
+.discovery-step-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  background: var(--color-primary-light);
+  display: grid;
+  place-items: center;
+}
+
+.discovery-step-title {
+  font-size: var(--font-heading-s);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.discovery-step-desc {
+  font-size: var(--font-body-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+/* ── Section 3: Core Product Areas ─────────────────────────── */
+.discovery-features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-24);
+}
+
+.discovery-feature-card {
+  padding: var(--space-24);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  position: relative;
+  transition:
+    transform var(--motion-normal) var(--motion-easing),
+    box-shadow var(--motion-normal) var(--motion-easing);
+}
+
+.discovery-feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.discovery-feature-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.discovery-feature-icon-wrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-xl);
+  display: grid;
+  place-items: center;
+}
+
+.discovery-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--font-caption);
+  font-weight: 700;
+  background: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.discovery-feature-title {
+  font-size: var(--font-heading-s);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.discovery-feature-desc {
+  font-size: var(--font-body-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+/* ── Section 4: Safety & Personalization ────────────────────── */
+.discovery-safety-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-24);
+}
+
+.discovery-safety-card {
+  padding: var(--space-24);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-16);
+}
+
+.discovery-safety-icon-wrapper {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-lg);
+  background: var(--color-primary-light);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.discovery-safety-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.discovery-safety-title {
+  font-size: var(--font-body);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.discovery-safety-desc {
+  font-size: var(--font-body-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+/* ── Section 5: Final CTA ──────────────────────────────────── */
+.discovery-final-cta-card {
+  padding: var(--space-48) var(--space-24);
+  text-align: center;
+  background: var(--gradient-brand);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-16);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-card);
+}
+
+.discovery-final-cta-title {
+  font-size: var(--font-heading-l);
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.discovery-final-cta-subheading {
+  font-size: var(--font-body-lg);
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 560px;
+}
+
+.discovery-final-cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-16);
+  margin-top: var(--space-8);
+}
+
+.discovery-final-cta-actions .ds-button-outline {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.discovery-final-cta-actions .ds-button-outline:hover {
+  border-color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ── Public Footer ─────────────────────────────────────────── */
+.public-footer {
+  border-top: 1px solid var(--color-border-subtle);
+  padding: var(--space-24);
+  background: var(--color-surface);
+}
+
+.public-footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+  font-size: var(--font-body-sm);
+}
+
+.public-footer-brand {
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.public-footer-copy {
+  color: var(--color-text-muted);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .public-nav-links {
+    display: none;
+  }
+
+  .public-main-content {
+    padding: var(--space-16) var(--space-16) var(--space-32);
+    gap: var(--space-40);
+  }
+
+  .discovery-hero,
+  .landing-hero {
+    padding: var(--space-32) var(--space-16);
+  }
+
+  .discovery-final-cta-card {
+    padding: var(--space-32) var(--space-16);
+  }
+}
