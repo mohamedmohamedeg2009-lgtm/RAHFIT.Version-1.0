@@ -4829,3 +4829,15 @@ button:focus-visible {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── How Rahafit Works Section Timeline ── */
+.how-it-works-section .step-timeline-card {
+  transition: transform var(--motion-normal) var(--motion-easing), border-color var(--motion-normal) var(--motion-easing), box-shadow var(--motion-normal) var(--motion-easing);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .how-it-works-section .step-timeline-card {
+    transition: none !important;
+    transform: none !important;
+  }
+}

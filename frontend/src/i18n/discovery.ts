@@ -7,33 +7,50 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
     navFeatures: "Features",
     navHowItWorks: "How it works",
     navSafety: "Safety & Privacy",
+    navPricing: "Pricing",
     navLogin: "Sign in",
     navDiscover: "Explore Rahafit",
     navRegister: "Create account",
 
-    // Hero Section
+    // Hero Section Reference
+    heroTrustBadge: "Safe, Intelligent & Privacy-First Athletic Training",
+    landingHeroHeadline: "Start Your Journey with Rahafit",
+    landingHeroSubheading:
+      "Rahafit connects athletic planning, nutrition tracking, recovery signals, and intelligent guidance that respects your goals and condition in one seamless experience.",
+    landingHeroPrimaryCta: "Create your account",
+    landingHeroSecondaryCta: "Explore features",
+    landingHeroTertiaryCta: "Skip to sign in",
     heroHeading: "Start Your Journey with Rahafit",
     heroSubheading:
       "Rahafit connects your fitness programming, nutrition tracking, recovery insights, and safety-aware AI guidance into one seamless experience.",
     heroPrimaryCta: "Create account",
     heroSecondaryCta: "Explore features",
-    heroSkipLink: "Skip to registration",
-    heroTrustBadge: "Safe, adaptive & privacy-first fitness coaching",
 
-    // How it works
-    howItWorksHeading: "How Rahafit Works",
-    howItWorksSubheading: "Four simple steps to transform your daily health and fitness routine.",
-    step1Title: "1. Create your account",
-    step1Desc: "Quick registration with email or Google to secure your personal health profile.",
-    step2Title: "2. Tell us about your goals & condition",
-    step2Desc:
-      "Complete our smart assessment including medical history, equipment availability, and fitness targets.",
-    step3Title: "3. Receive a personalized & safe experience",
-    step3Desc:
-      "Get deterministic workout plans, adapted nutrition targets, and real-time safety boundary enforcement.",
-    step4Title: "4. Track progress from your dashboard",
-    step4Desc:
-      "Log sessions, monitor daily adherence, and consult your safety-aware AI Coach whenever needed.",
+    // How Rahafit Works Section
+    howItWorksEyebrow: "HOW IT WORKS",
+    howItWorksHeading: "Your Journey with Rahafit in Four Steps",
+    howItWorksSubheading:
+      "From account creation to daily tracking, every step is designed to be clear, safe, and personalized for you.",
+    step1Title: "Create Your Account",
+    step1Desc: "Get started in minutes and securely log your core details.",
+    step2Title: "Set Your Goals & Condition",
+    step2Desc: "Complete the smart assessment to outline your targets and readiness level.",
+    step3Title: "Get a Personalized Experience",
+    step3Desc: "Rahafit relies on your data to provide appropriate and safe guidance.",
+    step4Title: "Track Your Progress Daily",
+    step4Desc: "Review workouts, nutrition, readiness, and progress from a single dashboard.",
+    howItWorksPrimaryCta: "Start your journey",
+    howItWorksSecondaryCta: "Explore features",
+
+    // 4 Value Pillars Bottom
+    valueItem1Title: "Secure & Trusted",
+    valueItem1Desc: "Data encryption & privacy protection at every step",
+    valueItem2Title: "Personalized AI",
+    valueItem2Desc: "Adaptive coaching aligned with your readiness and needs",
+    valueItem3Title: "Comprehensive Tracking",
+    valueItem3Desc: "Unified tracking for workouts, nutrition, and recovery",
+    valueItem4Title: "Continuous Support",
+    valueItem4Desc: "Smart plan updates based on your daily performance",
 
     // Product Areas (Core Features)
     productAreasHeading: "Core Product Capabilities",
@@ -78,24 +95,18 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
     safetyPoint3Desc:
       "AI recommendations provide fitness and lifestyle guidance and do not replace professional medical diagnosis or advice.",
 
+    // Pricing Placeholder / Info
+    pricingHeading: "Simple & Transparent Access",
+    pricingSubheading: "Start for free today and unlock full intelligent coaching capabilities.",
+    pricingFreeTitle: "Free Discovery Tier",
+    pricingFreeDesc: "Full access to smart assessment, workout tracking, and daily readiness check-in.",
+
     // Final CTA
     finalCtaHeading: "Ready to take your first step?",
     finalCtaSubheading:
       "Join Rahafit today and experience intelligent, safe, and personalized coaching.",
     finalCtaPrimary: "Get started now",
     finalCtaSecondary: "I already have an account",
-
-    // Landing Page Specifics
-    landingHeroHeadline: "Train smarter. Live better.",
-    landingHeroSubheading:
-      "Everything you need to build a healthier life: training, nutrition, recovery, and intelligent progress tracking in one place.",
-    landingHeroPrimaryCta: "Start for free",
-    landingHeroSecondaryCta: "See how it works",
-    landingHeroTitle: "Intelligent Coaching Built For Real Progress",
-    landingHeroSubtitle:
-      "Rahafit brings workout planning, nutrition management, and safety-focused AI advice together to help you build sustainable health habits.",
-    landingHeroCta: "Explore Rahafit",
-    landingLoginCta: "Sign in",
 
     // Floating Cards Copy
     heroCardStreak: "12 day streak",
@@ -129,30 +140,50 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
     navFeatures: "المميزات",
     navHowItWorks: "كيف يعمل",
     navSafety: "الأمان والخصوصية",
+    navPricing: "خطط الأسعار",
     navLogin: "تسجيل الدخول",
     navDiscover: "استكشف منصة Rahafit",
     navRegister: "أنشئ حسابك",
 
-    // Hero Section
+    // Hero Section Reference
+    heroTrustBadge: "تدريب رياضي آمن، ذكي، وبناءً على خصوصيتك",
+    landingHeroHeadline: "ابدأ رحلتك مع Rahafit",
+    landingHeroSubheading:
+      "تربط منصة Rahafit بين التخطيط الرياضي، متابعة التغذية، مؤشرات الاستشفاء، والتوجيه الذكي الذي يراعي أهدافك وحالتك في تجربة متكاملة واحدة.",
+    landingHeroPrimaryCta: "أنشئ حسابك",
+    landingHeroSecondaryCta: "استكشف المميزات",
+    landingHeroTertiaryCta: "تخطي إلى تسجيل الدخول",
     heroHeading: "ابدأ رحلتك مع Rahafit",
     heroSubheading:
       "تربط منصة Rahafit بين التخطيط الرياضي، متابعة التغذية، مؤشرات الاستشفاء، والتوجيه الذكي الذي يراعي أمانك وصحتك في تجربة متكاملة واحدة.",
     heroPrimaryCta: "أنشئ حسابك",
     heroSecondaryCta: "استكشف المميزات",
-    heroSkipLink: "تخطي إلى التسجيل",
-    heroTrustBadge: "تدريب رياضي آمن، متكيف، ويحافظ على خصوصيتك",
 
-    // How it works
-    howItWorksHeading: "كيف تعمل منصة Rahafit",
-    howItWorksSubheading: "أربع خطوات بسيطة لتحويل روتينك الرياضي والصحي اليومي.",
-    step1Title: "1. أنشئ حسابك",
-    step1Desc: "تسجيل سريع عبر البريد الإلكتروني أو حساب Google لحفظ ملفك الصحي الشخصي.",
-    step2Title: "2. أخبرنا عن أهدافك وحالتك",
-    step2Desc: "أكمل التقييم الذكي الذي يشمل السجل الصحي، الأدوات المتاحة، والأهداف الرياضية.",
-    step3Title: "3. يحصل المستخدم على تجربة مخصصة وآمنة",
-    step3Desc: "احصل على برنامج تدريبي حتمي، أهداف تغذية مخصصة، وتطبيق مباشر لحدود الأمان.",
-    step4Title: "4. يتابع تقدمه من لوحة التحكم",
-    step4Desc: "سجل جلسات التمرين، تابع الالتزام اليومي، واستشر المدرب الذكي عند الحاجة.",
+    // How Rahafit Works Section
+    howItWorksEyebrow: "كيف يعمل",
+    howItWorksHeading: "رحلتك مع Rahafit في أربع خطوات",
+    howItWorksSubheading:
+      "من إنشاء الحساب إلى المتابعة اليومية، كل خطوة مصممة لتكون واضحة وآمنة ومخصصة لك.",
+    step1Title: "أنشئ حسابك",
+    step1Desc: "ابدأ خلال دقائق وسجّل بياناتك الأساسية بأمان.",
+    step2Title: "حدّد أهدافك وحالتك",
+    step2Desc: "أكمل التقييم الذكي لتوضيح أهدافك ومستوى جاهزيتك.",
+    step3Title: "احصل على تجربة مخصصة",
+    step3Desc: "يعتمد Rahafit على بياناتك لتقديم توجيه مناسب وآمن.",
+    step4Title: "تابع تقدمك يوميًا",
+    step4Desc: "راجع التمارين، التغذية، الجاهزية، والتقدم من لوحة واحدة.",
+    howItWorksPrimaryCta: "ابدأ رحلتك",
+    howItWorksSecondaryCta: "اكتشف المميزات",
+
+    // 4 Value Pillars Bottom
+    valueItem1Title: "أمان وخصوصية",
+    valueItem1Desc: "تشفير البيانات وحماية خصوصيتك في كل خطوة",
+    valueItem2Title: "ذكاء اصطناعي محلي",
+    valueItem2Desc: "توجيهات متكيفة تفهم مستوى جاهزيتك واحتياجاتك",
+    valueItem3Title: "متابعة شاملة",
+    valueItem3Desc: "تكامل التمارين، التغذية، وساعات التعافي",
+    valueItem4Title: "دعم مستمر",
+    valueItem4Desc: "تحديثات ذكية لخطتك بناءً على أدائك اليومي",
 
     // Product Areas (Core Features)
     productAreasHeading: "المناطق والخصائص الأساسية",
@@ -196,23 +227,17 @@ export const discoveryCopy: Record<Locale, Record<string, string>> = {
     safetyPoint3Desc:
       "التوجيه الذكي يقدم إرشادات رياضية ولأسلوب الحياة، ولا يحل محل الاستشارة أو التشخيص الطبي المتخصص.",
 
+    // Pricing Placeholder / Info
+    pricingHeading: "وصول بسيط وشفاف",
+    pricingSubheading: "ابدأ مجاناً اليوم واستمتع بكل إمكانيات التدريب الذكي.",
+    pricingFreeTitle: "الباقة المجانية الاستكشافية",
+    pricingFreeDesc: "وصول كامل للتقييم الذكي، متابعة التمارين، وفحص الجاهزية اليومية.",
+
     // Final CTA
     finalCtaHeading: "جاهز تبدأ خطوتك الأولى؟",
     finalCtaSubheading: "انضم إلى Rahafit اليوم واستمتع بتدريب ذكي، آمن، ومخصص لك.",
     finalCtaPrimary: "ابدأ الآن",
     finalCtaSecondary: "لدي حساب بالفعل",
-
-    // Landing Page Specifics
-    landingHeroHeadline: "تمرّن بذكاء. عِش أفضل.",
-    landingHeroSubheading:
-      "كل ما تحتاجه لبناء حياة أصح: تمرين، تغذية، تعافٍ، ومتابعة ذكية في مكان واحد.",
-    landingHeroPrimaryCta: "ابدأ مجاناً",
-    landingHeroSecondaryCta: "شاهد كيف يعمل",
-    landingHeroTitle: "تدريب ذكي مصمم لتقدم حقيقي واستدامة",
-    landingHeroSubtitle:
-      "تجمع منصة Rahafit بين التخطيط الرياضي، متابعة التغذية، واستشارات الذكاء الاصطناعي الآمنة لبناء عادات صحية مستدامة.",
-    landingHeroCta: "استكشف Rahafit",
-    landingLoginCta: "تسجيل الدخول",
 
     // Floating Cards Copy
     heroCardStreak: "12 يوم متتالي",
