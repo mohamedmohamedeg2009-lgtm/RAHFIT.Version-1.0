@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import {
@@ -43,6 +43,8 @@ export default function IntelligentWorkoutSessionPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [draftVersion, setDraftVersion] = useState(0);
+  const draftVersionRef = useRef(0);
   const [error, setError] = useState<WorkoutClientError | null>(null);
   const [adaptation, setAdaptation] = useState<WorkoutAdaptationResponse | null>(null);
   const selectedDayNumber = session?.day_number ?? Number(dayNumber);
@@ -106,6 +108,8 @@ export default function IntelligentWorkoutSessionPage() {
       });
       setSession(created);
       setDirty(false);
+      draftVersionRef.current = 0;
+      setDraftVersion(0);
       setEntries(
         day.sections
           .flatMap((section) => section.exercises)
@@ -120,6 +124,7 @@ export default function IntelligentWorkoutSessionPage() {
 
   const save = async (status: SessionStatus = "in_progress") => {
     if (!session) return;
+    const savedDraftVersion = draftVersion;
     setSaving(true);
     setError(null);
     try {
@@ -130,7 +135,8 @@ export default function IntelligentWorkoutSessionPage() {
         notes: notes.trim() || null,
       });
       setSession(updated);
-      setDirty(false);
+      // Do not mark a newer local edit as saved when an earlier autosave finishes.
+      if (savedDraftVersion === draftVersionRef.current) setDirty(false);
     } catch (cause) {
       setError(mapWorkoutError(cause, locale));
     } finally {
@@ -155,13 +161,15 @@ export default function IntelligentWorkoutSessionPage() {
     return () => window.clearTimeout(timer);
     // `save` intentionally reads the current form snapshot and is recreated with it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dirty, entries, duration, notes, saving, session]);
+  }, [dirty, entries, duration, notes, saving, session, draftVersion]);
 
   const updateEntry = (
     exerciseId: string,
     transform: (entry: CompletedExerciseInput) => CompletedExerciseInput,
   ) => {
     setDirty(true);
+    draftVersionRef.current += 1;
+    setDraftVersion(draftVersionRef.current);
     setEntries((current) =>
       current.map((entry) => (entry.exercise_id === exerciseId ? transform(entry) : entry)),
     );
@@ -419,6 +427,8 @@ export default function IntelligentWorkoutSessionPage() {
               value={duration}
               onChange={(event) => {
                 setDirty(true);
+                draftVersionRef.current += 1;
+                setDraftVersion(draftVersionRef.current);
                 setDuration(event.target.value);
               }}
             />
@@ -429,6 +439,8 @@ export default function IntelligentWorkoutSessionPage() {
               value={notes}
               onChange={(event) => {
                 setDirty(true);
+                draftVersionRef.current += 1;
+                setDraftVersion(draftVersionRef.current);
                 setNotes(event.target.value);
               }}
             />
